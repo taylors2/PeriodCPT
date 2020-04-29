@@ -1,5 +1,5 @@
-/* 
- 
+/*
+
 #include <C:\Rtools\gcc-4.6.3\i686-w64-mingw32\include\stdio.h>
 #include <C:\Rtools\gcc-4.6.3\i686-w64-mingw32\include\stdlib.h>
 #include <C:\Rtools\gcc-4.6.3\i686-w64-mingw32\include\math.h>
@@ -20,13 +20,13 @@
 chain_t *MakeMCMCchain(){
 int fnname = 200;
   profile(TRUE, fnname);
-  
+
   chain_t *CHAIN;
   CHAIN = (chain_t *)my_calloc(1, sizeof(chain_t));
   CHAIN->first = NULL;
   CHAIN->last = NULL;
   CHAIN->length = 0;
-  
+
   profile(FALSE, fnname);
   return CHAIN;
 }
@@ -34,7 +34,7 @@ int fnname = 200;
 MCMCitem_t* MakeMCMCitem(int m, int *tau, int *N, double *g1, struct G2 *g2, int j){
   int fnname = 201;
   profile(TRUE, fnname);
-  
+
   MCMCitem_t *mcmc;
   int i;
   mcmc = (MCMCitem_t *)my_calloc(1, sizeof(MCMCitem_t));
@@ -46,7 +46,7 @@ MCMCitem_t* MakeMCMCitem(int m, int *tau, int *N, double *g1, struct G2 *g2, int
   mcmc->prob = 0;
   mcmc->next = NULL;
   mcmc->prev = NULL;
-  
+
   profile(FALSE, fnname);
   return mcmc;
 }
@@ -54,7 +54,7 @@ MCMCitem_t* MakeMCMCitem(int m, int *tau, int *N, double *g1, struct G2 *g2, int
 MCMCitem_t *CopyMCMCitem(MCMCitem_t *mcmc){
   int fnname = 202;
   profile(TRUE, fnname);
-  
+
   MCMCitem_t *new;
   int i;
   new = (MCMCitem_t *)my_calloc(1, sizeof(MCMCitem_t));
@@ -66,7 +66,7 @@ MCMCitem_t *CopyMCMCitem(MCMCitem_t *mcmc){
   new->prob = 0;
   new->next = NULL;
   new->prev = NULL;
-  
+
   profile(FALSE, fnname);
   return new;
 }
@@ -96,7 +96,7 @@ void DeleteMCMCchain(chain_t *CHAIN){
     this = next;
   }
   my_free(CHAIN);
-  
+
   profile(FALSE, fnname);
   return;
 }
@@ -106,7 +106,7 @@ void DeleteMCMCchain(chain_t *CHAIN){
 void PushToChain(chain_t *CHAIN, MCMCitem_t *mcmc){ //append mcmc to CHAIN
   int fnname = 205;
   profile(TRUE, fnname);
-  
+
   if(CHAIN->first == NULL){
     CHAIN->first = mcmc;
     CHAIN->last = mcmc;
@@ -119,7 +119,7 @@ void PushToChain(chain_t *CHAIN, MCMCitem_t *mcmc){ //append mcmc to CHAIN
     mcmc->next = NULL;
   }
   CHAIN->length++;
-  
+
   profile(FALSE, fnname);
   return;
 }
@@ -127,7 +127,7 @@ void PushToChain(chain_t *CHAIN, MCMCitem_t *mcmc){ //append mcmc to CHAIN
 void BubbleToChain(chain_t *CHAIN, MCMCitem_t *this){ //append mcmc to CHAIN
   int fnname = 206;
   profile(TRUE, fnname);
-  
+
   if(CHAIN->first == NULL){
     CHAIN->first = this;
     CHAIN->last = this;
@@ -135,7 +135,7 @@ void BubbleToChain(chain_t *CHAIN, MCMCitem_t *this){ //append mcmc to CHAIN
     profile(FALSE, fnname);
     return;
   }
-  
+
   if(CHAIN->first->value > this->value + 20){
     //prob of this will be ~0, push straight to end.
     this->prev = CHAIN->last;
@@ -144,7 +144,7 @@ void BubbleToChain(chain_t *CHAIN, MCMCitem_t *this){ //append mcmc to CHAIN
     CHAIN->last = this;
     CHAIN->length++;
     profile(FALSE, fnname);
-    return;    
+    return;
   }
 
   MCMCitem_t *place;
@@ -184,7 +184,7 @@ void BubbleToChain(chain_t *CHAIN, MCMCitem_t *this){ //append mcmc to CHAIN
 void PopFromChain(chain_t *CHAIN, MCMCitem_t *mcmc, int FREE){
   int fnname = 207;
   profile(TRUE, fnname);
-  
+
   if(CHAIN->last != mcmc){
     if(CHAIN->first != mcmc){  //somewhere in the middle
       mcmc->prev->next = mcmc->next;
@@ -201,7 +201,7 @@ void PopFromChain(chain_t *CHAIN, MCMCitem_t *mcmc, int FREE){
       CHAIN->first = NULL;
       CHAIN->last = NULL;
     }
-  } 
+  }
   mcmc->prev = NULL;
   mcmc->next = NULL;
   CHAIN->length--;
@@ -216,7 +216,7 @@ void PopFromChain(chain_t *CHAIN, MCMCitem_t *mcmc, int FREE){
 void ClearChain(chain_t *CHAIN){
   int fnname = 208;
   profile(TRUE, fnname);
-  
+
   if(CHAIN->first == CHAIN->last){
     profile(FALSE, fnname);
     return;
@@ -233,17 +233,17 @@ void ClearChain(chain_t *CHAIN){
   }
   CHAIN->first = CHAIN->last;
   CHAIN->length = 1;
-  
+
   profile(FALSE, fnname);
   return;
 }
 
-//-- Print 
+//-- Print
 
 void PrintMCMCchain(chain_t *CHAIN, int index){
   int fnname = 209;
   profile(TRUE, fnname);
-  
+
   MCMCitem_t *mcmc;
   mcmc = CHAIN->first;
   int maxm;
@@ -252,30 +252,30 @@ void PrintMCMCchain(chain_t *CHAIN, int index){
     if(maxm < mcmc->m) maxm = mcmc->m;
     mcmc = mcmc->next;
   }
-  
+
   FILE *f;
   int j;
-  char fname[100]; 
+  char fname[100];
   sprintf(fname,"%d_MCMClist.txt", index);
 
   f = fopen(fname, "w");
   fprintf(f,"me, prev, next, id, m, j, value, prob");
   for(j=0; j<maxm; j++) fprintf(f,", tau%d", j+1);
   fprintf(f,"\n");
-  
+
   mcmc = CHAIN->first;
   int i = 0;
   while(i < CHAIN->length){
-    fprintf(f,"%p, ", mcmc);
+    fprintf(f,"%p, ", (void *)mcmc);
     if(mcmc->prev == NULL){
       fprintf(f,"-1, ");
     }else{
-      fprintf(f,"%p, ",mcmc->prev);
+      fprintf(f,"%p, ", (void *)mcmc->prev);
     }
     if(mcmc->next == NULL){
       fprintf(f,"-1, ");
     }else{
-      fprintf(f,"%p, ",mcmc->next);
+      fprintf(f,"%p, ", (void *)mcmc->next);
     }
     fprintf(f,"%d, %d, %d, %f, %f", i, mcmc->m, mcmc->j, mcmc->value,mcmc->prob);
     for(j=0;j<maxm;j++){
@@ -290,7 +290,7 @@ void PrintMCMCchain(chain_t *CHAIN, int index){
     i++;
   }
   fclose(f);
-  
+
   profile(FALSE, fnname);
   return;
 }
@@ -300,7 +300,7 @@ void PrintMCMCchain(chain_t *CHAIN, int index){
 int ReturnChain(chain_t *CHAIN, int *draw, int offset, int *ndraw, int *err, double id){
   int fnname = 210;
   profile(TRUE, fnname);
-  
+
   int i, j;
   MCMCitem_t *this;
   this = CHAIN->first;
@@ -316,7 +316,7 @@ int ReturnChain(chain_t *CHAIN, int *draw, int offset, int *ndraw, int *err, dou
         *err = 2;
         break;
       }
-    }  
+    }
 
     //push -id at end of vector
     if(i<*ndraw){
@@ -327,11 +327,11 @@ int ReturnChain(chain_t *CHAIN, int *draw, int offset, int *ndraw, int *err, dou
 
     this = this->next;
   }
-  
+
   profile(FALSE, fnname);
   return i;
 }
-      
+
 void ExportDraws(chain_t *chain1, chain_t *chain2, int *draw, int *ndraw, int *err){
   int fnname = 211;
   profile(TRUE, fnname);
@@ -348,14 +348,14 @@ void EvalProbs(chain_t *chain){
   double max, sum;
   MCMCitem_t *this;
   max = chain->first->value;
-  
+
   //This can be commented if chain is sorted as chain->first is maximum
   //this = chain->first;
   //while(this!=NULL){
   //  if(max < this->value) max = this->value;
   //  this = this->next;
   //}
-  
+
   this = chain->first;
   sum = 0.0;
   while(this!=NULL){
@@ -363,7 +363,7 @@ void EvalProbs(chain_t *chain){
     this->prob = sum;
     this = this->next;
   }
-  
+
   profile(FALSE, fnname);
   return;
 }

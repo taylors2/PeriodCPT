@@ -17,3 +17,4 @@ BugReports: http://github.com/taylors2/PeriodCPT/issues
 Depend: R (>=3.4.2)
 Author: Simon Taylor [aut, cre],
   Rebecca Killick [ctb], Jamie-Leigh Chapman [ctb]
+RoxygenNote: 7.1.0

@@ -1,4 +1,4 @@
-/* 
+/*
 
 #include <C:\Rtools\gcc-4.6.3\i686-w64-mingw32\include\stdio.h>
 #include <C:\Rtools\gcc-4.6.3\i686-w64-mingw32\include\stdlib.h>
@@ -99,7 +99,7 @@ void PushToList(list_t *list, MCMCitem_t *current, chain_t *chain){
   if(list->length == list->maxlen){
     PopLastListItem(list);  //!!!should not remove last item if it contains current!!!
   }
-  
+
   Prop_t *this,*place;
   int point = FALSE;
   this = makePropItem(current, chain);
@@ -171,7 +171,7 @@ int CompareCase(MCMCitem_t *current, Prop_t *this){
 chain_t *FindCase(list_t *list, MCMCitem_t *current){
   int fnname = 407;
   profile(TRUE, fnname);
-  
+
   Prop_t *this;
   this = list->first;
   int search;
@@ -192,7 +192,7 @@ chain_t *FindCase(list_t *list, MCMCitem_t *current){
 void PrintPropCache(list_t * list, int index){
   int fnname = 408;
   profile(TRUE, fnname);
-  
+
   Prop_t *this;
   this = list->first;
   int maxm;
@@ -201,32 +201,32 @@ void PrintPropCache(list_t * list, int index){
     if(maxm < this->m) maxm = this->m;
     this = this->next;
   }
-  
+
   FILE *f;
   int j;
-  char fname[100]; 
+  char fname[100];
   sprintf(fname,"%d_PROPlist.txt", index);
 
   f = fopen(fname, "w");
   fprintf(f,"me, prev, next, id, m, j, value, chain");
   for(j=0; j<maxm; j++) fprintf(f,", tau%d", j+1);
   fprintf(f,"\n");
-  
+
   this = list->first;
   int i = 0;
   while(i < list->length){
-    fprintf(f,"%p, ", this);
+    fprintf(f,"%p, ", (void *)this);
     if(this->prev == NULL){
       fprintf(f,"-1, ");
     }else{
-      fprintf(f,"%p, ",this->prev);
+      fprintf(f,"%p, ",(void *)this->prev);
     }
     if(this->next == NULL){
       fprintf(f,"-1, ");
     }else{
-      fprintf(f,"%p, ",this->next);
+      fprintf(f,"%p, ",(void *)this->next);
     }
-    fprintf(f,"%d, %d, %d, %f, %p", i, this->m, this->j, this->value, this->chain);
+    fprintf(f,"%d, %d, %d, %f, %p", i, this->m, this->j, this->value, (void *)this->chain);
     for(j=0;j<maxm;j++){
       if(j<this->m){
         fprintf(f,", %d", this->tau[j]);
@@ -239,7 +239,7 @@ void PrintPropCache(list_t * list, int index){
     i++;
   }
   fclose(f);
-  
+
   profile(FALSE, fnname);
   return;
 }
