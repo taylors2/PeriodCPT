@@ -1,12 +1,19 @@
 Package: PeriodCPT
 Type: Package
-Title: Within period changepoint detection.
-Version: 0.1.0
-Author: Simon Taylor
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: BLAH
-License: What license is it under?
+Title: Within Period Changepoint Detection for Periodic Data
+Version: 1.2.1
+Date: 2020-04-29
+Authors@R: c(
+	person("Simon","Taylor", role=c("aut","cre"), email="simon.taylor@ed.ac.uk"),
+	person("Rebecca","Killick",role="ctb"),
+  person("Jamie-Leigh","Chapman",role="ctb"))
+Maintainer: Simon Taylor <simon.taylor@ed.ac.uk>
+Description: Detection of changepoint events for periodic time series data.
+License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
 URL: http://github.com/taylors2/PeriodCPT
 BugReports: http://github.com/taylors2/PeriodCPT/issues
+Depend: R (>=3.4.2)
+Author: Simon Taylor [aut, cre],
+  Rebecca Killick [ctb], Jamie-Leigh Chapman [ctb]

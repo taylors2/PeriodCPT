@@ -1,0 +1,71 @@
+#1.0.1
+- C: correction to m1<->m2 acceptance probability.
+- Typo in CircCPT chachesize -> cachesize.
+- Circ_plot to include standard plotting arguments via ...
+- Correct error in Param_Quantile when m=1.
+#1.0.2
+- C: correcction to abs() in convergence test.
+- Param_quantile: redefine upperbound in uniroot to prevent initiation error when all data==0
+- CPT_freq: fixes apply issue when all draws from CircCPT are the same.
+- FindBounds: Ensure repeated columns are not returned.
+- Extend to Normal data, changes in mean and/or variance
+- Edited plotting fuction to allow for rlim rather than c(0,rmax)
+#1.0.3
+- Add new distributional assuptions to FindBounds function
+- Added functions TauProb and NightProb to evaluate joint posterior prob of particular cpt positions
+#1.0.4
+- Correct error in CircCPT re. err output from C code being read as out$err rather than draw$err in stop().
+- Correct error created by apply due to operations on non-matrix input
+- C: error in dmvstvar, missing n.
+- Added NightIntervals() function.
+#1.0.5
+- Correct wrong prior for anchor event.
+- Error in NightBound caused by FindBound, last column was not always all 1s!
+#1.0.6
+- Change defaults of inits in CircCPT to start at opposite ends of parameter space rather than being random.
+- C: error in ProcessData, duplication of data from wrong location.
+- C: error in extracting data on segment, data aquired was 1 time point too early.
+- Error in NightTestDist(), ngti beging calculated incorrectly when ngt_st==N.
+#1.0.7
+- correct default definition of init2 in CircCPT()
+- FUDGE!: when all data values are the same, set init2=1 --> Particular problem with Var and Normal
+
+#1.1.0
+- Added function PredLogOdds()
+#1.1.1
+- Correction to NightBounds() to ensure validity of ngt input argument.
+- Correction to NightProb(), return NA if ngt is invalid (previously calc. m=1 prob if ngt was invalid)
+#1.1.2
+- C: memory leakage, 'sq' not freed in Evaluate_G2.
+- C: Error in ProcessData where data ordering was not performed correctly
+#1.1.3
+- Added a missing logical test to NightBound() if evaluation fails
+- Add 'clip' argument to WaitTime() -- Edit suggestion by Jamie-Leigh Chapman
+#1.1.4
+- Corrected mis-alignment issue in NightIntervals()
+#1.1.5
+- Remove package dependency to RPostgreSQL. This only impacts getSensorData() that is now inactive.
+    Information to reactivate are detailed within function.
+#1.1.6
+- Edit to the function NightIntervals() to correct errors in calculation.
+#1.1.7
+- Add additional 'prob' argument to FindBounds(), NightBounds() and NightIntervals() to evaluate
+  low level intervals based on different quantiles of the piecewise constant periodic function.
+#1.1.8
+- Missing prob agrument for FindBounds() within NightIntervals()
+#1.2.0
+- Added CircCPT_FitMeasure.h to provide mode estimates and fit measures (currently only for dist=Normal) when calling c function CircCPT_RJMCMC. CircCPT() currently ignores any values returned by this.
+- Edited the use & storage of 'hyp' for "Normal" and "Mean" so that the c-scale and known variance are kept on the original scale and are only ever transformed to precision for being passed into C.
+- Corrected the default 'init2' value in CircCPT for cases when minseglen does not factor into period length
+#1.2.0.1
+- C: correct reading error in function Normal_meanvar_Fit in CircCPT_FitMeasure.h
+
+#1.2.1
+- Uploaded to GitHub for colaboration work space.
+- Make numerous edits with respect to package utility, finish uncompleted functionality, strip out company specific functions, and other things.
+- Manual pages have been temporarially removed and will programatically created at a later date.
+
+
+
+
+
