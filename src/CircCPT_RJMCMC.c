@@ -25,7 +25,7 @@
 
  */
 
-extern void CircCPT_RJMCMC( 
+extern void CircCPT_RJMCMC(
     double *data,       //data vector
     int *time,          //time vector
     int *n,             //length of data vector
@@ -66,19 +66,19 @@ extern void CircCPT_RJMCMC(
 #include"CircCPT_FitMeasure.h"
 
 void CircCPT_RJMCMC(double *data, int *time, int *n, int *N, int *dist, double *hypparam,
-                    double *hypS, double *hypM, int *minseglen, int *itstep, int *Maxit, double *typeI, 
+                    double *hypS, double *hypM, int *minseglen, int *itstep, int *Maxit, double *typeI,
                     int *init1, int *m1, int *init2, int *m2, int *progress, int *CACHEMAX, int *maxM, int *burn,
                     int *err, int *draw, int *ndraw, int *conv, int *numParamPerSeg,
                     int *out_mmode, int *out_taumode, double *out_segparammode, double *out_fits){
   int fname = 000;
   profile(TRUE, fname);
-  
+
   //Dist: 0=Poisson, 1=Binomial, 2=Normal(meanvar), 3=Norm(mean), 4=Norm(var)
   //time: in range 1,...,N
   //err: 1=invalid dist, 2=insufficient draw length to export all samples.
   //conv: 0=Failed to converge, 1=convergence successful.
 
-  if((*dist < 0) & (*dist>4)){  //Is dist specified correctly
+  if((*dist < 0) | (*dist>4)){  //Is dist specified correctly
     *err = 1;
     goto ESCAPE;
   }
@@ -116,7 +116,7 @@ void CircCPT_RJMCMC(double *data, int *time, int *n, int *N, int *dist, double *
     batch_iteration(MCMC2, itstep, g1, g2, minseglen, N, progress, CACHEMAX);
 
     //<<</\>>> THIS CAN BE DONE IN PARALLEL <<</\>>>
-    
+
     if(BURN==FALSE){
       //preform convergence test
       passTest = ConvTest(MCMC1, MCMC2, typeI, N, maxM);
@@ -131,14 +131,14 @@ void CircCPT_RJMCMC(double *data, int *time, int *n, int *N, int *dist, double *
   int TotalChainLength = MCMC1->length + MCMC2->length;
   MCMCitem_t *TauHat = ModeTau(MCMC1, MCMC2, &TotalChainLength);
   double *FitMeasure = (double*)my_calloc(4, sizeof(double));
-  int nModeEst = TauHat->m * *numParamPerSeg; 
+  int nModeEst = TauHat->m * *numParamPerSeg;
   double *ModeEst = (double*)my_calloc(nModeEst * 2, sizeof(double));
   Evaluate_Fit_and_SegParamModes(TauHat, data, time, n, N, dist, hypparam, hypS, hypM, minseglen, maxM,
                                  FitMeasure, ModeEst, &nModeEst);
   CopyModeFitToOutput(TauHat, FitMeasure, ModeEst, &nModeEst, out_mmode, out_taumode, out_segparammode, out_fits);
   //***new: end
-  
-  
+
+
   //export MCMC samples
   ExportDraws(MCMC1, MCMC2, draw, ndraw, err);
 
@@ -156,12 +156,12 @@ void CircCPT_RJMCMC(double *data, int *time, int *n, int *N, int *dist, double *
 
 
 void R_init_CirCPT_Cfunctions(DllInfo *info){
-  
+
   R_CMethodDef cMethods[] = {
     {"CircCPT_RJMCMC", (DL_FUNC) &CircCPT_RJMCMC, 29},
     {NULL,NULL,0}
   };
-  
+
   R_registerRoutines(info, cMethods, NULL, NULL, NULL);
   R_useDynamicSymbols(info, TRUE);
 }
