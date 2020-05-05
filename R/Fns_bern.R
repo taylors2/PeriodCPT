@@ -16,3 +16,32 @@ param.prior.make.bern <- function(param.a, param.b){
   out <- c("param.a" = param.a, "param.b" = param.b)
   return(out)
 }
+
+
+PeriodCPT.bern <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "unif"),
+                           Mhyp = 1, spread = 1, param.a = 1, param.b = 1,
+                           inits = NULL, n.iter = 1e6, n.chain = 1, n.burn = 0,
+                           cachesize = 50, quiet = FALSE){
+
+  distribution <- "bern"
+  if(!is.numeric(data))
+    stop("Data is invalid for Bernoulli sampling distribution.")
+  if(!all(data == 0L | data == 1L))
+    stop("Data is invalid for Bernoulli sampling distribution.")
+
+  Mprior <- match.arg(Mprior)
+  ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
+                     distribution = distribution, Mprior = Mprior, Mhyp = Mhyp,
+                     spread = spread, inits = inits,
+                     n.iter, n.chain, n.burn, cashesize, quiet,
+                     param.a, param.b)
+
+  ans <- PeriodCPT.main(ans)
+  ans <- eval(paste0("SummariseOutput.",distribution,"(ans)"))
+  return(ans)
+}
+
+SummariseOutput.bern <- function(object){
+  return(object)
+}
+

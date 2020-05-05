@@ -26,3 +26,30 @@ param.prior.make.mean <- function(param.m, param.c, var){
   return(out)
 
 }
+
+PeriodCPT.mean <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "unif"),
+                           Mhyp = 1, spread = 1, param.m = 0, param.c = 1, var = 1,
+                           inits = NULL, n.iter = 1e6, n.chain = 1, n.burn = 0,
+                           cachesize=50, quiet=FALSE){
+
+  distribution <- "mean"
+  if(!is.numeric(data))
+    stop("Data is invalid for Normal sampling distribution.")
+
+  Mprior <- match.arg(Mprior)
+  ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
+                     distribution = distribution, Mprior = Mprior, Mhyp = Mhyp,
+                     spread = spread, inits = inits,
+                     n.iter, n.chain, n.burn, cashesize, quiet,
+                     param.m, param.c, var)
+
+  ans <- PeriodCPT.main(ans)
+  ans <- eval(paste0("SummariseOutput.",distribution,"(ans)"))
+  return(ans)
+}
+
+
+SummariseOutput.mean <- function(object){
+  return(object)
+}
+

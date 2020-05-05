@@ -7,11 +7,12 @@ setClass("pcpt", slots=list(
     pcpt.prior   = "list",        ## Prior info for the pcpt prior
     param.prior  = "numeric",     ## Prior info for the segment parameters
     MCMC.options = "list",        ## List of MCMC options
-    MCMC         = "list",        ## MCMC output from chain
+    MCMC.inits   = "list",        ## List of chain initial values
+    MCMC.chains  = "list",        ## MCMC output from chain
     param.est    = "list",        ## Mode estimates for segment parameters
     pcpt.est     = "list",        ## Mode estimates for pcpt paramters
     date         = "character",   ## Date that the object was created
-    version      = "character")  ## Version of code
+    version      = "character")   ## Version of code
 )
 #  prototype = prototype(
 #    date         = date(),
@@ -82,7 +83,7 @@ setReplaceMethod("periodlength", "pcpt", function(object, value) {
     object@npcpts.max <- floor(object@periodlength / object@minseglen)
   }
   return(object)
-}
+})
 
 ## set/get and reset minseglen slot
 if(!isGeneric("minseglen")) {
@@ -98,14 +99,14 @@ setGeneric("minseglen<-", function(object, value) standardGeneric("minseglen<-")
 setReplaceMethod("minseglen", "pcpt", function(object, value) {
   if(length(minseglen) != 1 || !is.numeric(minseglen))
     stop("Minimum segment length specifed incorrectly.")
-  if(minseglen < 0 || floor(minseglen) != minseglen)
+  if(minseglen <= 0 || floor(minseglen) != minseglen)
     stop("Minimum segment length specifed incorrectly.")
   object@minseglen <- minseglen
   if(length(object@periodlength) == 1){
     object@npcpts.max <- floor(object@periodlength / object@minseglen)
   }
   return(minseglen)
-}
+})
 
 ## set/get npcpts.max slot
 if(!isGeneric("npcpts.max")) {
@@ -183,8 +184,6 @@ setReplaceMethod("MCMC.options", "pcpt", function(object, value) {
   return(object)
 })
 
-
-
 # set/get n.chains item in MCMC.options slot
 if(!isGeneric("n.chains")) {
   if(is.function("n.chains")){
@@ -195,6 +194,11 @@ if(!isGeneric("n.chains")) {
   setGeneric("n.chains", fun)
 }
 setMethod("n.chains","pcpt",function(object) object@MCMC.options$n.chains)
+setGeneric("n.chains<-", function(object, value) standardGeneric("n.chains<-"))
+setReplaceMethod("n.chains", "pcpt", function(object, value) {
+  object@MCMC.options$n.chains <- value
+  return(object)
+})
 
 # set/get and reset n.iter item in MCMC.options slot
 if(!isGeneric("n.iter")) {
@@ -238,6 +242,57 @@ if(!isGeneric("toggle.quiet")) {
 }
 setMethod("toggle.quiet","pcpt",function(object){
   object@MCMC.options$quiet <- !object@MCMC.options$quiet})
+
+# set/get and reset MCMC.inits slot
+if(!isGeneric("MCMC.inits")) {
+  if(is.function("MCMC.inits")){
+    fun <- MCMC.inits
+  }else{
+    fun <- function(object){ standardGeneric("MCMC.inits") }
+  }
+  setGeneric("MCMC.inits", fun)
+}
+setMethod("MCMC.inits","pcpt",function(object) object@MCMC.inits)
+setGeneric("MCMC.inits<-", function(object, value) standardGeneric("MCMC.inits<-"))
+setReplaceMethod("MCMC.inits", "pcpt", function(object, value) {
+  object@MCMC.inits <- value
+  return(object)
+})
+
+# set/get and reset MCMC slot for given chain index
+if(!isGeneric("MCMC.chain")) {
+  if(is.function("MCMC.chain")){
+    fun <- MCMC.chain
+  }else{
+    fun <- function(object, index){ standardGeneric("MCMC.chain") }
+  }
+  setGeneric("MCMC.chain", fun)
+}
+setMethod("MCMC.chain","pcpt",function(object, index) object@MCMC.chains[[paste0("`",index,"`")]])
+setGeneric("MCMC.chain<-", function(object, index, value) standardGeneric("MCMC.chain<-"))
+setReplaceMethod("MCMC.chain", "pcpt", function(object, index, value) {
+  if(!(index %in% as.numeric(names(object@MCMC))))
+    stop(paste0("Index `",index,"` not found in list of chains."))
+  object@MCMC.chains[[paste0("`",index,"`")]] <- value
+  return(object)
+})
+
+# set/get and reset all of MCMC slot
+if(!isGeneric("MCMC.chains")) {
+  if(is.function("MCMC.chains")){
+    fun <- MCMC.chains
+  }else{
+    fun <- function(object){ standardGeneric("MCMC.chains") }
+  }
+  setGeneric("MCMC.chains", fun)
+}
+setMethod("MCMC.chains","pcpt",function(object) object@MCMC.chains)
+setGeneric("MCMC.chains<-", function(object, value) standardGeneric("MCMC.chains<-"))
+setReplaceMethod("MCMC.chains", "pcpt", function(object, value) {
+  object@MCMC.chains <- value
+  return(object)
+})
+
 
 }
 
