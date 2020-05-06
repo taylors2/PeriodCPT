@@ -20,7 +20,7 @@ param.prior.make.pois <- function(){
 PeriodCPT.pois <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "unif"),
                            Mhyp = 1, spread = 1, param.a = 1, param.b = 1,
                            inits = NULL, n.iter = 1e6, n.chain = 1, n.burn = 0,
-                           cachesize=50, quiet=FALSE){
+                           cachesize=50, quiet=FALSE, ...){
 
   distribution <- "pois"
   if(!is.numeric(data))
@@ -34,8 +34,8 @@ PeriodCPT.pois <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
                      distribution = distribution, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits,
-                     n.iter, n.chain, n.burn, cashesize, quiet,
-                     param.a, param.b)
+                     n.iter, n.chain, n.burn, cachesize, quiet,
+                     param.a, param.b, ...)
 
   ans <- PeriodCPT.main(ans)
   ans <- eval(paste0("SummariseOutput.",distribution,"(ans)"))

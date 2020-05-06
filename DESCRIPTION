@@ -14,7 +14,8 @@ Encoding: UTF-8
 LazyData: true
 URL: http://github.com/taylors2/PeriodCPT
 BugReports: http://github.com/taylors2/PeriodCPT/issues
-Depend: R (>=3.4.2)
+Depend: R(>=3.4.2)
+Depends: methods
 Author: Simon Taylor [aut, cre],
   Rebecca Killick [ctb], Jamie-Leigh Chapman [ctb]
 RoxygenNote: 7.1.0

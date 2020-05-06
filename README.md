@@ -27,5 +27,5 @@ utility for different data types and appropriate changes in different structures
 - [ ] Use position in period index rather than based on 24hr.
 - [ ] Convergence checks. (Related to MSL)
 - [ ] Speed test.
-
+- [ ] Allow data being specifed as zoo object (nb, may need coredata() to extract time series data.)
 NOTE: Do not edit 'MODE' item in CircCPT output.

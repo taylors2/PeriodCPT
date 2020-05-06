@@ -3,7 +3,7 @@
 class_input <- function(data, periodlength, minseglen, distribution,
                         Mprior, Mhyp, spread, inits, ...){
 
-  ans               = new("pcpt")
+  ans               = methods::new("pcpt")
   data.set(ans)     = data
   periodlength(ans) = periodlength
   minseglen(ans)    = minseglen;
@@ -107,7 +107,7 @@ rMprior <- function(n, object, ...){
     m <- rep(0,n)
     for(i in 1:n){
       while(m[i]>npcpts.max(object)){
-        m[i] <- 1 + rpois(n = 1, rate = pcpt.prior(object)$Mhyp[1])
+        m[i] <- 1 + rpois(n = 1, lambda = pcpt.prior(object)$Mhyp[1])
       }
     }
     return(m)
@@ -121,7 +121,7 @@ rpcpt_single <- function(object){
   N <- periodlength(object)
   l <- minseglen(object)
   a <- pcpt.prior(object)$spread
-  mMax  <- npcpt.max(object)
+  mMax  <- npcpts.max(object)
   m <- rMprior(1, object)
   if(m == 1){
     tau <- 0
@@ -148,7 +148,7 @@ Definie.inits <- function(object, inits, ...){
     ##Define two chains that are initiated at the ends of the parameter space
     n.chains(object) <- 2
     inits.pcpt[[1]] <- 0
-    inits.pcpt[[2]] <- seq(from = 0, by = minseglen(object), len = npcpt.max(object))
+    inits.pcpt[[2]] <- seq(from = 0, by = minseglen(object), len = npcpts.max(object))
   }else if(is.function(inits)){
     ##Generate inits according to provided function
     for(i in 1:n.chains(object)){
@@ -172,17 +172,17 @@ Definie.inits <- function(object, inits, ...){
 
   if(length(inits.pcpt) != n.chains(object))
     stop("Incorrect number of initial values for specified number of chains.")
-  if(!all(unlist(lapply(tmp, class)) %in% c("numeric","integer")))
+  if(!all(unlist(lapply(inits.pcpt, class)) %in% c("numeric","integer")))
     stop("Class of at least one inits is not numeric or interger.")
   m <- unlist(lapply(inits.pcpt, length))
-  if(any(m<1 || m>npcpt.max(object)))
+  if(any(m<1 || m>npcpts.max(object)))
     stop("Incorrect number of within period changepoints specified by inits.")
   for(i in 1:n.chains(object)){
     if(any(floor(inits.pcpt[[i]]) != inits.pcpt[[i]]))
       stop("In inits, within period cpts must be whole numbers.")
-    if(inits.pcpt[[i]][1] < 0 || inits.pcpt[[i]][1] >= npcpt.max(object))
+    if(inits.pcpt[[i]][1] < 0 || inits.pcpt[[i]][1] >= npcpts.max(object))
       stop("In inits, within period cpts must be within [0. period lenght).")
-    if(any(diff(c(inits.pcpt[[i]], inits.pcpt[[i]][1]+periodlength(object))) < l))
+    if(any(diff(c(inits.pcpt[[i]], inits.pcpt[[i]][1]+periodlength(object))) < minseglen(object)))
       stop("In inits, within period cpts does not satisfy minimum segment length condition.")
   }
 
@@ -199,9 +199,9 @@ initialise.MCMC.list <- function(n){
 
 
 populate.chain <- function(object, C.chain.output, blank = -1){
-  TAU <- matrix(C.chain.output, ncol = npcpt.max(object), byrow = TRUE)
+  TAU <- matrix(C.chain.output, ncol = npcpts.max(object), byrow = TRUE)
   TAU[TAU == blank] <- NA
-  colnames(TAU) <- paste0("tau",1:npcpt.max(object))
+  colnames(TAU) <- paste0("tau",1:npcpts.max(object))
   TAU <- TAU[ , !apply(is.na(TAU), 2, all), drop = FALSE]
   return(TAU)
 }

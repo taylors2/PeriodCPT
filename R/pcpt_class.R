@@ -12,28 +12,36 @@ setClass("pcpt", slots=list(
     param.est    = "list",        ## Mode estimates for segment parameters
     pcpt.est     = "list",        ## Mode estimates for pcpt paramters
     date         = "character",   ## Date that the object was created
-    version      = "character")   ## Version of code
-)
-#  prototype = prototype(
-#    date         = date(),
-#    version      = as(packageVersion("PeriodCPT"), 'character') ) )
+    version      = "character"),   ## Version of code
+
+  prototype = prototype(
+    date         = date(),
+    version      = as(packageVersion("PeriodCPT"), 'character') ) )
 
 ############################################################################################
-#data.set       data.set<-
-#periodlength   periodlength<-
-#minseglen      minseglen<-
-#npcpts.max
-#distribution   distribution<-
-#pcpt.prior     pcpt.prior<-
-#param.prior    param.prior<-
-#MCMC.options   MCMC.options<-
-  #n.chains
-  #n.iter         n.iter<-
-  #n.burn         n.burn<-
-  #toggle.quiet
+#exportMethods(
+#  data.set, periodlength, minseglen, npcpts.max, distribution, pcpt.prior, param.prior,
+#  MCMC.options, n.chains, n.iter, n.burn, toggle.quiet, MCMC.inits, MCMC.chain, MCMC.chains,
+#  "data.set<-", "periodlength<-", "minseglen<-", "distribution<-", "pcpt.prior<-",
+#  "param.prior<-", "MCMC.options<-", "n.chains<-", "n.iter<-", "n.burn<-", "MCMC.inits<-",
+#  "MCMC.chain<-", "MCMC.chains<-"
+#)
+
+##TODO!!!
+#########
+#nseg/ncpts
+#cpts
+#param.est/param/coef
+#seg.len
+#plot
+#summary
+#show
+#print
+#logLik/likelihood
+#quantile
+############################################################################################
 
 
-{
 
 ## set/get and reset data.set slot
 if(!isGeneric("data.set")) {
@@ -44,7 +52,7 @@ if(!isGeneric("data.set")) {
   }
   setGeneric("data.set", fun)
 }
-setMethod("data.set","pcpt",function(object) coredata(object@data.set))
+setMethod("data.set","pcpt",function(object) object@data.set)
 setGeneric("data.set<-", function(object, value) standardGeneric("data.set<-"))
 setReplaceMethod("data.set", "pcpt", function(object, value) {
   ##Input check
@@ -67,7 +75,7 @@ if(!isGeneric("periodlength")) {
   }
   setGeneric("periodlength", fun)
 }
-setMethod("periodlength","pcpt",function(object) coredata(object@periodlength))
+setMethod("periodlength","pcpt",function(object) object@periodlength)
 setGeneric("periodlength<-", function(object, value) standardGeneric("periodlength<-"))
 setReplaceMethod("periodlength", "pcpt", function(object, value) {
   if(is.null(periodlength)){
@@ -94,7 +102,7 @@ if(!isGeneric("minseglen")) {
   }
   setGeneric("minseglen", fun)
 }
-setMethod("minseglen","pcpt",function(object) coredata(object@minseglen))
+setMethod("minseglen","pcpt",function(object) object@minseglen)
 setGeneric("minseglen<-", function(object, value) standardGeneric("minseglen<-"))
 setReplaceMethod("minseglen", "pcpt", function(object, value) {
   if(length(minseglen) != 1 || !is.numeric(minseglen))
@@ -117,7 +125,7 @@ if(!isGeneric("npcpts.max")) {
   }
   setGeneric("npcpts.max", fun)
 }
-setMethod("npcpts.max","pcpt",function(object) coredata(object@npcpts.max))
+setMethod("npcpts.max","pcpt",function(object) object@npcpts.max)
 
 # set/get and reset distribution slot
 if(!isGeneric("distribution")) {
@@ -196,6 +204,8 @@ if(!isGeneric("n.chains")) {
 setMethod("n.chains","pcpt",function(object) object@MCMC.options$n.chains)
 setGeneric("n.chains<-", function(object, value) standardGeneric("n.chains<-"))
 setReplaceMethod("n.chains", "pcpt", function(object, value) {
+  if(!any(names(object@MCMC.options) == "n.chains"))
+    stop("MCMC.options slot not initialised correctly for `n.chains`.")
   object@MCMC.options$n.chains <- value
   return(object)
 })
@@ -212,6 +222,8 @@ if(!isGeneric("n.iter")) {
 setMethod("n.iter","pcpt",function(object) object@MCMC.options$n.iter)
 setGeneric("n.iter<-", function(object, value) standardGeneric("n.iter<-"))
 setReplaceMethod("n.iter", "pcpt", function(object, value) {
+  if(!any(names(object@MCMC.options) == "n.iter"))
+    stop("MCMC.options slot not initialised correctly for `n.iter`.")
   object@MCMC.options$n.iter <- value
   return(object)
 })
@@ -228,6 +240,8 @@ if(!isGeneric("n.burn")) {
 setMethod("n.burn","pcpt",function(object) object@MCMC.options$n.burn)
 setGeneric("n.burn<-", function(object, value) standardGeneric("n.burn<-"))
 setReplaceMethod("n.burn", "pcpt", function(object, value) {
+  if(!any(names(object@MCMC.options) == "n.burn"))
+    stop("MCMC.options slot not initialised correctly for `n.burn`.")
   object@MCMC.options$n.burn <- value
   return(object)
 })
@@ -241,6 +255,10 @@ if(!isGeneric("toggle.quiet")) {
   setGeneric("toggle.quiet", fun)
 }
 setMethod("toggle.quiet","pcpt",function(object){
+  if(!any(names(object@MCMC.options) == "quiet"))
+    stop("MCMC.options slot not initialised correctly for `quiet`.")
+  if(!is.logical(object@MCMC.options$quiet))
+    stop("`quiet` item in MCMC.options slot is not logical.")
   object@MCMC.options$quiet <- !object@MCMC.options$quiet})
 
 # set/get and reset MCMC.inits slot
@@ -294,18 +312,8 @@ setReplaceMethod("MCMC.chains", "pcpt", function(object, value) {
 })
 
 
-}
 
 
-
-
-###############################################################
-#tmp <- new("pcpt")
-#data.set(tmp)
-#tmpdata <- ts(rnorm(10))
-#data.set(tmp) <- tmpdata
-#data.set(tmp)
-#tmp
 
 
 

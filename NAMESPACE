@@ -1,15 +1,22 @@
-export(CircCPT)
-export(Circ_plot)
-export(Circ_rline)
-export(Circ_arc)
-export(Circ_line)
-export(diagnostic.plot)
-export(Param_quantiles)
-export(CPT_freq)
-export(CPT_mode)
-export(QuantileGivenCPT)
-importFrom("graphics", "abline", "axis", "barplot", "layout", "lines",
-                "plot", "points", "polygon", "segments", "text", "title")
-importFrom("stats", "pbeta", "pgamma", "pnorm", "pt", "qbeta",
-                "qgamma", "qnorm", "qt", "uniroot")
+import(methods)
+import(graphics)
+import(stats)
+
+export(PeriodCPT)
+export(PeriodCPT.bern)
+export(PeriodCPT.pois)
+export(PeriodCPT.norm)
+export(PeriodCPT.mean)
+export(PeriodCPT.var)
+export(class_input)
+
+exportClasses(pcpt)
+exportMethods(
+  data.set, periodlength, minseglen, npcpts.max, distribution, pcpt.prior, param.prior,
+  MCMC.options, n.chains, n.iter, n.burn, toggle.quiet, MCMC.inits, MCMC.chain, MCMC.chains,
+  "data.set<-", "periodlength<-", "minseglen<-", "distribution<-", "pcpt.prior<-",
+  "param.prior<-", "MCMC.options<-", "n.chains<-", "n.iter<-", "n.burn<-", "MCMC.inits<-",
+  "MCMC.chain<-", "MCMC.chains<-"
+)
+
 useDynLib(PeriodCPT, .registration = TRUE)
