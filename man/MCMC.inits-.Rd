@@ -34,7 +34,8 @@ Rebecca Killick
 }
 \examples{
 x=new("pcpt") # new pcpt object
-MCMC.inits(x) = Definie.inits(x) # replaces the existing MCMC.inits slot in x
+MCMC.inits(x) = list(c(0), c(0, 6))
+  # replaces the existing MCMC.inits slot in x
 }
 
 \keyword{methods}

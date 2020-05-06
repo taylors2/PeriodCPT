@@ -78,14 +78,18 @@ if(!isGeneric("periodlength")) {
 setMethod("periodlength","pcpt",function(object) object@periodlength)
 setGeneric("periodlength<-", function(object, value) standardGeneric("periodlength<-"))
 setReplaceMethod("periodlength", "pcpt", function(object, value) {
-  if(is.null(periodlength)){
-    object@periodlength <- round(1/frequency(data.set(object)))
+  if(is.null(value)){
+    if(!is.ts(data.set(object))){
+      stop("Cannot find and assign period length.")
+    }else{
+      object@periodlength <- round(1/frequency(data.set(object)))
+    }
   }else{
-    if(length(periodlength) != 1 || !is.numeric(periodlength))
+    if(length(value) != 1 || !is.numeric(value))
       stop("Period length specified incorrectly.")
-    if(floor(periodlength) != periodlength || periodlength < 0)
+    if(floor(value) != value || value < 0)
       stop("Period length specified incorrectly.")
-    object@periodlength <- periodlength
+    object@periodlength <- value
   }
   if(length(object@minseglen) == 1){
     object@npcpts.max <- floor(object@periodlength / object@minseglen)
@@ -105,15 +109,15 @@ if(!isGeneric("minseglen")) {
 setMethod("minseglen","pcpt",function(object) object@minseglen)
 setGeneric("minseglen<-", function(object, value) standardGeneric("minseglen<-"))
 setReplaceMethod("minseglen", "pcpt", function(object, value) {
-  if(length(minseglen) != 1 || !is.numeric(minseglen))
+  if(length(value) != 1 || !is.numeric(value))
     stop("Minimum segment length specifed incorrectly.")
-  if(minseglen <= 0 || floor(minseglen) != minseglen)
+  if(value <= 0 || floor(value) != value)
     stop("Minimum segment length specifed incorrectly.")
-  object@minseglen <- minseglen
+  object@minseglen <- value
   if(length(object@periodlength) == 1){
     object@npcpts.max <- floor(object@periodlength / object@minseglen)
   }
-  return(minseglen)
+  return(object)
 })
 
 ## set/get npcpts.max slot
@@ -289,7 +293,7 @@ if(!isGeneric("MCMC.chain")) {
 setMethod("MCMC.chain","pcpt",function(object, index) object@MCMC.chains[[paste0("`",index,"`")]])
 setGeneric("MCMC.chain<-", function(object, index, value) standardGeneric("MCMC.chain<-"))
 setReplaceMethod("MCMC.chain", "pcpt", function(object, index, value) {
-  if(!(index %in% as.numeric(names(object@MCMC))))
+  if(!(index %in% as.numeric(names(object@MCMC.chains))))
     stop(paste0("Index `",index,"` not found in list of chains."))
   object@MCMC.chains[[paste0("`",index,"`")]] <- value
   return(object)

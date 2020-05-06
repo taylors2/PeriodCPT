@@ -38,7 +38,7 @@ Simon Taylor
 }
 
 \seealso{
-  \code{\link{pcpt}}, \code{\link{PeriodCPT.bern}}, \code{\link{PeriodCPT.pois}}, \code{\link{PeriodCPT.norm}}, \code{\link{PeriodCPT.mean}}, \code{\link{PeriodCPT.var}}
+  \code{\linkS4class{pcpt}}, \code{\link{PeriodCPT.bern}}, \code{\link{PeriodCPT.pois}}, \code{\link{PeriodCPT.norm}}, \code{\link{PeriodCPT.mean}}, \code{\link{PeriodCPT.var}}
 }
 
 \examples{

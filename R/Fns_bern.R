@@ -1,4 +1,4 @@
-param.prior.make.bern <- function(param.a, param.b){
+param.prior.make.bern <- function(param.a, param.b, ...){
   ##y~bern(theta), theta~beta(param.a, param.b)
   if(missing(param.a)){
     param.a <- 1

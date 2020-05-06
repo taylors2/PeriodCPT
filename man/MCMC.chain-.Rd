@@ -7,12 +7,14 @@ Generic Function - MCMC.chain<-
 Generic function
 }
 \usage{
-MCMC.chain(object)<-value
+MCMC.chain(object, index)<-value
 }
 \arguments{
   \item{object}{
 	Depending on the class of \code{object} depends on the method used (and if one exists)
-}
+	}
+	\item{index}{ Single positive integer giving chain index.}
+
   \item{value}{
 	Replacement value
 }

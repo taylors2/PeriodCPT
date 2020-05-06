@@ -34,4 +34,4 @@ n.iter(x) # retrieves the n.iter item in the MCMC.options slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

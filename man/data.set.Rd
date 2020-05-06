@@ -33,4 +33,4 @@ data.set(x) # retrieves the data.set slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

@@ -26,10 +26,11 @@
 }
 \seealso{
   \code{\link{periodlength-methods}}
+}
 \examples{
 x = new("pcpt") # new pcpt object
 periodlength(x) # retrieves the periodlength slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

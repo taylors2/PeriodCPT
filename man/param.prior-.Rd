@@ -34,7 +34,7 @@ Rebecca Killick
 }
 \examples{
 x=new("pcpt") # new pcpt object
-param.prior(x) = param.prior.make.bern(param.a = 1, param.b = 1)
+param.prior(x) = c("param.a" = 1, "param.b" = 1)
    # replaces the existing param.prior slot in x
 }
 

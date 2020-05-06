@@ -33,4 +33,4 @@ MCMC.inits(x) # retrieves the MCMC.inits slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

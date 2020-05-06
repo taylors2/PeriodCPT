@@ -34,8 +34,11 @@ Rebecca Killick
 }
 \examples{
 x=new("pcpt") # new pcpt object
-MCMC.options(x) = MCMC.options.make()
-n.iter(x) = 1e6 # replaces the existing n.iter item in the MCMC.options slot in x
+MCMC.options(x) = list(
+         n.iter = 1e6, n.chain = 1,
+         n.burn = 1e4, cachesize = 50,
+         quiet = FALSE)
+n.iter(x) = 1e7 # replaces the existing n.iter item in the MCMC.options slot in x
 }
 
 \keyword{methods}

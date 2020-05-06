@@ -1,4 +1,4 @@
-param.prior.make.var <- function(){
+param.prior.make.var <- function(param.a, param.b, ...){
   ##y ~ Norm(0, theta), theta ~ InvGama(param.a, param.b)
 
   if(missing(param.a)){

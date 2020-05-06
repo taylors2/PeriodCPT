@@ -33,4 +33,4 @@ MCMC.chains(x) # retrieves the MCMC.chains slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

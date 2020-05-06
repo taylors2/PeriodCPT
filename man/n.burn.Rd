@@ -34,4 +34,4 @@ n.burn(x) # retrieves the n.burn item in the MCMC.options slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

@@ -34,7 +34,7 @@ Rebecca Killick
 }
 \examples{
 x=new("pcpt") # new pcpt object
-MCMC.chains(x) = vector(`1` = NULL, `2` = NULL)
+MCMC.chains(x) = list(`1` = NULL, `2` = NULL)
     # replaces the existing MCMC.chains slot in x
 }
 

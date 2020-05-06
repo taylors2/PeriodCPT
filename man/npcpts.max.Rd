@@ -1,13 +1,13 @@
-\name{npcpt.max}
-\alias{npcpt.max}
+\name{npcpts.max}
+\alias{npcpts.max}
 \title{
-  Generic Function -- npcpt.max
+  Generic Function -- npcpts.max
 }
 \description{
   Generic function
 }
 \usage{
-  npcpt.max(object)
+  npcpts.max(object)
 }
 \arguments{
   \item{object}{
@@ -25,12 +25,12 @@
   Rebecca Killick
 }
 \seealso{
-  \code{\link{npcpt.max-methods}}
+  \code{\link{npcpts.max-methods}}
 }
 \examples{
 x = new("pcpt") # new pcpt object
-npcpt.max(x) # retrieves the npcpt.max slot from x
+npcpts.max(x) # retrieves the npcpts.max slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

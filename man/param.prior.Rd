@@ -33,4 +33,4 @@ param.prior(x) # retrieves the param.prior slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

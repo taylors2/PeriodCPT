@@ -33,4 +33,4 @@ minseglen(x) # retrieves the minseglen slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

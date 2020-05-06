@@ -36,4 +36,4 @@ x@MCMC.options$quiet
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

@@ -34,7 +34,10 @@ Rebecca Killick
 }
 \examples{
 x=new("pcpt") # new pcpt object
-MCMC.options(x) = MCMC.options.make()
+MCMC.options(x) = list(
+         n.iter = 1e6, n.chain = 1,
+         n.burn = 1e4, cachesize = 50,
+         quiet = FALSE)
 n.chains(x) = 3 # replaces the existing n.chains item in the MCMC.options slot in x
 }
 

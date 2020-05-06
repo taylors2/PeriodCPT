@@ -4,7 +4,7 @@ PeriodCPT <- function(data,
                       ...){
   distribution = match.arg(distribution)
   if(missing(data)) stop("data is missing.")
-  ans <- eval(call(paste0("PeriodCPT.",distribution,"(data = data, ...)")))
+  ans <- eval(parse(text=paste0("PeriodCPT.",distribution,"(data = data, ...)")))
   return(ans)
 }
 

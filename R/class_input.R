@@ -3,10 +3,11 @@
 class_input <- function(data, periodlength, minseglen, distribution,
                         Mprior, Mhyp, spread, inits, ...){
 
+
   ans               = methods::new("pcpt")
   data.set(ans)     = data
-  periodlength(ans) = periodlength
-  minseglen(ans)    = minseglen;
+  if(!missing(periodlength)) periodlength(ans) = periodlength
+  if(!missing(minseglen))    minseglen(ans)    = minseglen;
   distribution(ans) = distribution
 
   pcpt.prior(ans)   = pcpt.prior.make(Mprior, Mhyp, spread)
@@ -46,12 +47,14 @@ pcpt.prior.make <- function(Mprior = c("unif","pois"), Mhyp, spread = 1){
 
 ## Create/check parameter prior info for slot
 param.prior.make <- function(distribution, ...){
-  param.prior.make.fn <- get(paste0("PeriodCPT:::param.prior.",distribution))
-  return(param.prior.make.fn(...))
+
+  param.prior.make.fn <- paste0("PeriodCPT:::param.prior.make.",distribution,"(...)")
+  return(eval(parse(text = param.prior.make.fn)))
 }
 
 ## Create/check MCMC options for slot
-MCMC.options.make <- function(n.iter, n.chain, n.burn, cachesize, quiet){
+MCMC.options.make <- function(n.iter, n.chains, n.burn,
+                              cachesize, quiet, ...){
 
   if(missing(n.iter)){
     stop("MCMC option - n.iter not specified.")
@@ -88,28 +91,27 @@ MCMC.options.make <- function(n.iter, n.chain, n.burn, cachesize, quiet){
   if(missing(quiet)){
     quiet <- FALSE
   }else{
-    if(!is.numeric(quiet) || length(quiet) != 1 || !is.logical(quiet) || anyNA(quiet))
+    if(length(quiet) != 1 || !is.logical(quiet) || anyNA(quiet))
       stop("MCMC option - quiet specified incorrectly")
   }
 
   return(
-    list(n.iter = n.iter, n.chain = n.chain,
+    list(n.iter = n.iter, n.chains = n.chains,
          n.burn = n.burn, cachesize = cachesize,
          quiet = quiet)
   )
 }
 
 ## Simulate the number of within period changepoints given pcpt.prior info
-rMprior <- function(n, object, ...){
-  if(pcpt.prior(object)$Mprior){
+rMprior <- function(n, object){
+  if(pcpt.prior(object)$Mprior == "unif"){
     return(sample.int(npcpts.max(object), size = n, replace = TRUE))
   }else if(pcpt.prior(object)$Mprior == "pois"){
-    m <- rep(0,n)
-    for(i in 1:n){
-      while(m[i]>npcpts.max(object)){
-        m[i] <- 1 + rpois(n = 1, lambda = pcpt.prior(object)$Mhyp[1])
-      }
-    }
+    lam <- pcpt.prior(object)$Mhyp[1]
+    m <- qpois(p = runif(n = n,
+                         min = ppois(0,lam),
+                         max = ppois(npcpts.max(object),lam) ),
+               lambda = lam)
     return(m)
   }else{
     stop("Unrecognised prior for the number of within period changepoints.")
@@ -121,13 +123,12 @@ rpcpt_single <- function(object){
   N <- periodlength(object)
   l <- minseglen(object)
   a <- pcpt.prior(object)$spread
-  mMax  <- npcpts.max(object)
   m <- rMprior(1, object)
   if(m == 1){
     tau <- 0
   }else{
     Delta <- N - l*m
-    p     <- rgamma(n = m, shape = 1, rate = 1)
+    p     <- rgamma(n = m, shape = a, rate = 1)
     delta <- rmultinom(n = 1, size = Delta, prob = p/sum(p))[,1]
     tau0  <- sample.int(n = N, size = 1) - 1
     tau   <- tau0 + cumsum(c(0,delta[-m] + l))
@@ -198,7 +199,7 @@ initialise.MCMC.list <- function(n){
 }
 
 
-populate.chain <- function(object, C.chain.output, blank = -1){
+populate.chain <- function(object, C.chain.output, blank = -1, ...){
   TAU <- matrix(C.chain.output, ncol = npcpts.max(object), byrow = TRUE)
   TAU[TAU == blank] <- NA
   colnames(TAU) <- paste0("tau",1:npcpts.max(object))

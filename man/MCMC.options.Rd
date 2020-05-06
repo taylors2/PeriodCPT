@@ -33,4 +33,4 @@ MCMC.options(x) # retrieves the MCMC.options slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

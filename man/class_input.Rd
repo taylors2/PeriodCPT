@@ -11,7 +11,7 @@ This function is called by \code{PeriodCPT} and its distribution specific functi
 WARNING: Checks on inputs may not be comprehensive!
 }
 \usage{
-class_input <- function(data, periodlength, minseglen, distribution,
+class_input(data, periodlength, minseglen, distribution,
                         Mprior, Mhyp, spread, inits, ...)
 }
 \arguments{
@@ -57,7 +57,8 @@ Rebecca Killick
 \code{\link{PeriodCPT}},\code{\linkS4class{pcpt}}
 }
 \examples{
-#This function should only be used by developers, see its use in PeriodCPT and distribution specific variations.
+#This function should only be used by developers.
+#See its use in PeriodCPT and distribution specific variations.
 }
 
 \keyword{methods}

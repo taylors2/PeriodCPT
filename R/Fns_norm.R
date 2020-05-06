@@ -1,4 +1,4 @@
-param.prior.make.norm <- function(){
+param.prior.make.norm <- function(param.m, param.c, param.a, param.b, ...){
   ##y ~ Norm(theta[1], theta[2]),
   ##theta[1] ~ Norm(param.m, param.c * theta[2])
   ##theta[2] ~ IGamma(param.a, param.b)

@@ -7,12 +7,13 @@
   Generic function
 }
 \usage{
-  MCMC.chain(object)
+  MCMC.chain(object, index)
 }
 \arguments{
   \item{object}{
     Depending on the class of \code{object} depends on the method used (and if one exists)
   }
+  \item{index}{ Single positive integer giving chain index.}
 }
 \details{
   Generic Function
@@ -29,9 +30,9 @@
 }
 \examples{
 x = new("pcpt") # new pcpt object
-MCMC.chain(x) = list(`1` = NULL, `2` = NULL)
+MCMC.chains(x) = list(`1` = NULL, `2` = NULL)
 MCMC.chain(x, 2) # retrieves the the second listed item from the MCMC.chains slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

@@ -1,4 +1,4 @@
-param.prior.make.pois <- function(){
+param.prior.make.pois <- function(param.a, param.b, ...){
   ##y~pois(lambda), lambda~gamma(param.a, param.b)
   if(missing(param.a)){
     param.a <- 1

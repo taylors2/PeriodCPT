@@ -33,4 +33,4 @@ pcpt.prior(x) # retrieves the pcpt.prior slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }

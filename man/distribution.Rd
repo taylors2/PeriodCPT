@@ -33,4 +33,4 @@ distribution(x) # retrieves the distribution slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }
-\keywoed{ internal }
+\keyword{ internal }
