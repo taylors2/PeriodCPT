@@ -19,3 +19,4 @@ Depends: methods
 Author: Simon Taylor [aut, cre],
   Rebecca Killick [ctb], Jamie-Leigh Chapman [ctb]
 RoxygenNote: 7.1.0
+NeedsCompilation: yes

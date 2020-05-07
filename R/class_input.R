@@ -5,8 +5,16 @@ class_input <- function(data, periodlength, minseglen, distribution,
 
   ans               = methods::new("pcpt")
   data.set(ans)     = data
-  if(!missing(periodlength)) periodlength(ans) = periodlength
-  if(!missing(minseglen))    minseglen(ans)    = minseglen;
+  if(!missing(periodlength)){
+    periodlength(ans) = periodlength
+  }else if(!is.ts(data)){
+    stop("Period length is not defined either via data as `ts` object or explicitly given as input.")
+  }
+  if(!missing(minseglen)){
+    minseglen(ans)    = minseglen;
+  }else{
+    minseglen(ans)    = 1;
+  }
   distribution(ans) = distribution
 
   pcpt.prior(ans)   = pcpt.prior.make(Mprior, Mhyp, spread)
@@ -124,14 +132,14 @@ rpcpt_single <- function(object){
   a <- pcpt.prior(object)$spread
   m <- rMprior(1, object)
   if(m == 1){
-    tau <- 0
+    tau <- 1
   }else{
     Delta <- N - l*m
     p     <- rgamma(n = m, shape = a, rate = 1)
     delta <- rmultinom(n = 1, size = Delta, prob = p/sum(p))[,1]
-    tau0  <- sample.int(n = N, size = 1) - 1
+    tau0  <- sample.int(n = N, size = 1)
     tau   <- tau0 + cumsum(c(0,delta[-m] + l))
-    tau   <- sort(tau %% N)
+    tau   <- sort(tau %% N) + 1
   }
   return(tau)
 }
@@ -147,8 +155,8 @@ Definie.inits <- function(object, inits, ...){
   }else if(any(inits == "ends")){
     ##Define two chains that are initiated at the ends of the parameter space
     n.chains(object) <- 2
-    inits.pcpt[[1]] <- 0
-    inits.pcpt[[2]] <- seq(from = 0, by = minseglen(object), len = npcpts.max(object))
+    inits.pcpt[[1]] <- 1
+    inits.pcpt[[2]] <- seq(from = 1, by = minseglen(object), len = npcpts.max(object))
   }else if(is.function(inits)){
     ##Generate inits according to provided function
     for(i in 1:n.chains(object)){
@@ -180,8 +188,8 @@ Definie.inits <- function(object, inits, ...){
   for(i in 1:n.chains(object)){
     if(any(floor(inits.pcpt[[i]]) != inits.pcpt[[i]]))
       stop("In inits, within period cpts must be whole numbers.")
-    if(inits.pcpt[[i]][1] < 0 || inits.pcpt[[i]][1] >= npcpts.max(object))
-      stop("In inits, within period cpts must be within [0. period lenght).")
+    if(inits.pcpt[[i]][1] < 1 || inits.pcpt[[i]][1] > npcpts.max(object))
+      stop("In inits, within period cpts must be within [1, period length].")
     if(any(diff(c(inits.pcpt[[i]], inits.pcpt[[i]][1]+periodlength(object))) < minseglen(object)))
       stop("In inits, within period cpts does not satisfy minimum segment length condition.")
   }

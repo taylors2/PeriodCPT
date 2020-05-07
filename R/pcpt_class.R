@@ -62,6 +62,7 @@ setReplaceMethod("data.set", "pcpt", function(object, value) {
     object@data.set <- value
   }else{
     object@data.set <- ts(value)
+    object@periodlength <- frequency(value)
   }
   return(object)
 })
@@ -82,7 +83,9 @@ setReplaceMethod("periodlength", "pcpt", function(object, value) {
     if(!is.ts(data.set(object))){
       stop("Cannot find and assign period length.")
     }else{
-      object@periodlength <- round(1/frequency(data.set(object)))
+      N <- frequency(data.set(object))
+      if(floor(N) != N) stop("data frequency must be an integer.")
+      object@periodlength <- N
     }
   }else{
     if(length(value) != 1 || !is.numeric(value))

@@ -79,6 +79,11 @@ Objects can be created by calls of the form \code{new("pcpt", ...)}.
     \item{MCMC.chains}{\code{signature(object = "pcpt")}: retrieves MCMC.chains slot }
     \item{MCMC.chain}{\code{signature(object = "pcpt", index = "numeric")}: retrieves from the MCMC.chains slot the chain corresponding to the \code{index}-th chain. }
 
+    \item{print}{\code{signature(x = "cpt")}: prints details of the pcpt object including summary}
+    \item{show}{\code{signature(object = "cpt")}: prints details of the pcpt object including summary}
+    \item{summary}{\code{signature(object = "pcpt", ...)}: prints a summary of the pcpt object }
+    \item{plot}{\code{signature(x = "pcpt", ...)}: plots the pcpt object}
+
   }
 }
 
@@ -97,15 +102,15 @@ x = new("pcpt")       # creates a new object with the pcpt class defaults
 periodlength(x)       # retrieves the periodlength slot from x
 periodlength(x) <- 12 # replaces the periodlength slot from x with 12
 
-# Example of a change in variance at 100 in simulated normal data
+# Example of a within period change in probability in simulated bernoulli data
 set.seed(1)
-x = ts(rbinom(n = 120, size = 1, rep( c(0.2,0.5), each = 6)), freq = 1/12)
+x = ts(rbinom(n = 120, size = 1, rep( c(0.2,0.5), each = 6)), freq = 12)
 ans = PeriodCPT(x, distribution = "bern")
 
+print(ans) # prints details of the analysis including a summary
+summary(ans)
 ##\/TODO\/
 ##########
-##print(ans) # prints details of the analysis including a summary
-##summary(ans)
 ##plot(ans) # plots the data with change (vertical line) at 100
 ##logLik(ans) # raw likelihood of the data with changepoints, second value is likelihood + penalty
 }

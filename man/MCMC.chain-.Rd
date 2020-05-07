@@ -37,7 +37,7 @@ Rebecca Killick
 \examples{
 x=new("pcpt") # new pcpt object
 MCMC.chains(x) = list(`1` = NULL, `2` = NULL)
-MCMC.chain(x, 2) = 0  #assigns the number zero to the second list item in MCMC.chains slot of x
+MCMC.chain(x, 2) = 1  #assigns the number 1 to the second list item in MCMC.chains slot of x
 }
 
 \keyword{methods}
