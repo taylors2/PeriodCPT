@@ -35,7 +35,7 @@ Rebecca Killick
 \examples{
 x=new("pcpt") # new pcpt object
 MCMC.options(x) = list(
-         n.iter = 1e6, n.chain = 1,
+         n.iter = 1e6, n.chains = 1,
          n.burn = 1e4, cachesize = 50,
          quiet = FALSE)
 n.burn(x) = 0 # replaces the existing n.burn item in the MCMC.options slot in x

@@ -16,7 +16,8 @@ exportMethods(
   MCMC.options, n.chains, n.iter, n.burn, toggle.quiet, MCMC.inits, MCMC.chain, MCMC.chains,
   "data.set<-", "periodlength<-", "minseglen<-", "distribution<-", "pcpt.prior<-",
   "param.prior<-", "MCMC.options<-", "n.chains<-", "n.iter<-", "n.burn<-", "MCMC.inits<-",
-  "MCMC.chain<-", "MCMC.chains<-"
+  "MCMC.chain<-", "MCMC.chains<-",
+  print, show, summary, plot
 )
 
 useDynLib(PeriodCPT, .registration = TRUE)

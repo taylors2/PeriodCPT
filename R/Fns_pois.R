@@ -19,7 +19,7 @@ param.prior.make.pois <- function(param.a, param.b, ...){
 
 PeriodCPT.pois <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "unif"),
                            Mhyp = 1, spread = 1, param.a = 1, param.b = 1,
-                           inits = NULL, n.iter = 1e6, n.chain = 1, n.burn = 0,
+                           inits = NULL, n.iter = 1e6, n.chains = 1, n.burn = 0,
                            cachesize=50, quiet=FALSE, ...){
 
   distribution <- "pois"
@@ -33,12 +33,11 @@ PeriodCPT.pois <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   Mprior <- match.arg(Mprior)
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
                      distribution = distribution, Mprior = Mprior, Mhyp = Mhyp,
-                     spread = spread, inits = inits,
-                     n.iter, n.chain, n.burn, cachesize, quiet,
-                     param.a, param.b, ...)
+                     spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,
+                     n.burn = n.burn, cachesize = cachesize, quiet = quiet,
+                     param.a = param.a, param.b = param.b, ...)
 
   ans <- PeriodCPT.main(ans)
-  ans <- eval(paste0("SummariseOutput.",distribution,"(ans)"))
   return(ans)
 }
 

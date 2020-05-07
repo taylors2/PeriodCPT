@@ -3,7 +3,6 @@
 class_input <- function(data, periodlength, minseglen, distribution,
                         Mprior, Mhyp, spread, inits, ...){
 
-
   ans               = methods::new("pcpt")
   data.set(ans)     = data
   if(!missing(periodlength)) periodlength(ans) = periodlength
@@ -186,7 +185,7 @@ Definie.inits <- function(object, inits, ...){
     if(any(diff(c(inits.pcpt[[i]], inits.pcpt[[i]][1]+periodlength(object))) < minseglen(object)))
       stop("In inits, within period cpts does not satisfy minimum segment length condition.")
   }
-
+  names(inits.pcpt) <- as.character(1:n.chains(object))
   return(inits.pcpt)
 
 }

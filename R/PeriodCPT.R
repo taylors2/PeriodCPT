@@ -5,6 +5,7 @@ PeriodCPT <- function(data,
   distribution = match.arg(distribution)
   if(missing(data)) stop("data is missing.")
   ans <- eval(parse(text=paste0("PeriodCPT.",distribution,"(data = data, ...)")))
+  ans <- eval(parse(text = paste0("SummariseOutput.",distribution,"(ans)")))
   return(ans)
 }
 
@@ -25,7 +26,7 @@ PeriodCPT.main <- function(object){
       draw$C.chain.output[(i-1)*len.chain.samples + (1:len.chain.samples)],
       blank = -1)
   }
-
+  return(object)
 }
 
 ##################################################

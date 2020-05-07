@@ -9,7 +9,7 @@
 \usage{
 PeriodCPT.norm(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "unif"),
                            Mhyp = 1, spread = 1, param.m = 0, param.c = 1, param.a = 1,
-                           param.b = 1, inits = NULL, n.iter = 1e6, n.chain = 1,
+                           param.b = 1, inits = NULL, n.iter = 1e6, n.chains = 1,
                            n.burn = 0, cachesize = 50, quiet = FALSE, ...)
 }
 
@@ -28,7 +28,7 @@ PeriodCPT.norm(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "uni
   \item{param.c, param.a, param.b}{Positive numbers giving the scale & shape hyper-parameters for the normal-InvGamma prior distribution on the within period segment parameter. All set to 1 by default.}
   \item{inits}{Initial values for the chains. See details}
   \item{n.iter}{Positive integer giving the number of iterations for the MCMC.}
-  \item{n.chain}{Positive integer giving the number of chains to evaluate.}
+  \item{n.chains}{Positive integer giving the number of chains to evaluate.}
   \item{n.burn}{Positive integer giving the initial number iterations to discard as the burn-in period.}
   \item{cachesize}{Positive integer giving the cache size to minimise re-evaluation of repeated scenarios within the MCMC algorithm. Set to 50 by default.}
   \item{quiet}{Logical flag indicating whether a progress bar should be printed}

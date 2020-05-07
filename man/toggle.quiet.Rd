@@ -29,7 +29,10 @@
 }
 \examples{
 x = new("pcpt") # new pcpt object
-MCMC.options(x) = MCMC.options.make()
+MCMC.options(x) = list(
+         n.iter = 1e6, n.chain = 1,
+         n.burn = 1e4, cachesize = 50,
+         quiet = FALSE)
 x@MCMC.options$quiet
 toggle.quiet(x) # inverts the logical item quiet in the MCMC.options slot.
 x@MCMC.options$quiet

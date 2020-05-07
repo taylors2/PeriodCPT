@@ -34,7 +34,7 @@ Rebecca Killick
 }
 \examples{
 x=new("pcpt") # new pcpt object
-pcpt.prior(x) = pcpt.prior.make(Mprior = "pois", Mhyp = 1, spread = 1)
+pcpt.prior(x) = list(Mprior = "pois", Mhyp = 1, spread = 1)
    # replaces the existing pcpt.prior slot in x
 }
 

@@ -290,12 +290,12 @@ if(!isGeneric("MCMC.chain")) {
   }
   setGeneric("MCMC.chain", fun)
 }
-setMethod("MCMC.chain","pcpt",function(object, index) object@MCMC.chains[[paste0("`",index,"`")]])
+setMethod("MCMC.chain","pcpt",function(object, index) object@MCMC.chains[[as.character(index)]])
 setGeneric("MCMC.chain<-", function(object, index, value) standardGeneric("MCMC.chain<-"))
 setReplaceMethod("MCMC.chain", "pcpt", function(object, index, value) {
   if(!(index %in% as.numeric(names(object@MCMC.chains))))
     stop(paste0("Index `",index,"` not found in list of chains."))
-  object@MCMC.chains[[paste0("`",index,"`")]] <- value
+  object@MCMC.chains[[as.character(index)]] <- value
   return(object)
 })
 
@@ -316,8 +316,35 @@ setReplaceMethod("MCMC.chains", "pcpt", function(object, value) {
 })
 
 
+#################################################
 
+setMethod("show","pcpt",function(object){
+  cat("Class 'pcpt' : Changepoint Object\n")
+  cat("        ~~   : S4 class containing", length(attributes(object))-1, "slots with names\n")
+  cat("             ", names(attributes(object))[1:(length(attributes(object))-1)], "\n\n")
+  cat("Created on  :", object@date, "\n\n")
+  cat("summary(.)  :\n----------\n")
+  summary(object)
+})
 
+setMethod("print","pcpt",function(x, ...){
+  show(x)
+})
+
+setMethod("summary","pcpt",function(object, ...){
+  cat("Created Using changepoint version",object@version,'\n')
+  cat("Distribution           : ", distribution(object), '\n')
+  cat("Period length          : ", periodlength(object), "\n")
+  cat("Minimum Segment Length : ", minseglen(object),    "\n")
+  cat("Maximum no. of cpts    : ", npcpts.max(object),   "\n")
+  cat("Number of chains       : ", n.chains(object),     "\n")
+  cat("Number of pcpts        : ", "[CODE TO DO!!]",     "\n")
+  cat("Periodic cpt locations : ", "[CODE TO DO!!]",     "\n")
+})
+
+setMethod("plot","pcpt",function(x, ...){
+  cat("Plot function for pcpt class not yet implemented !!!\n")
+})
 
 
 
