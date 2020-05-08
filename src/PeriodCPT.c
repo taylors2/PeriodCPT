@@ -69,12 +69,19 @@ extern void PeriodCPT(
                    spread, Pdist, Phyp, err, g1, g2);
   if(*err != 0) goto ESC1;
 
-
   for(int ichain = 0; ichain < *nchains; ichain++){
+    //initialise chain
 
+    //Run burn
+
+    //Run chain, syncro exporting of sample to output
+
+    //Clean-up
 
   }
 
+  //If requested, calculate mode estimates and summaries
+  //  Must return void and be able to call from R
 
 
   //Initialise draw output to blank character
@@ -86,6 +93,8 @@ extern void PeriodCPT(
     }
   }
 
+  free(g2);
+  free(g1);
 
   ESC1:;
   return;
