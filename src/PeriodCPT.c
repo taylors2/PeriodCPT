@@ -34,6 +34,7 @@ extern void PeriodCPT(
 */
 
 #include "PeriodCPT_LOOKUP.h"
+#include "PeriodCPT_MCMC.h"
 
 extern void PeriodCPT(
     double  *data,       //Periodic time series data
@@ -69,14 +70,34 @@ extern void PeriodCPT(
                    spread, Pdist, Phyp, err, g1, g2);
   if(*err != 0) goto ESC1;
 
+  int save;
+  char str[50];
+  char *progress_text = str;
   for(int ichain = 0; ichain < *nchains; ichain++){
     //initialise chain
+    MCMCitem_t *current;
+    current = GetInital_tau(&(inits[ichain * *maxM]), N, maxM, blank, g1, g2);
+    cache_t **PROPCACHE;
+    PROPCACHE = Make_Cache_List(*cache);
+    int ncache = 0;
 
     //Run burn
+    save = FALSE;
+    sprintf(progress_text, "Chain %d/%d (burn-in)  : ",ichain, *nchains);
+    PeriodCPT_MCMC(current, nburn, save, &(draw[ichain * *maxM * *niter]),
+      N, maxM, minseglen, g1, g2, PROPCACHE, &ncache, cache,
+      quiet, &progress_text, blank, err);
 
     //Run chain, syncro exporting of sample to output
+    save = TRUE;
+    sprintf(progress_text, "Chain %d/%d (iteration): ",ichain, *nchains);
+    PeriodCPT_MCMC(current, niter, save, &(draw[ichain * *maxM * *niter]),
+      N, maxM, minseglen, g1, g2, PROPCACHE, &ncache, cache,
+      quiet, &progress_text,blank, err);
 
     //Clean-up
+    Delete_Cache_List(PROPCACHE, *cache);
+    Delete_MCMCitem(current);
 
   }
 
