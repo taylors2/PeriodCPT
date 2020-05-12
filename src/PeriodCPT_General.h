@@ -36,6 +36,7 @@ struct MCMCchain{
 
 struct CacheItem{
   MCMCitem_t *generator;
+  int         count;
   chain_t    *chain;
 };
 

@@ -35,6 +35,8 @@ extern void PeriodCPT(
 
 #include "PeriodCPT_LOOKUP.h"
 #include "PeriodCPT_MCMC.h"
+#include "PeriodCPT_MCMCgeneric.h"
+#include "PeriodCPT_Cache.h"
 
 extern void PeriodCPT(
     double  *data,       //Periodic time series data
