@@ -1,3 +1,6 @@
+#ifndef FILE_PROPOSAL
+#define FILE_PROPOSAL
+
 #include "PeriodCPT_General.h"
 #include "PeriodCPT_MCMCgeneric.h"
 #include "PeriodCPT_Cache.h"
@@ -232,7 +235,6 @@ double AcceptanceProb(MCMCitem_t *current, MCMCitem_t *accept,
                       cache_t **PROPCACHE, int *ncache, int *cachemax,
                       double *g1, segval_t *g2, int *minseglen, int *N){
 
-  int SAME;
   double lZ0, lZ1, lZ2, lmax, alpha;
   chain_t *psetj;
 
@@ -279,3 +281,6 @@ double AcceptanceProb(MCMCitem_t *current, MCMCitem_t *accept,
 
   return alpha;
 }
+
+
+#endif //FILE_PROPOSAL

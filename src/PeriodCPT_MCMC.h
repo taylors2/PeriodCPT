@@ -1,3 +1,6 @@
+#ifndef FILE_MCMC
+#define FILE_MCMC
+
 #include "PeriodCPT_General.h"
 #include "PeriodCPT_MCMCgeneric.h"
 #include "PeriodCPT_Cache.h"
@@ -49,10 +52,10 @@ void PushToOutput(int *draw, MCMCitem_t *current, int *blank, int *maxM){
 void PeriodCPT_MCMC(MCMCitem_t *current, int *nsteps, int save,
           int *draw, int *N, int *maxM, int *minseglen, double *g1,
           segval_t *g2, cache_t **PROPCACHE, int *ncache, int *maxcache,
-          int *quiet, char **progress_text, int *blank, int *err){
+          int *quiet, char **progress_text, int *blank, int *tk, int *err){
 
   for(int i = 0; i < *nsteps; i++){
-    if(*quiet != TRUE) Progress(i, *nsteps, progress_text);
+    if(*quiet != TRUE) Progress(i, *nsteps, *tk, progress_text);
     single_step(PROPCACHE, ncache, maxcache, current, g1, g2, minseglen, N);
     if(save == TRUE) PushToOutput(&(draw[i * *maxM]), current, blank, maxM);
   }
@@ -61,3 +64,5 @@ void PeriodCPT_MCMC(MCMCitem_t *current, int *nsteps, int save,
 }
 
 
+
+#endif //FILE_MCMC

@@ -62,6 +62,7 @@ extern void PeriodCPT(
 ){
 
   *err = 0;
+//  int NTICKS = 20;
 
   //MAKE LOOKUP TABLES
   double   *g1;
@@ -71,7 +72,7 @@ extern void PeriodCPT(
   MAKE_LOOK_TABLES(data, time, n, N, minseglen, maxM, Mdist, Mhyp,
                    spread, Pdist, Phyp, err, g1, g2);
   if(*err != 0) goto ESC1;
-
+/*
   int save;
   char str[50];
   char *progress_text = str;
@@ -88,14 +89,14 @@ extern void PeriodCPT(
     sprintf(progress_text, "Chain %d/%d (burn-in)  : ",ichain, *nchains);
     PeriodCPT_MCMC(current, nburn, save, &(draw[ichain * *maxM * *niter]),
       N, maxM, minseglen, g1, g2, PROPCACHE, &ncache, cache,
-      quiet, &progress_text, blank, err);
+      quiet, &progress_text, blank, &NTICKS, err);
 
     //Run chain, syncro exporting of sample to output
     save = TRUE;
     sprintf(progress_text, "Chain %d/%d (iteration): ",ichain, *nchains);
     PeriodCPT_MCMC(current, niter, save, &(draw[ichain * *maxM * *niter]),
       N, maxM, minseglen, g1, g2, PROPCACHE, &ncache, cache,
-      quiet, &progress_text,blank, err);
+      quiet, &progress_text,blank, &nticks, err);
 
     //Clean-up
     Delete_Cache_List(PROPCACHE, *cache);
@@ -105,21 +106,13 @@ extern void PeriodCPT(
 
   //If requested, calculate mode estimates and summaries
   //  Must return void and be able to call from R
+*/
 
 
-  //Initialise draw output to blank character
-  for(int i = 0; i < (*nchains * *niter * *maxM); i++){
-    if(i % *maxM == 0){
-      draw[i] = 1;
-    }else{
-      draw[i] = *blank;
-    }
-  }
-
+  ESC1:;
   free(g2);
   free(g1);
 
-  ESC1:;
   return;
 }
 

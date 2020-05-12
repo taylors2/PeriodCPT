@@ -1,3 +1,6 @@
+#ifndef FILE_DISTRIBUTIONS
+#define FILE_DISTRIBUTIONS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <R.h>
@@ -76,4 +79,4 @@ double dmvstvar( double n, double x, double xx, double mu, double a, double b, i
 
 
 
-
+#endif //FILE_DISTRIBUTIONS

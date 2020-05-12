@@ -1,3 +1,6 @@
+#ifndef FILE_MCMCGENERIC
+#define FILE_MCMCGENERIC
+
 #include "PeriodCPT_General.h"
 #include "PeriodCPT_LOOKUP.h"
 
@@ -133,3 +136,5 @@ int Compare_MCMCitem(MCMCitem_t *test, MCMCitem_t *instance, int checkj){
   }
   return 1;
 }
+
+#endif //FILE_MCMCGENERIC

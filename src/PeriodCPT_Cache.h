@@ -1,3 +1,6 @@
+#ifndef FILE_CACHE
+#define FILE_CACHE
+
 #include "PeriodCPT_General.h"
 #include "PeriodCPT_MCMCgeneric.h"
 
@@ -36,9 +39,9 @@ int Compare_Cache_Item(cache_t *test, MCMCitem_t *instance){
 }
 
 chain_t *Find_in_Cache(cache_t **cache, int *n, MCMCitem_t *mcmc){
-  int compare, i;
-  compare = 0;
-  for(int i = 0; (i < *n) && (compare == 0); i++){
+  int i = 0;
+  int compare = 0;
+  for(i = 0; (i < *n) && (compare == 0); i++){
     compare = Compare_Cache_Item(cache[i], mcmc);
   }
   if(compare == 1){
@@ -70,3 +73,5 @@ void Push_To_Cache(cache_t **cache, int *last, int *length, cache_t *item){
 }
 
 
+
+#endif //FILE_CACHE

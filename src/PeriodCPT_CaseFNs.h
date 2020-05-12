@@ -1,3 +1,6 @@
+#ifndef FILE_CASEFNS
+#define FILE_CASEFNS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <R.h>
@@ -5,6 +8,7 @@
 #include <math.h>
 
 #include "PeriodCPT_distributions.h"
+#include "PeriodCPT_General.h"
 
 //--General structure for functions
 //double Mprior_"Mdist"(int m, int *max, double *params);
@@ -30,8 +34,7 @@
 //-------------------------------------------------------------
 
 void Free_Summary_Stats(double **SumStats){
-  double number_of_stat_types = SumStats[0][0];
-  for(int i = 1; i < number_of_stat_types; i++){
+  for(int i = 1; i <= SumStats[0][0]; i++){
     free(SumStats[i]);
   }
   free(SumStats[0]);
@@ -40,69 +43,15 @@ void Free_Summary_Stats(double **SumStats){
 }
 
 double **Make_Summary_Stats(int number_of_stat_types, int length){
-  double **SumStats;
+  double **SumStats, *tmp;
   SumStats = (double **)calloc(1 + number_of_stat_types, sizeof(double *));
-  SumStats[0] = (double *)calloc(1, sizeof(double));
-  SumStats[0][0] = (double)number_of_stat_types;
+  tmp = (double *)calloc(1, sizeof(double));
+  tmp[0] = (double)number_of_stat_types;
+  SumStats[0] = tmp;
   for(int i = 1; i <= number_of_stat_types; i++){
-    SumStats[0] = (double *)calloc(2 * length, sizeof(double));
+    SumStats[i] = (double *)calloc(2 * length, sizeof(double));
   }
   return SumStats;
-}
-
-void Get_Functions(char **Mdist, char **Pdist, double (*Mprior)(), double (*Samp_Dist)(),
-                   double **(*Summary_Stats)(), int *err){
-
-//double (*Mprior)();
-  double Mprior_unif();
-  double Mprior_pois();
-  if(      strcmp(*Mdist, "unif") == 0){
-    Mprior = Mprior_unif;
-  }else if(strcmp(*Mdist, "pois") == 0){
-    Mprior = &Mprior_unif;
-  }else{
-    *err = 1;
-    return;
-  }
-
-//double   (*Samp_Dist)();        //returns a double
-//double **(*Summary_Stats)();    //returns a double pointer containg double values
-  double   Samp_Dist_bern();
-  double **Summary_Stats_bern();
-  double   Samp_Dist_binom();
-  double **Summary_Stats_binom();
-  double   Samp_Dist_mean();
-  double **Summary_Stats_mean();
-  double   Samp_Dist_norm();
-  double **Summary_Stats_norm();
-  double   Samp_Dist_pois();
-  double **Summary_Stats_pois();
-  double   Samp_Dist_var();
-  double **Summary_Stats_var();
-
-  if(      strcmp(*Pdist, "bern") == 0){
-    Samp_Dist = &Samp_Dist_bern;
-    Summary_Stats = &Summary_Stats_bern;
-//  }else if(strcmp(*Pdist, "binom") == 0){
-//    Samp_Dist = &Samp_Dist_binom;
-//    Summary_Stats = &Summary_Stats_binom;
-  }else if(strcmp(*Pdist, "pois") == 0){
-    Samp_Dist = &Samp_Dist_pois;
-    Summary_Stats = &Summary_Stats_pois;
-  }else if(strcmp(*Pdist, "mean") == 0){
-    Samp_Dist = &Samp_Dist_mean;
-    Summary_Stats = &Summary_Stats_mean;
-  }else if(strcmp(*Pdist, "norm") == 0){
-    Samp_Dist = &Samp_Dist_norm;
-    Summary_Stats = &Summary_Stats_norm;
-  }else if(strcmp(*Pdist, "var" ) == 0){
-    Samp_Dist = &Samp_Dist_var;
-    Summary_Stats = &Summary_Stats_var;
-  }else{
-    *err = 2;
-    return;
-  }
-  return;
 }
 
 //------------------------------------------------------------
@@ -118,6 +67,23 @@ double Mprior_unif(int m, int *max, double *params){
   return -log(*max);
 }
 
+double Mprior_BLANK(int m, int *max, double *params){
+  //Mprior blank holding funciton for errors.
+  return 0.0;
+}
+
+//------------------------------------------------------------
+
+double Samp_Dist_BLANK(double *SumStats, int nStat, double *Phyp){
+  //Samp_Dist blank holding funciton for errors.
+  return 0.0;
+}
+
+double **Summary_Stats_BLANK(double *data, int *time, int *n, int *N){
+  //Summary_Stats blank holding funciton for errors.
+  return NULL;
+};
+
 //------------------------------------------------------------
 
 double Samp_Dist_bern(double *SumStats, int nStat, double *Phyp){
@@ -126,7 +92,7 @@ double Samp_Dist_bern(double *SumStats, int nStat, double *Phyp){
   double alpha          = Phyp[0];
   double beta           = Phyp[1];
   return dbbinom(sum_x, count_x, alpha, beta, TRUE) +
-           dmhg(1.0, sum_x, count_x, TRUE);
+    dmhg(1.0, sum_x, count_x, TRUE);
 }
 
 double **Summary_Stats_bern(double *data, int *time, int *n, int *N){
@@ -136,7 +102,7 @@ double **Summary_Stats_bern(double *data, int *time, int *n, int *N){
     SumStats[2][time[i] - 1] += 1;          //2: count_xi
   }
   return SumStats;
-};
+}
 
 //------------------------------------------------------------
 
@@ -151,7 +117,6 @@ double Samp_Dist_binom(double *SumStats, int nStat, double *Phyp){
     dmhg(sum_lchoose_nx, sum_x, sum_n, TRUE);
 }
 
-
 double **Summary_Stats_binom(double *data, int *time, int *n, int *N){
   double **SumStats = Make_Summary_Stats(3, *N);
   for(int i = 0; i < *n; i++){
@@ -160,7 +125,7 @@ double **Summary_Stats_binom(double *data, int *time, int *n, int *N){
     SumStats[3][time[i] - 1] += lchoose(data[i + *n], data[i]); //3: sum_log(choose(ni, xi))
   }
   return SumStats;
-};
+}
 */
 
 //------------------------------------------------------------
@@ -183,7 +148,7 @@ double **Summary_Stats_pois(double *data, int *time, int *n, int *N){
     SumStats[3][time[i] - 1] += lgamma(data[i]+1);  //3: sum_log(xi!)
   }
   return SumStats;
-};
+}
 
 //------------------------------------------------------------
 
@@ -205,7 +170,7 @@ double **Summary_Stats_mean(double *data, int *time, int *n, int *N){
     SumStats[3][time[i] - 1] += data[i]*data[i];    //3: sum_xi^2
   }
   return SumStats;
-};
+}
 
 //------------------------------------------------------------
 
@@ -220,7 +185,7 @@ double Samp_Dist_norm(double *SumStats, int nStat, double *Phyp){
   return dmvstMeanVar(count_x, sum_x, sum_xx, m, 1/c, alpha, beta, TRUE);
 }
 
-double **Summary_Stats_norm(double *data, int *time, int *n, int *N){
+double ** Summary_Stats_norm(double *data, int *time, int *n, int *N){
   double **SumStats = Make_Summary_Stats(3, *N);
   for(int i = 0; i < *n; i++){
     SumStats[1][time[i] - 1] += 1;                  //1: count_xi
@@ -228,7 +193,7 @@ double **Summary_Stats_norm(double *data, int *time, int *n, int *N){
     SumStats[3][time[i] - 1] += data[i]*data[i];    //3: sum_xi^2
   }
   return SumStats;
-};
+}
 
 //------------------------------------------------------------
 
@@ -240,14 +205,56 @@ double Samp_Dist_var(double *SumStats, int nStat, double *Phyp){
   return dmvstvar(count_x, 0.0, sum_xx, 0.0, alpha, beta, TRUE);
 }
 
-double **Summary_Stats_var(double *data, int *time, int *n, int *N){
+double ** Summary_Stats_var(double *data, int *time, int *n, int *N){
   double **SumStats = Make_Summary_Stats(3, *N);
   for(int i = 0; i < *n; i++){
     SumStats[1][time[i] - 1] += 1;                  //1: count_xi
     SumStats[2][time[i] - 1] += data[i]*data[i];    //2: sum_xi^2
   }
   return SumStats;
-};
+}
 
+//--------------------------------------------------------------------------
 
+void Get_Functions(char **Mdist, char **Pdist, Mprior_Ptr **Mprior,
+                    Samp_Dist_Ptr **Samp_Dist,
+                    Summary_Stats_Ptr **Summary_Stats, int *err){
 
+  if(      strcmp(*Mdist, "unif") == 0){
+    *Mprior = Mprior_unif;
+  }else if(strcmp(*Mdist, "pois") == 0){
+    *Mprior = Mprior_pois;
+  }else{
+    *Mprior = Mprior_BLANK;
+    *err = 1;
+    return;
+  }
+
+  if(      strcmp(*Pdist, "bern") == 0){
+    *Samp_Dist = Samp_Dist_bern;
+    *Summary_Stats = Summary_Stats_bern;
+//  }else if(strcmp(*Pdist, "binom") == 0){
+//    Samp_Dist = Samp_Dist_binom;
+//    Summary_Stats = Summary_Stats_binom;
+  }else if(strcmp(*Pdist, "pois") == 0){
+    *Samp_Dist = Samp_Dist_pois;
+    *Summary_Stats = Summary_Stats_pois;
+  }else if(strcmp(*Pdist, "mean") == 0){
+    *Samp_Dist = Samp_Dist_mean;
+    *Summary_Stats = Summary_Stats_mean;
+  }else if(strcmp(*Pdist, "norm") == 0){
+    *Samp_Dist = Samp_Dist_norm;
+    *Summary_Stats = Summary_Stats_norm;
+  }else if(strcmp(*Pdist, "var" ) == 0){
+    *Samp_Dist = Samp_Dist_var;
+    *Summary_Stats = Summary_Stats_var;
+  }else{
+    *Samp_Dist = Samp_Dist_BLANK;
+    *Summary_Stats = Summary_Stats_BLANK;
+    *err = 2;
+    return;
+  }
+  return;
+}
+
+#endif //FILE_CASEFNS

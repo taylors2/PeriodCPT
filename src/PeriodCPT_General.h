@@ -1,3 +1,6 @@
+#ifndef FILE_GENERAL
+#define FILE_GENERAL
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <R.h>
@@ -11,6 +14,11 @@ typedef struct segval segval_t;
 typedef struct MCMCitem MCMCitem_t;
 typedef struct MCMCchain chain_t;
 typedef struct CacheItem cache_t;
+
+typedef double (Mprior_Ptr       )(int,     int*, double*);
+typedef double (Samp_Dist_Ptr    )(double*, int,  double*);
+typedef double **(Summary_Stats_Ptr)(double*, int*, int*, int*);
+
 
 struct segval {
   int     cpt;
@@ -65,3 +73,7 @@ void Progress(int i, int n, int tk, char **str){
   return;
 }
 
+
+
+
+#endif //FILE_GENERAL
