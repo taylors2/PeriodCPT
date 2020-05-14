@@ -6,7 +6,7 @@
 #include "PeriodCPT_Cache.h"
 
 int CheckTauOrder(int *tau, int i, int len, int *N){
-
+  //Rprintf("CheckTauOrder\n");
   if(len == 1){ //M1, no cpts so do nothing
     return i;
   }
@@ -44,6 +44,7 @@ int CheckTauOrder(int *tau, int i, int len, int *N){
 void EvaluateProposalsCases(chain_t *proposals, int *tauprop, int *jpos,
                             int mprop, int minseglen, int *N, double *g1,
                             segval_t *g2, int DEATH){
+  //Rprintf("EvaluateProposalsCases\n");
   int st;
   int ipos = *jpos;
   ipos = CheckTauOrder(tauprop, ipos, mprop, N);
@@ -55,13 +56,17 @@ void EvaluateProposalsCases(chain_t *proposals, int *tauprop, int *jpos,
   }else{
     st = tauprop[ipos-1] + minseglen;
   }
-  st = ((st-1) % *N) + 1;
+  if(st > *N){
+    st -= *N;
+  }else if(st < 1){
+    st += *N;
+  }
 
   int evaluate = TRUE;
   MCMCitem_t *mcmc;
 
   while(evaluate == TRUE){
-    if(tauprop[ipos]==st) evaluate = FALSE;
+    if(tauprop[ipos] == st) evaluate = FALSE;
     mcmc = Make_MCMCitem(mprop, tauprop, N, g1, g2, ipos);
     Sort_to_chain(proposals, mcmc);
     tauprop[ipos]--;
@@ -73,7 +78,7 @@ void EvaluateProposalsCases(chain_t *proposals, int *tauprop, int *jpos,
 
 void death_proposals(chain_t *proposals, MCMCitem_t *current,
                      double *g1, segval_t *g2, int *minseglen, int *N){
-
+  //Rprintf("death_proposals\n");
   //cannot remove any more segments for M1 case
   if(current->m == 1) {
     return;
@@ -90,20 +95,20 @@ void death_proposals(chain_t *proposals, MCMCitem_t *current,
   int *tauprop, ipos, mprop;
   mprop = current->m - 1;
   ipos = current->j;
-  tauprop = (int*)calloc(mprop, sizeof(int));
+  tauprop = (int*)my_calloc(mprop, sizeof(int));
   for(int i = 0; i < mprop; i++) tauprop[i] = current->tau[i + (i>=ipos)];
   if(ipos == mprop) ipos = 0;
 
   //Move next cpt within minseglen range
   EvaluateProposalsCases(proposals, tauprop, &ipos, mprop,
                          *minseglen-1, N, g1, g2, TRUE);  //general death
-  free(tauprop);
+  my_free(tauprop);
   return;
 }
 
 void move_proposals(chain_t *proposals, MCMCitem_t *current,
                     double *g1, segval_t *g2, int *minseglen, int *N){
-
+  //Rprintf("move_proposals\n");
   if(current->m == 1){
     //If M=1, then evaluate case direcly (single scenario)
     int tauprop = 1;
@@ -115,7 +120,7 @@ void move_proposals(chain_t *proposals, MCMCitem_t *current,
 
   int *tauprop, mprop, ipos;
   mprop = current->m;
-  tauprop = (int*)calloc(mprop, sizeof(int));
+  tauprop = (int*)my_calloc(mprop, sizeof(int));
   for(int i = 0; i < mprop; i++) tauprop[i] = current->tau[i];
   ipos = current->j;
 
@@ -127,7 +132,7 @@ void move_proposals(chain_t *proposals, MCMCitem_t *current,
   if(tauprop[ipos]<1) tauprop[ipos] += *N;
   EvaluateProposalsCases(proposals, tauprop, &ipos, mprop,
                          *minseglen, N, g1, g2, FALSE);  //general move
-  free(tauprop);
+  my_free(tauprop);
 
   return;
 }
@@ -135,14 +140,14 @@ void move_proposals(chain_t *proposals, MCMCitem_t *current,
 
 void birth_proposals(chain_t *proposals, MCMCitem_t *current,
                      double *g1, segval_t *g2, int *minseglen, int *N){
-
+  //Rprintf("birth_proposals\n");
   //Get all cases if performing M1->M2 transision
   if(current->m == 1){
 
     int mprop = current->m + 1;
     int *tauprop, st;
     MCMCitem_t *mcmc, *mcmc2;
-    tauprop = (int *)calloc(2, sizeof(int));
+    tauprop = (int *)my_calloc(2, sizeof(int));
     for(tauprop[1] = *minseglen+1; tauprop[1] <= *N; tauprop[1]++){
       st = (tauprop[1] <= (*N - *minseglen)) ? 1 : tauprop[1] + *minseglen - *N ;
       for(tauprop[0] = st; (tauprop[1] - tauprop[0]) >= *minseglen; tauprop[0]++){
@@ -153,14 +158,14 @@ void birth_proposals(chain_t *proposals, MCMCitem_t *current,
         Sort_to_chain(proposals, mcmc2);
       }
     }
-    free(tauprop);
+    my_free(tauprop);
     return;
   }
 
   //add to proposal the birth cases
   int mprop = current->m + 1;
   int *tauprop, ipos;
-  tauprop = (int*)calloc(mprop,sizeof(int));
+  tauprop = (int*)my_calloc(mprop,sizeof(int));
   for(int l = 0; l < *minseglen; l++){
     ipos = current->j;
     for(int i = 0; i < (mprop-1); i++){
@@ -192,7 +197,7 @@ void birth_proposals(chain_t *proposals, MCMCitem_t *current,
     HERE:;
   }
   DONE:;
-  free(tauprop);
+  my_free(tauprop);
 
   return;
 }
@@ -200,7 +205,7 @@ void birth_proposals(chain_t *proposals, MCMCitem_t *current,
 
 chain_t *MakeProposals(MCMCitem_t *current, double *g1, segval_t *g2,
                        int *minseglen, int *N){
-
+  //Rprintf("MakeProposals\n");
   chain_t *proposals;
   proposals = Make_Chain();
   death_proposals(proposals, current, g1, g2, minseglen, N);
@@ -210,21 +215,22 @@ chain_t *MakeProposals(MCMCitem_t *current, double *g1, segval_t *g2,
   return proposals;
 }
 
-chain_t *EvaluateProposal(cache_t **PROPCACHE, int *ncache, int*maxcache,
+cache_t *EvaluateProposal(cache_t **PROPCACHE, int *ncache, int*maxcache,
                           MCMCitem_t *current, int *minseglen, int *N,
                           double *g1, segval_t *g2){
-  chain_t *proposals;
+  //Rprintf("EvaluateProposal\n");
+  cache_t *proposals;
   proposals = Find_in_Cache(PROPCACHE, ncache, current);
   if(proposals == NULL){
-    proposals = MakeProposals(current, g1, g2, minseglen, N);
-    Push_To_Cache(PROPCACHE, ncache, maxcache,
-                  Make_Cache_Item(Copy_MCMCitem(current), proposals));
-
+    chain_t *prop_chain = MakeProposals(current, g1, g2, minseglen, N);
+    proposals = Make_Cache_Item(Copy_MCMCitem(current), prop_chain);
+    Push_To_Cache(PROPCACHE, ncache, maxcache, proposals);
   }
   return proposals;
 }
 
 MCMCitem_t *sampleProposal(chain_t *proposals){
+  //Rprintf("sampleProposal\n");
   double u = runif(0, proposals->last->prob);
   MCMCitem_t *this = proposals->first;
   while(u>this->prob) this = this->next;
@@ -234,22 +240,32 @@ MCMCitem_t *sampleProposal(chain_t *proposals){
 double AcceptanceProb(MCMCitem_t *current, MCMCitem_t *accept,
                       cache_t **PROPCACHE, int *ncache, int *cachemax,
                       double *g1, segval_t *g2, int *minseglen, int *N){
-
+  //Rprintf("AcceptanceProb\n");
   double lZ0, lZ1, lZ2, lmax, alpha;
-  chain_t *psetj;
+  cache_t *psetj;
 
   if(Compare_MCMCitem(accept, current, FALSE)){
-    return 1;
+    psetj = EvaluateProposal(PROPCACHE, ncache, cachemax, current,
+                             minseglen, N, g1, g2);
+    psetj->count += 2;
+    Bubble_Chace_Item(PROPCACHE, ncache, cachemax,psetj);
+    return 1.0;
   }
 
 
   psetj = EvaluateProposal(PROPCACHE, ncache, cachemax, current,
                            minseglen, N, g1, g2);
-  lZ0 = log(psetj->last->prob) + psetj->first->value;
+  psetj->count += 2;
+  Bubble_Chace_Item(PROPCACHE, ncache, cachemax,psetj);
+
+  lZ0 = log(psetj->chain->last->prob) + psetj->chain->first->value;
 
   psetj = EvaluateProposal(PROPCACHE, ncache, cachemax, accept,
                            minseglen, N, g1, g2);
-  lZ1 = log(psetj->last->prob) + psetj->first->value;
+  psetj->count += 2;
+  Bubble_Chace_Item(PROPCACHE, ncache, cachemax,psetj);
+
+  lZ1 = log(psetj->chain->last->prob) + psetj->chain->first->value;
 
   if(current->m == 1){
     if(accept->j == 1){
@@ -259,7 +275,10 @@ double AcceptanceProb(MCMCitem_t *current, MCMCitem_t *accept,
     }
     psetj = EvaluateProposal(PROPCACHE, ncache, cachemax, accept,
                              minseglen, N, g1, g2);
-    lZ2 = log(psetj->last->prob) + psetj->first->value;  //Z[kjp]
+    psetj->count += 2;
+    Bubble_Chace_Item(PROPCACHE, ncache, cachemax,psetj);
+
+    lZ2 = log(psetj->chain->last->prob) + psetj->chain->first->value;  //Z[kjp]
     lmax = (lZ2>lZ1) ? lZ2 : lZ1;
     alpha = lZ0 - lmax - 2*log(2) + log(exp(lmax - lZ1) + exp(lmax - lZ2));
   }else if(accept->m == 1){
@@ -270,7 +289,10 @@ double AcceptanceProb(MCMCitem_t *current, MCMCitem_t *accept,
     }
     psetj = EvaluateProposal(PROPCACHE, ncache, cachemax, accept,
                              minseglen, N, g1, g2);
-    lZ2 = log(psetj->last->prob) + psetj->first->value;  //Z[kj]
+    psetj->count += 2;
+    Bubble_Chace_Item(PROPCACHE, ncache, cachemax, psetj);
+
+    lZ2 = log(psetj->chain->last->prob) + psetj->chain->first->value;  //Z[kj]
     lmax = (lZ2>lZ0) ? lZ2 : lZ0;
     alpha = lmax - lZ1 + 2*log(2) - log(exp(lmax - lZ0) + exp(lmax - lZ2));
   }else{

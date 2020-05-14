@@ -7,6 +7,7 @@
 
 void Evaluate_G1(Mprior_Ptr Mprior, int *maxM, int *N, double *spread,
                  double *Mhyp, int *minseglen, double *g1){
+  //Rprintf("Evaluate_G1\n");
   for(int m = 1; m <= *maxM; m++){
     //model prior
     g1[m-1] = Mprior(m, maxM, Mhyp);	//Prior for number of segments
@@ -25,12 +26,12 @@ void Evaluate_G1(Mprior_Ptr Mprior, int *maxM, int *N, double *spread,
 void Evaluate_G2(double **SumStats, Samp_Dist_Ptr Samp_Dist, int *N,
                  int *minseglen, double *spread, double *Phyp,
                  segval_t *g2){
-
+  //Rprintf("Evaluate_G2\n");
   //Evaluate lookup table for function g2(tau, len)
   int id, startSeg;
-  double *Spart     = calloc(*N, sizeof(double));
+  double *Spart     = my_calloc(*N, sizeof(double));
   int nStats        = (int)SumStats[0][0];
-  double *thisStats = calloc(nStats, sizeof(double));
+  double *thisStats = my_calloc(nStats, sizeof(double));
 
   id = 0;
   for(int tau = 1; tau <= *N; tau++){
@@ -72,7 +73,8 @@ void Evaluate_G2(double **SumStats, Samp_Dist_Ptr Samp_Dist, int *N,
       id++;
     }
   }
-  free(Spart);
+  my_free(Spart);
+  my_free(thisStats);
   return;
 }
 
@@ -91,7 +93,7 @@ void MAKE_LOOK_TABLES(
     int       *err,          //Error flag
     double    *g1,           //Lookup list (m)
     segval_t  *g2){          //Lookup table (pcpt)
-
+  //Rprintf("MAKE_LOOK_TABLES\n");
   Mprior_Ptr *Mprior = NULL;
   Samp_Dist_Ptr *Samp_Dist = NULL;
   Summary_Stats_Ptr *Summary_Stats = NULL;
@@ -110,16 +112,19 @@ void MAKE_LOOK_TABLES(
 
 
 double Get_g2(int tau, int len, segval_t *g2, int *N){
+  //Rprintf("Get_g2\n");
   //order: t1l1 t1l2 t1l3 t2l1 t2l2 t2l3 t3l1 t3l2 t3l3
   //Includes -Inf cases where len<minseglen (retain for spacing!!!)
   return g2[(tau-1) * *N + len - 1].value;
 }
 
 double Get_g1(int m, double *g1){
+  //Rprintf("Get_g1\n");
   return g1[m-1];
 }
 
 double Eval_at_CPT(int *tau, int m, int *N, double *g1, segval_t *g2){
+  //Rprintf("Eval_at_CPT\n");
   double out = Get_g1(m,g1);
   if(m > 1){
     out += Get_g2(tau[0], tau[0] - tau[m-1] + *N, g2, N);
@@ -134,7 +139,7 @@ double Eval_at_CPT(int *tau, int m, int *N, double *g1, segval_t *g2){
 
 
 void PrintLookup(double *g1, segval_t *g2, int *maxM, int *N){
-
+  //Rprintf("PrintLookup\n");
   FILE *f;
 
   //---------------------------------------

@@ -61,18 +61,21 @@ extern void PeriodCPT(
     int     *draw        //Vectorised MCMC output (append each chain)
 ){
 
+  //Rprintf("PeriodCPT\n");
   *err = 0;
-//  int NTICKS = 20;
+  int NTICKS = 20;
 
   //MAKE LOOKUP TABLES
   double   *g1;
   segval_t *g2;
-  g1 = (double *)   calloc( *maxM ,   sizeof(double)   );
-  g2 = (segval_t *) calloc( *N * *N , sizeof(segval_t) );
+  g1 = (double *)   my_calloc( *maxM ,   sizeof(double)   );
+  g2 = (segval_t *) my_calloc( *N * *N , sizeof(segval_t) );
   MAKE_LOOK_TABLES(data, time, n, N, minseglen, maxM, Mdist, Mhyp,
                    spread, Pdist, Phyp, err, g1, g2);
+  //PrintLookup(g1, g2, maxM, N);
+
   if(*err != 0) goto ESC1;
-/*
+
   int save;
   char str[50];
   char *progress_text = str;
@@ -84,19 +87,20 @@ extern void PeriodCPT(
     PROPCACHE = Make_Cache_List(*cache);
     int ncache = 0;
 
+
     //Run burn
     save = FALSE;
-    sprintf(progress_text, "Chain %d/%d (burn-in)  : ",ichain, *nchains);
+    sprintf(progress_text, "Chain %d/%d (burn-in)  : ",ichain+1, *nchains);
     PeriodCPT_MCMC(current, nburn, save, &(draw[ichain * *maxM * *niter]),
       N, maxM, minseglen, g1, g2, PROPCACHE, &ncache, cache,
       quiet, &progress_text, blank, &NTICKS, err);
 
     //Run chain, syncro exporting of sample to output
     save = TRUE;
-    sprintf(progress_text, "Chain %d/%d (iteration): ",ichain, *nchains);
+    sprintf(progress_text, "Chain %d/%d (iteration): ",ichain+1, *nchains);
     PeriodCPT_MCMC(current, niter, save, &(draw[ichain * *maxM * *niter]),
       N, maxM, minseglen, g1, g2, PROPCACHE, &ncache, cache,
-      quiet, &progress_text,blank, &nticks, err);
+      quiet, &progress_text,blank, &NTICKS, err);
 
     //Clean-up
     Delete_Cache_List(PROPCACHE, *cache);
@@ -106,12 +110,12 @@ extern void PeriodCPT(
 
   //If requested, calculate mode estimates and summaries
   //  Must return void and be able to call from R
-*/
+
 
 
   ESC1:;
-  free(g2);
-  free(g1);
+  my_free(g2);
+  my_free(g1);
 
   return;
 }

@@ -56,20 +56,34 @@ struct CacheItem{
 
 void Progress(int i, int n, int tk, char **str){
   if(i == 0){
-    printf("%s |", *str);
+    Rprintf("%s |", *str);
   }
 
   int diff = floor(tk * (i+1) / n) - floor(tk * (i) / n);
   if(diff != 0){
     for(int itk = 0; itk < diff; itk++){
-      printf("=");
+      Rprintf("=");
     }
   }
 
   if((i+1) == n){
-    printf("|\n");
+    Rprintf("|\n");
   }
 
+  return;
+}
+
+
+void *my_calloc(size_t count, size_t size){
+  void *pt;
+  pt = calloc(count, size);
+  //Rprintf("A - %p\n",pt);
+  return pt;
+}
+
+void my_free(void *pt){
+  //Rprintf("F - %p\n",pt);
+  free(pt);
   return;
 }
 

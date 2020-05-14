@@ -109,6 +109,7 @@ ans = PeriodCPT(x, distribution = "bern")
 
 print(ans) # prints details of the analysis including a summary
 summary(ans)
+
 ##\/TODO\/
 ##########
 ##plot(ans) # plots the data with change (vertical line) at 100
