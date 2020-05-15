@@ -40,6 +40,14 @@ PeriodCPT.bern <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   return(ans)
 }
 
+param_mode_calc.bern <- function(stats){
+  if(length(stats) != 2)
+    stop("Length of sufficient statistcs in param_mode_calc.bern is not 2.")
+  phi = stats[1]/(stats[1] + stats[2])
+  names(phi) = "theta"
+  return(phi)
+}
+
 SummariseOutput.bern <- function(object){
   return(object)
 }

@@ -58,6 +58,15 @@ PeriodCPT.norm <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   return(ans)
 }
 
+param_mode_calc.norm <- function(stats){
+  if(length(stats) != 4)
+    stop("Length of sufficient statistcs in param_mode_calc.norm is not 4.")
+  phi1 = stats[1]
+  phi2 = stats[4]/(stats[3] + 1.5)
+  names(phi) = c("mu","sig2")
+  return(phi)
+}
+
 SummariseOutput.norm <- function(object){
   return(object)
 }

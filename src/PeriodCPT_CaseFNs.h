@@ -91,6 +91,12 @@ double **Summary_Stats_BLANK(double *data, int *time, int *n, int *N){
   return NULL;
 };
 
+void Sufficient_Stats_BLANK(double *SumStats, int nSumm, int nSuff, double *Phyp, double *out){
+  //Rprintf("Sufficient_Stats_BLANK\n");
+  return;
+}
+
+
 //------------------------------------------------------------
 
 double Samp_Dist_bern(double *SumStats, int nStat, double *Phyp){
@@ -113,9 +119,20 @@ double **Summary_Stats_bern(double *data, int *time, int *n, int *N){
   return SumStats;
 }
 
+void Sufficient_Stats_bern(double *SumStats, int nSumm, int nSuff, double *Phyp, double *out){
+  //Rprintf("Sufficient_Stats_bern\n");
+  double sum_x          = SumStats[0];
+  double count_x        = SumStats[1];
+  double alpha          = Phyp[0];
+  double beta           = Phyp[1];
+  out[0] = alpha + sum_x;
+  out[1] = beta  + count_x - sum_x;
+  return;
+}
+
 //------------------------------------------------------------
 
-/*
+
 double Samp_Dist_binom(double *SumStats, int nStat, double *Phyp){
   //Rprintf("Samp_Dist_binom\n");
   double sum_x          = SumStats[0];
@@ -137,7 +154,18 @@ double **Summary_Stats_binom(double *data, int *time, int *n, int *N){
   }
   return SumStats;
 }
-*/
+
+void Sufficient_Stats_binom(double *SumStats, int nSumm, int nSuff, double *Phyp, double *out){
+  //Rprintf("Sufficient_Stats_binom\n");
+  double sum_x          = SumStats[0];
+  double sum_n          = SumStats[1];
+  //double sum_lchoose_nx = SumStats[2];
+  double alpha          = Phyp[0];
+  double beta           = Phyp[1];
+  out[0] = alpha + sum_x;
+  out[1] = beta  + sum_n - sum_x;
+  return;
+}
 
 //------------------------------------------------------------
 
@@ -163,6 +191,18 @@ double **Summary_Stats_pois(double *data, int *time, int *n, int *N){
   return SumStats;
 }
 
+void Sufficient_Stats_pois(double *SumStats, int nSumm, int nSuff, double *Phyp, double *out){
+  //Rprintf("Sufficient_Stats_pois\n");
+  double sum_x          = SumStats[0];
+  double count_x        = SumStats[1];
+  //double sum_lfact      = SumStats[2];
+  double alpha          = Phyp[0];
+  double beta           = Phyp[1];
+  out[0] = alpha + sum_x;
+  out[1] = beta  + count_x;
+  return;
+}
+
 //------------------------------------------------------------
 
 double Samp_Dist_mean(double *SumStats, int nStat, double *Phyp){
@@ -185,6 +225,20 @@ double **Summary_Stats_mean(double *data, int *time, int *n, int *N){
     SumStats[3][time[i] - 1] += data[i]*data[i];    //2: sum_xi^2
   }
   return SumStats;
+}
+
+void Sufficient_Stats_mean(double *SumStats, int nSumm, int nSuff, double *Phyp, double *out){
+  //Rprintf("Sufficient_Stats_mean\n");
+  double count_x        = SumStats[0];
+  double sum_x          = SumStats[1];
+  //double sum_xx         = SumStats[2];
+  double m              = Phyp[0];
+  double c              = Phyp[1];
+  double var            = Phyp[2];
+  double tmp = count_x*c + var;
+  out[0] = (c*sum_x + var*m)/tmp;
+  out[1] = var*c/tmp;
+  return;
 }
 
 //------------------------------------------------------------
@@ -212,6 +266,24 @@ double ** Summary_Stats_norm(double *data, int *time, int *n, int *N){
   return SumStats;
 }
 
+void Sufficient_Stats_norm(double *SumStats, int nSumm, int nSuff, double *Phyp, double *out){
+  //Rprintf("Sufficient_Stats_norm\n");
+  double count_x = SumStats[0];
+  double sum_x   = SumStats[1];
+  double sum_xx  = SumStats[2];
+  double m       = Phyp[0];
+  double c       = Phyp[1];
+  double alpha   = Phyp[2];
+  double beta    = Phyp[3];
+  double tmp = count_x * c + 1;
+  out[0] = (c*sum_x + m) / tmp;
+  out[1] = c/tmp;
+  out[2] = alpha + 0.5 * count_x;
+  out[3] = beta + 0.5 * (sum_xx + sum_x * (sum_x/count_x)) +
+    0.5 * count_x * (sum_x/count_x + m) * (sum_x/count_x + m) / tmp;
+  return;
+}
+
 //------------------------------------------------------------
 
 double Samp_Dist_var(double *SumStats, int nStat, double *Phyp){
@@ -231,6 +303,17 @@ double ** Summary_Stats_var(double *data, int *time, int *n, int *N){
     SumStats[2][time[i] - 1] += data[i]*data[i];    //1: sum_xi^2
   }
   return SumStats;
+}
+
+void Sufficient_Stats_var(double *SumStats, int nSumm, int nSuff, double *Phyp, double *out){
+  //Rprintf("Sufficient_Stats_var\n");
+  double count_x = SumStats[0];
+  double sum_xx  = SumStats[1];
+  double alpha   = Phyp[2];
+  double beta    = Phyp[3];
+  out[0] = alpha + 0.5 * count_x;
+  out[1] = beta + 0.5 * sum_xx;
+  return;
 }
 
 //--------------------------------------------------------------------------
@@ -272,6 +355,32 @@ void Get_Functions(char **Mdist, char **Pdist, Mprior_Ptr **Mprior,
     *Samp_Dist = Samp_Dist_BLANK;
     *Summary_Stats = Summary_Stats_BLANK;
     *err = 2;
+    return;
+  }
+  return;
+}
+
+
+
+void Get_SuffStats_Function(char **Pdist,
+    Sufficient_Stats_Ptr **Sufficient_Stats, int *err){
+  //Rprintf("Get_SuffStats_Function\n");
+
+  if(      strcmp(*Pdist, "bern") == 0){
+    *Sufficient_Stats = Sufficient_Stats_bern;
+//  }else if(strcmp(*Pdist, "binom") == 0){
+//    Sufficient_Stats = Sufficient_Stats_binom;
+  }else if(strcmp(*Pdist, "pois") == 0){
+    *Sufficient_Stats = Sufficient_Stats_pois;
+  }else if(strcmp(*Pdist, "mean") == 0){
+    *Sufficient_Stats = Sufficient_Stats_mean;
+  }else if(strcmp(*Pdist, "norm") == 0){
+    *Sufficient_Stats = Sufficient_Stats_norm;
+  }else if(strcmp(*Pdist, "var" ) == 0){
+    *Sufficient_Stats = Sufficient_Stats_var;
+  }else{
+    *Sufficient_Stats = Sufficient_Stats_BLANK;
+    *err = 3;
     return;
   }
   return;

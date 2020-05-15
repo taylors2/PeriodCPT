@@ -41,6 +41,15 @@ PeriodCPT.pois <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   return(ans)
 }
 
+param_mode_calc.pois <- function(stats){
+  if(length(stats) != 2)
+    stop("Length of sufficient statistcs in param_mode_calc.pois is not 2.")
+  phi = stats[1]/stats[2]
+  names(phi) = "lambda"
+  return(phi)
+}
+
+
 SummariseOutput.pois <- function(object){
   return(object)
 }

@@ -30,7 +30,7 @@ PeriodCPT.main <- function(object){
   }
 
   ##Run C code
-  draw <- .C("PeriodCPT",
+  draw <- .C("PeriodCPT_RJMCMC",
              data    = as.numeric(data.set(object)),
              time    = as.integer(time2C),
              n       = as.integer(length(data.set(object))),

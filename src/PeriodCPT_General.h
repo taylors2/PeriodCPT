@@ -18,6 +18,7 @@ typedef struct CacheItem cache_t;
 typedef double (Mprior_Ptr       )(int,     int*, double*);
 typedef double (Samp_Dist_Ptr    )(double*, int,  double*);
 typedef double **(Summary_Stats_Ptr)(double*, int*, int*, int*);
+typedef void   (Sufficient_Stats_Ptr)(double*, int, int, double*, double*);
 
 
 struct segval {

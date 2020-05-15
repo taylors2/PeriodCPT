@@ -9,8 +9,8 @@ setClass("pcpt", slots=list(
     MCMC.options = "list",        ## List of MCMC options
     MCMC.inits   = "list",        ## List of chain initial values
     MCMC.chains  = "list",        ## MCMC output from chain
-    param.est    = "list",        ## Mode estimates for segment parameters
-    pcpt.est     = "list",        ## Mode estimates for pcpt paramters
+    param.mode   = "list",        ## Mode estimates for segment parameters
+    pcpt.mode    = "list",        ## Mode estimates for pcpt paramters
     date         = "character",   ## Date that the object was created
     version      = "character"),   ## Version of code
 
@@ -334,15 +334,39 @@ setMethod("print","pcpt",function(x, ...){
   show(x)
 })
 
-setMethod("summary","pcpt",function(object, ...){
+setMethod("summary","pcpt",function(object, index, ...){
+
+  pcpt_mode  <- pcpt.mode(object)
+  param_mode <- param.mode(object)
   cat("Created Using changepoint version",object@version,'\n')
   cat("Distribution           : ", distribution(object), '\n')
   cat("Period length          : ", periodlength(object), "\n")
   cat("Minimum Segment Length : ", minseglen(object),    "\n")
   cat("Maximum no. of cpts    : ", npcpts.max(object),   "\n")
   cat("Number of chains       : ", n.chains(object),     "\n")
-  cat("Number of pcpts        : ", "[CODE TO DO!!]",     "\n")
-  cat("Periodic cpt locations : ", "[CODE TO DO!!]",     "\n")
+  if(length(pcpt_mode) != 0){
+    for(i in 1:n.chains(object)){
+      extra <- ""
+      if(length(pcpt_mode) > 1) extra <- paste0("Chain ",i,"/",n.chains(object))
+      cat("Periodic cpt locations : ", extra, " : (",
+          paste0(as.numeric(pcpt_mode[[i]]),collapse = ", "),")\n")
+    }
+  }else{
+    cat("Periodic cpt locations : ...\n")
+  }
+  if(length(param_mode) != 0){
+    for(i in 1:n.chains(object)){
+      extra <- ""
+      if(length(param_mode) > 1) extra <- paste0("Chain ",i,"/",n.chains(object))
+      for(k in 1:nrow(param_mode[[i]])){
+        cat("Segment param ",k," mode   : ", extra, " : (",
+            paste0(as.numeric(param_mode[[i]][k,]),collapse = ", "),")\n")
+      }
+    }
+  }else{
+    cat("Segment param . mode   : ...\n")
+  }
+
 })
 
 setMethod("plot","pcpt",function(x, ...){
@@ -350,4 +374,36 @@ setMethod("plot","pcpt",function(x, ...){
 })
 
 
+##################################################################
+# set/get and reset pcpt.mode slot
+if(!isGeneric("pcpt.mode")) {
+  if(is.function("pcpt.mode")){
+    fun <- pcpt.mode
+  }else{
+    fun <- function(object){ standardGeneric("pcpt.mode") }
+  }
+  setGeneric("pcpt.mode", fun)
+}
+setMethod("pcpt.mode","pcpt",function(object) object@pcpt.mode)
+setGeneric("pcpt.mode<-", function(object, value) standardGeneric("pcpt.mode<-"))
+setReplaceMethod("pcpt.mode", "pcpt", function(object, value) {
+  object@pcpt.mode <- value
+  return(object)
+})
+
+# set/get and reset param.mode slot
+if(!isGeneric("param.mode")) {
+  if(is.function("param.mode")){
+    fun <- param.mode
+  }else{
+    fun <- function(object){ standardGeneric("param.mode") }
+  }
+  setGeneric("param.mode", fun)
+}
+setMethod("param.mode","pcpt",function(object) object@param.mode)
+setGeneric("param.mode<-", function(object, value) standardGeneric("param.mode<-"))
+setReplaceMethod("param.mode", "pcpt", function(object, value) {
+  object@param.mode <- value
+  return(object)
+})
 

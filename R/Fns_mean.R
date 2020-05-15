@@ -1,5 +1,5 @@
-param.prior.make.mean <- function(param.m, param.c, param.var, ...){
-  ##y ~ Norm(theta, param.var), theta~Norm(param.m, param.c)
+param.prior.make.mean <- function(param.m, param.c, const.var, ...){
+  ##y ~ Norm(theta, const.var), theta~Norm(param.m, param.c)
 
   if(missing(param.m)){
     param.m <- 0
@@ -15,20 +15,20 @@ param.prior.make.mean <- function(param.m, param.c, param.var, ...){
       stop("Normal-InvGamma `param.c` hyper parameter specified incorrectly.")
   }
 
-  if(missing(param.var)){
-    param.var <- 1
+  if(missing(const.var)){
+    const.var <- 1
   }else{
-    if(!is.numeric(param.var) || length(param.var) != 1 || any(param.var <= 0))
-      stop("Known `param.var` parameter in distribution function is specified incorrectly.")
+    if(!is.numeric(const.var) || length(const.var) != 1 || any(const.var <= 0))
+      stop("Known `const.var` parameter in distribution function is specified incorrectly.")
   }
 
-  out <- c("param.var" = param.var, "param.m" = param.m, "param.c" = param.c)
+  out <- c("const.var" = const.var, "param.m" = param.m, "param.c" = param.c)
   return(out)
 
 }
 
 PeriodCPT.mean <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "unif"),
-                           Mhyp = 1, spread = 1, param.m = 0, param.c = 1, param.var = 1,
+                           Mhyp = 1, spread = 1, param.m = 0, param.c = 1, const.var = 1,
                            inits = NULL, n.iter = 1e6, n.chains = 1, n.burn = 0,
                            cachesize=50, quiet=FALSE, ...){
 
@@ -43,12 +43,20 @@ PeriodCPT.mean <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
                      spread = spread, inits = inits, n.iter = n.iter,
                      n.chains = n.chains, n.burn = n.burn, cachesize = cachesize,
                      quiet = quiet, param.m = param.m, param.c = param.c,
-                     param.var = param.var, ...)
+                     const.var = const.var, ...)
 
   ans <- PeriodCPT.main(ans)
   return(ans)
 }
 
+
+param_mode_calc.mean <- function(stats){
+  if(length(stats) != 2)
+    stop("Length of sufficient statistcs in param_mode_calc.mean is not 2.")
+  phi = stats[1]
+  names(phi) = "mu"
+  return(phi)
+}
 
 SummariseOutput.mean <- function(object){
   return(object)

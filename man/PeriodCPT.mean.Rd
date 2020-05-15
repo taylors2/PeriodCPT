@@ -8,7 +8,7 @@
 }
 \usage{
 PeriodCPT.mean(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "unif"),
-                           Mhyp = 1, spread = 1, param.m = 0, param.c = 1, param.var = 1,
+                           Mhyp = 1, spread = 1, param.m = 0, param.c = 1, const.var = 1,
                            inits = NULL, n.iter = 1e6, n.chains = 1,
                            n.burn = 0, cachesize = 50, quiet = FALSE, ...)
 }
@@ -26,7 +26,7 @@ PeriodCPT.mean(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "uni
   \item{spread}{Positive number specifying the prior degree of spread around the period for the changepoint positions. By default, 1 indicates random uniform spread.}
   \item{param.m}{A single number giving the location hyper-parameters for the normal prior distribution on the within period segment parameter. Set to 0 by default.}
   \item{param.c}{Positive numbers giving the scale hyper-parameters for the normal prior distribution on the within period segment parameter. Set to 1 by default.}
-  \item{param.var}{Positive numbers stating the known and constant variance of the sampling distribution. Set to 1 by default.}
+  \item{const.var}{Positive numbers stating the known and constant variance of the sampling distribution. Set to 1 by default.}
   \item{inits}{Initial values for the chains. See details}
   \item{n.iter}{Positive integer giving the number of iterations for the MCMC.}
   \item{n.chains}{Positive integer giving the number of chains to evaluate.}
@@ -39,7 +39,7 @@ PeriodCPT.mean(data, periodlength = NULL, minseglen = 1, Mprior = c("pois", "uni
 \details{
   This function is used to find with period changepoint events for selected sampling distribution and statistic. A changepoint is denoted as the (!)LAST OBSERVATION OF THE CURRENT SEGMENT/REGIME(!)
 
-  Segment parameters: This model assumes that, for a given segment, data~norm(mu, param.var) for a known variance that is the same across all segments. The prior distribution for the mean parameter is mu~norm(prior.m, prior.c).
+  Segment parameters: This model assumes that, for a given segment, data~norm(mu, const.var) for a known variance that is the same across all segments. The prior distribution for the mean parameter is mu~norm(prior.m, prior.c).
 
   Within period changepoint parameters: The prior for the number of within period changepoint events is either:
   \describe{
