@@ -33,13 +33,14 @@ PeriodCPT.mean <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
                            cachesize=50, quiet=FALSE, ...){
 
   distribution <- "mean"
+  nsegparam <- 1
   if(!is.numeric(data))
     stop("Data is invalid for Normal sampling distribution.")
 
   Mprior <- match.arg(Mprior)
 
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
-                     distribution = distribution, Mprior = Mprior, Mhyp = Mhyp,
+                     distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter,
                      n.chains = n.chains, n.burn = n.burn, cachesize = cachesize,
                      quiet = quiet, param.m = param.m, param.c = param.c,
@@ -49,15 +50,3 @@ PeriodCPT.mean <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   return(ans)
 }
 
-
-param_mode_calc.mean <- function(stats){
-  if(length(stats) != 2)
-    stop("Length of sufficient statistcs in param_mode_calc.mean is not 2.")
-  phi = stats[1]
-  names(phi) = "mu"
-  return(phi)
-}
-
-SummariseOutput.mean <- function(object){
-  return(object)
-}

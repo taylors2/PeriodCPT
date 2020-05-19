@@ -168,4 +168,15 @@ void Swap_MCMCitems(MCMCitem_t *a, MCMCitem_t *b){
   return;
 }
 
+MCMCitem_t * Find_in_Chain(chain_t *chain, MCMCitem_t *mcmc){
+  if(chain->first == NULL) return NULL;
+  MCMCitem_t *this = chain->first;
+  while(this != NULL){
+    if(Compare_MCMCitem(mcmc, this, FALSE) == 1){
+      return this;
+    }
+  }
+  return NULL;
+}
+
 #endif //FILE_MCMCGENERIC

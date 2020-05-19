@@ -4,13 +4,17 @@ setClass("pcpt", slots=list(
     minseglen    = "numeric",     ## Minimum segment length (L)
     npcpts.max   = "numeric",     ## Maximum number of with period changepoints [floor(N/L)]
     distribution = "character",   ## Distribution
+    nsegparam    = "numeric",     ## Number of paramters per segment.
     pcpt.prior   = "list",        ## Prior info for the pcpt prior
     param.prior  = "numeric",     ## Prior info for the segment parameters
     MCMC.options = "list",        ## List of MCMC options
     MCMC.inits   = "list",        ## List of chain initial values
-    MCMC.chains  = "list",        ## MCMC output from chain
-    param.mode   = "list",        ## Mode estimates for segment parameters
-    pcpt.mode    = "list",        ## Mode estimates for pcpt paramters
+    MCMC.last    = "list",        ## List of chain values at last interation (filled at summarised)
+    results      = "list",        ## MCMC output from chain / Summarised chain(s)
+    summarised   = "logical",     ## Does results slot are the raw chain (FALSE) or are summaised (TRUE)
+    param.mode   = "numeric",     ## Mode estimates for segment parameters
+    pcpt.mode    = "numeric",     ## Mode estimates for pcpt paramters
+    fit          = "numeric",     ## Fit metric, evaluated at summary
     date         = "character",   ## Date that the object was created
     version      = "character"),   ## Version of code
 
@@ -21,10 +25,10 @@ setClass("pcpt", slots=list(
 ############################################################################################
 #exportMethods(
 #  data.set, periodlength, minseglen, npcpts.max, distribution, pcpt.prior, param.prior,
-#  MCMC.options, n.chains, n.iter, n.burn, toggle.quiet, MCMC.inits, MCMC.chain, MCMC.chains,
+#  MCMC.options, n.chains, n.iter, n.burn, toggle.quiet, MCMC.inits, result, results,
 #  "data.set<-", "periodlength<-", "minseglen<-", "distribution<-", "pcpt.prior<-",
 #  "param.prior<-", "MCMC.options<-", "n.chains<-", "n.iter<-", "n.burn<-", "MCMC.inits<-",
-#  "MCMC.chain<-", "MCMC.chains<-"
+#  "result<-", "results<-"
 #)
 
 ##TODO!!!
@@ -284,39 +288,107 @@ setReplaceMethod("MCMC.inits", "pcpt", function(object, value) {
   return(object)
 })
 
-# set/get and reset MCMC slot for given chain index
-if(!isGeneric("MCMC.chain")) {
-  if(is.function("MCMC.chain")){
-    fun <- MCMC.chain
+
+# set/get and reset MCMC.last slot
+if(!isGeneric("MCMC.last")) {
+  if(is.function("MCMC.last")){
+    fun <- MCMC.last
   }else{
-    fun <- function(object, index){ standardGeneric("MCMC.chain") }
+    fun <- function(object){ standardGeneric("MCMC.last") }
   }
-  setGeneric("MCMC.chain", fun)
+  setGeneric("MCMC.last", fun)
 }
-setMethod("MCMC.chain","pcpt",function(object, index) object@MCMC.chains[[as.character(index)]])
-setGeneric("MCMC.chain<-", function(object, index, value) standardGeneric("MCMC.chain<-"))
-setReplaceMethod("MCMC.chain", "pcpt", function(object, index, value) {
-  if(!(index %in% as.numeric(names(object@MCMC.chains))))
-    stop(paste0("Index `",index,"` not found in list of chains."))
-  object@MCMC.chains[[as.character(index)]] <- value
+setMethod("MCMC.last","pcpt",function(object) object@MCMC.last)
+setGeneric("MCMC.last<-", function(object, value) standardGeneric("MCMC.last<-"))
+setReplaceMethod("MCMC.last", "pcpt", function(object, value) {
+  object@MCMC.last <- value
+  return(object)
+})
+
+# set/get and reset MCMC slot for given chain index
+if(!isGeneric("result")) {
+  if(is.function("result")){
+    fun <- result
+  }else{
+    fun <- function(object, index){ standardGeneric("result") }
+  }
+  setGeneric("result", fun)
+}
+setMethod("result","pcpt",function(object, index) object@results[[as.character(index)]])
+setGeneric("result<-", function(object, index, value) standardGeneric("result<-"))
+setReplaceMethod("result", "pcpt", function(object, index, value) {
+  if(!(index %in% as.numeric(names(object@results))))
+    stop(paste0("Index `",index,"` not found in list."))
+  object@results[[as.character(index)]] <- value
   return(object)
 })
 
 # set/get and reset all of MCMC slot
-if(!isGeneric("MCMC.chains")) {
-  if(is.function("MCMC.chains")){
-    fun <- MCMC.chains
+if(!isGeneric("results")) {
+  if(is.function("results")){
+    fun <- results
   }else{
-    fun <- function(object){ standardGeneric("MCMC.chains") }
+    fun <- function(object){ standardGeneric("results") }
   }
-  setGeneric("MCMC.chains", fun)
+  setGeneric("results", fun)
 }
-setMethod("MCMC.chains","pcpt",function(object) object@MCMC.chains)
-setGeneric("MCMC.chains<-", function(object, value) standardGeneric("MCMC.chains<-"))
-setReplaceMethod("MCMC.chains", "pcpt", function(object, value) {
-  object@MCMC.chains <- value
+setMethod("results","pcpt",function(object) object@results)
+setGeneric("results<-", function(object, value) standardGeneric("results<-"))
+setReplaceMethod("results", "pcpt", function(object, value) {
+  object@results <- value
   return(object)
 })
+
+if(!isGeneric("summarised")) {
+  if(is.function("summarised")){
+    fun <- summarised
+  }else{
+    fun <- function(object){ standardGeneric("summarised") }
+  }
+  setGeneric("summarised", fun)
+}
+setMethod("summarised","pcpt",function(object) object@summarised)
+setGeneric("summarised<-", function(object, value) standardGeneric("summarised<-"))
+setReplaceMethod("summarised", "pcpt", function(object, value) {
+  if(!is.logical(value)) stop("Can only assign logical to summarised slot.")
+  object@summarised <- value
+  return(object)
+})
+
+if(!isGeneric("summarized")) {
+  if(is.function("summarized")){
+    fun <- summarized
+  }else{
+    fun <- function(object){ standardGeneric("summarized") }
+  }
+  setGeneric("summarized", fun)
+}
+setMethod("summarized","pcpt",function(object) object@summarised)
+setGeneric("summarized<-", function(object, value) standardGeneric("summarized<-"))
+setReplaceMethod("summarized", "pcpt", function(object, value) {
+  if(!is.logical(value)) stop("Can only assign logical to summarised slot.")
+  object@summarised <- value
+  return(object)
+})
+
+if(!isGeneric("nsegparam")) {
+  if(is.function("nsegparam")){
+    fun <- nsegparam
+  }else{
+    fun <- function(object){ standardGeneric("nsegparam") }
+  }
+  setGeneric("nsegparam", fun)
+}
+setMethod("nsegparam","pcpt",function(object) object@nsegparam)
+setGeneric("nsegparam<-", function(object, value) standardGeneric("nsegparam<-"))
+setReplaceMethod("nsegparam", "pcpt", function(object, value) {
+  if(length(value)!=1 | !is.numeric(value) | any(value<1) | any(value != floor(value))){
+    stop("Assignment to nseglen slot is not a single positive integer.")
+  }
+  object@nsegparam <- value
+  return(object)
+})
+
 
 
 #################################################
@@ -407,3 +479,69 @@ setReplaceMethod("param.mode", "pcpt", function(object, value) {
   return(object)
 })
 
+# set/get and reset fit slot for given chain index
+if(!isGeneric("fit")) {
+  if(is.function("fit")){
+    fun <- fit
+  }else{
+    fun <- function(object){ standardGeneric("fit") }
+  }
+  setGeneric("fit", fun)
+}
+setMethod("fit","pcpt",function(object, index) object@fit)
+setGeneric("fit<-", function(object, value) standardGeneric("fit<-"))
+setReplaceMethod("fit", "pcpt", function(object, value) {
+  object@fit <- value
+  return(object)
+})
+
+
+## set/get and reset data.set slot
+if(!isGeneric("seglen")) {
+  if (is.function("seglen")){
+    fun <- seglen
+  }else {
+    fun <- function(object){ standardGeneric("seglen") }
+  }
+  setGeneric("seglen", fun)
+}
+setMethod("seglen","pcpt",function(object){
+  if(length(pcpt.mode(object))==0){
+    warning("Mode pcpt has not yet been evaluated.")
+  }else{
+    tau <- pcpt.mode(object)
+    sl <- diff(c(tau[length(tau)]-periodlength(object), tau))
+    unname(sl)
+    return(sl)
+  }
+})
+
+
+## set/get and reset data.set slot
+if(!isGeneric("nsegs")) {
+  if (is.function("nsegs")){
+    fun <- nsegs
+  }else {
+    fun <- function(object){ standardGeneric("nsegs") }
+  }
+  setGeneric("nsegs", fun)
+}
+setMethod("nsegs","pcpt",function(object){
+  if(length(pcpt.mode(object))==0){
+    warning("Mode pcpt has not yet been evaluated.")
+    return(NA)
+  }else{
+    return(length(pcpt.mode(object)))
+  }
+})
+
+## set/get and reset data.set slot
+if(!isGeneric("npcpts")) {
+  if (is.function("npcpts")){
+    fun <- npcpts
+  }else {
+    fun <- function(object){ standardGeneric("npcpts") }
+  }
+  setGeneric("npcpts", fun)
+}
+setMethod("npcpts","pcpt",function(object){return(nsegs(object))})

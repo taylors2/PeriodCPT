@@ -97,7 +97,9 @@ void MAKE_LOOK_TABLES(
   Mprior_Ptr *Mprior = NULL;
   Samp_Dist_Ptr *Samp_Dist = NULL;
   Summary_Stats_Ptr *Summary_Stats = NULL;
-  Get_Functions(Mdist, Pdist, &Mprior, &Samp_Dist, &Summary_Stats, err);
+  Get_Mprior(Mdist, &Mprior, err);
+  Get_Pprior(Pdist, &Samp_Dist, err);
+  Get_SumStats_FN(Pdist, &Summary_Stats, err);
 
   if(*err != 0){
     return;

@@ -1,6 +1,6 @@
 ##pcpt, class_input
 
-class_input <- function(data, periodlength, minseglen, distribution,
+class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
                         Mprior, Mhyp, spread, inits, ...){
 
   ans               = methods::new("pcpt")
@@ -16,12 +16,13 @@ class_input <- function(data, periodlength, minseglen, distribution,
     minseglen(ans)    = 1;
   }
   distribution(ans) = distribution
-
+  nsegparam(ans)    = nsegparam
   pcpt.prior(ans)   = pcpt.prior.make(Mprior, Mhyp, spread)
   param.prior(ans)  = param.prior.make(distribution, ...)
   MCMC.options(ans) = MCMC.options.make(...)
   MCMC.inits(ans)   = Definie.inits(ans, inits, ...)
-  MCMC.chains(ans)  = initialise.MCMC.list(n.chains(ans))
+  results(ans)      = initialise.MCMC.list(n.chains(ans))
+  summarised(ans)   = FALSE
 
 
   return(ans)

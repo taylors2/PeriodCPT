@@ -12,6 +12,7 @@
 #include "PeriodCPT_MCMC.h"
 #include "PeriodCPT_MCMCgeneric.h"
 #include "PeriodCPT_Cache.h"
+#include "PeriodCPT_modepcpt.h"
 
 //---------------------------------------------------------
 
@@ -35,7 +36,13 @@ extern void PeriodCPT_RJMCMC(
     int     *quiet,      //Progress bar logical flag
     int     *blank,      //Holding number of blank or NA spaces in inits and draw
     int     *err,        //Error flag
-    int     *draw        //Vectorised MCMC output (append each chain)
+    int     *draw,       //Vectorised MCMC output (append each chain)
+    int     *Eval_Fits,  //Logical, should mode and fit estimates be calculated?
+    int     *mode_pcpt,  //pcpt mode output
+    double  *mode_params,//Segment parameter posterior mode output
+    int     *nsegparams, //Number of parameters per segment
+    double  *fits,       //Fit metrics output
+    int     *nfits       //Number of fit metrics
 ){
 
   //Rprintf("PeriodCPT\n");
@@ -88,7 +95,11 @@ extern void PeriodCPT_RJMCMC(
   //If requested, calculate mode estimates and summaries
   //  Must return void and be able to call from R
 
-
+  if(*Eval_Fits == 1){
+    Mode_pcpt(draw, maxM, niter, nchains, blank, N, g1, g2, mode_pcpt);
+    Mode_Fit_Calcuation(data, time, n, N, Pdist, Phyp, mode_pcpt, blank, maxM, err,
+                        fits, nfits, mode_params, nsegparams);
+  }
 
   ESC1:;
   my_free(g2);
@@ -105,7 +116,6 @@ extern void PeriodCPT_EvaluateSufficientStats(
     int     *time,       //Within period time index
     int     *n,          //Length of data
     int     *N,          //Period length
-    char   **Mdist,      //Name of pcpt total prior distribution
     char   **Pdist,      //Name of sampling distribution
     double  *Phyp,       //Hyper-parameter(s) for segment parameter priors
     int     *draws,      //m freq tau1, ...
@@ -120,11 +130,11 @@ extern void PeriodCPT_EvaluateSufficientStats(
   *err = 0;
 
   //Grab distribution related functions
-  Mprior_Ptr *Mprior = NULL;
   Samp_Dist_Ptr *Samp_Dist = NULL;
   Summary_Stats_Ptr *Summary_Stats = NULL;
   Sufficient_Stats_Ptr *Sufficient_Stats = NULL;
-  Get_Functions(Mdist, Pdist, &Mprior, &Samp_Dist, &Summary_Stats, err);
+  Get_Pprior(Pdist, &Samp_Dist, err);
+  Get_SumStats_FN(Pdist, &Summary_Stats, err);
   Get_SuffStats_Function(Pdist, &Sufficient_Stats, err);
   if(*err != 0){
     goto ESC1;
@@ -135,49 +145,14 @@ extern void PeriodCPT_EvaluateSufficientStats(
     out[i] = *blank;
   }
 
-
   double **SumStats = Summary_Stats(data, time, n, N);
   int numSumStats = (int)SumStats[0][0];
-  /*
-  Rprintf("nSumStats: %d\n",numSumStats);
-  for(int i = 0; i < *N; i++){
-    Rprintf("  %d) SumStats - ",i);
-    for(int k = 0; k<numSumStats;k++){
-      Rprintf("%d: %f ",k+1, SumStats[k+1][i]);
-    }
-    Rprintf("\n");
-  }
-
-  int m, *tau, thistau, prevtau;
-  for(int i = 0; i < *nrdraws; i++){
-    m = draws[i * *ncdraws];
-    tau = (int*)my_calloc(m, sizeof(int));
-    for(int k = 0; k < m; k++){
-      tau[k] = draws[i * *ncdraws + 2 + k];
-    }
-
-    for(int seg = (m-1); seg >= 0; seg--){
-      thistau = tau[seg];
-      if(seg == 0){
-        prevtau = tau[m-1];
-      }else{
-        prevtau = tau[seg - 1];
-      }
-    }
-    Rprintf("%d] m: %d tau: (%d",i,m,tau[0]);
-    for(int k=1; k<m; k++) Rprintf(", %d",tau[k]);
-    Rprintf(")\n");
-
-    my_free(tau);
-  }*/
-
 
   int m, *tau, thistau, prevtau;
   //int freq;
   double *thisStats, *thisSuff;
   for(int i = 0; i < *nrdraws; i++){
     m = draws[i * *ncdraws];
-    //freq = draws[i * *ncdraws + 1];
     tau = (int *)my_calloc(m, sizeof(int));
     for(int j = 0; j < m; j++) tau[j] = draws[i * *ncdraws + 2 + j];
     for(int seg = (m-1); seg >= 0; seg--){
@@ -195,9 +170,6 @@ extern void PeriodCPT_EvaluateSufficientStats(
         thistau--;
         if(thistau == 0) thistau += *N;
       }
-
-//      Rprintf("%d) m:%d t1:%d t2:%d s:%f n:%f\n", i, m, prevseg, thistau,
-//              thisStats[0], thisStats[1]);
 
       thisSuff = (double *)my_calloc(*nSuffStats, sizeof(double));
       Sufficient_Stats( thisStats, numSumStats, *nSuffStats, Phyp, thisSuff);
@@ -220,6 +192,43 @@ extern void PeriodCPT_EvaluateSufficientStats(
   return;
 }
 
+//-----------------------------------------------------------
+
+extern void Tally_pcpt(int *chains, int *nrow, int *ncol, int *blank, int *tally){
+  //Create table of unique pcpt samples, using the prob slot at counter
+  chain_t *unique;
+  MCMCitem_t *search = NULL;
+  MCMCitem_t *current = NULL;
+  for(int i = 0; i < *nrow; i++){
+    current = my_calloc(1, sizeof(MCMCitem_t));
+    current->m = 0;
+    for(int j=0; j<*ncol; j++){
+      if(chains[i * *ncol + j] != *blank) current->m++;
+    }
+    current->tau = my_calloc(current->m, sizeof(int));
+    for(int j=0; j<current->m; j++) current->tau[j] = chains[i * *ncol + j];
+    current->j = i;        //indexed poisition within original list
+    current->prob = 1.0;   //Used for tally
+    search = Find_in_Chain(unique, current);
+    if(search == NULL){
+      //does not exist in list, so add a copy to chain
+      Push_to_chain(unique, Copy_MCMCitem(current));
+    }else{
+      //iterate counter for case in table
+      search->prob += 1.0;
+    }
+    Delete_MCMCitem(current);
+  }
+  current = unique->first;
+  while(current != NULL){
+    tally[current->j] = (int)current->value;
+    current = current->next;
+  }
+  Delete_Chain(unique);
+  return;
+}
+
+
 
 //------------------------------------------------------------
 
@@ -228,8 +237,9 @@ extern void PeriodCPT_EvaluateSufficientStats(
 void R_init_PeriodCPT_Cfunctions(DllInfo *info){
 
  R_CMethodDef cMethods[] = {
- {"PeriodCPT_RJMCMC", (DL_FUNC) &PeriodCPT_RJMCMC, 20},
- {"PeriodCPT_EvaluateSufficientStats", (DL_FUNC) &PeriodCPT_EvaluateSufficientStats, 14},
+ {"PeriodCPT_RJMCMC", (DL_FUNC) &PeriodCPT_RJMCMC, 26},
+ {"PeriodCPT_EvaluateSufficientStats", (DL_FUNC) &PeriodCPT_EvaluateSufficientStats, 13},
+ {"Tally_pcpt", (DL_FUNC) &PeriodCPT_EvaluateSufficientStats, 5},
  {NULL,NULL,0}
  };
 
@@ -242,7 +252,14 @@ void R_init_PeriodCPT_Cfunctions(DllInfo *info){
 //------------------------
 // 1: Mprior distribution not recognised
 // 2: Sampling distribution not recognised
-// 3: Sufficient Statistic function not identified
+// 3: Summary Statistic function not identified
+// 4: Sufficient Statistic function not identified
+// 5: Segment parameter mode function not identified
+// 6: Fit metric calculation function not identified
+//WARNINGS
+// 101: Segment param mode is not unique. Consider changing prior hyper-params.
+// 102: Small sample size on segment for reliable fit metric. Consider increasing minimum segment length.
+
 
 
 

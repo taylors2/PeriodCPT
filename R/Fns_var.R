@@ -25,12 +25,13 @@ PeriodCPT.var <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("
                           cachesize=50, quiet=FALSE, ...){
 
   distribution <- "var"
+  nsegparam <- 1
   if(!is.numeric(data))
     stop("Data is invalid for Normal sampling distribution.")
 
   Mprior <- match.arg(Mprior)
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
-                     distribution = distribution, Mprior = Mprior, Mhyp = Mhyp,
+                     distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,
                      n.burn = n.burn, cachesize = cachesize, quiet = quiet,
                      param.a = param.a, param.b = param.b, ...)

@@ -1,157 +1,324 @@
-Summarise_EvalSS <- function(object, index){
-   #index missing -> combine all chains
-   #index = 0 -> summarise chains individually
-   #index = chainID -> summarise just single chain
+Summarize_chains <- function(object, all = TRUE){
+  return(Summarise_chains(object, all = TRUE))
+}
 
-  if(missing(index)){
-    draws <- NULL
-    for(i in 1:n.chains(object)){
-      draws <- rbind(draws, MCMC.chain(object, i))
-    }
-  }else if(index == 0){
-     out <- lapply(1:n.chains(object), Summarise_EvalSS, object = object)
-     names(out) <- names(MCMC.chains(object))
-     return(out)
-  }else{
-     draws <- MCMC.chain(object, index)
+Summarise_chains <- function(object, all = TRUE){
+
+  if(summarised(object) == TRUE){
+    #Already summarised, perform combine if requested
+    if(all) object <- Summarise_combine(object)
+    return(object)
   }
 
-  for(i in ncol(draws):1) draws <- draws[order(draws[,i]),]
-  m <- apply(!is.na(draws),1,sum)
-  L1 <- c(m[-1]!=m[-length(m)],TRUE)
-  L2 <- c(!apply(draws[-1,]==draws[-nrow(draws),],1,all,na.rm=TRUE),TRUE)
-  LL <- L1 | L2
-  freq <- diff(c(0,which(LL)))
-  m <- m[LL]
-  draws <- cbind(m,freq,draws[LL,])[order(freq,decreasing = TRUE),]
+  MCMC.last(object) <- Calc_MCMC_last(object)    ##Store the last iteration
+  for(index in 1:n.chains(object)){ ##Perform summary per chain
+    object <- Summarise_single_chain(object, index)
+  }
+  if(all) object <- Summarise_combine(object) #combine if requested
+  return(object)
+}
 
-  phyp_names <- strsplit(names(param.prior(object)),"[.]")
-  L <- unlist(lapply(phyp_names,function(a){a[1]=="param"}))
-  nSuffStats <- sum(L)
-  phyp_names <- unlist(lapply(phyp_names,tail,n=1))
+Summarize_combine <- function(object){
+  return(Summarise_combine(object))
+}
 
+Summarise_combine <- function(object){
+  if(length(results(object)) == 1 | n.chains(object)==1){
+    #Either already combined or n.chains(object)==1
+    return(object)
+  }
+
+  tab <- result(object, 1)
+  for(c in 2:n.chains(object)){
+    tab2 <- result(object, 2)
+    ##Pad tables such that ncol(tab)==ncol(tab2)
+    if(ncol(tab) < ncol(tab2)){
+      tab_tmp <- array(NA,dim=c(nrow(tab), ncol(tab2)))
+      tab_tmp[,colnames(tab2) %in% colnames(tab)] <- tab
+      colnames(tab_tmp) <- colnames(tab2)
+      tab <- tab_tmp
+    }else if(ncol(tab) > ncol(tab2)){
+      tab_tmp <- array(NA,dim=c(nrow(tab2), ncol(tab)))
+      tab_tmp[,colnames(tab) %in% colnames(tab2)] <- tab2
+      colnames(tab_tmp) <- colnames(tab)
+      tab2 <- tab_tmp
+    }
+
+    keep <- rep(TRUE,nrow(tab2)) #tab2 rows not in tab == TRUE (needed for appending)
+    for(i in 1:nrow(tab2)){
+      j <- 1
+      while(j<=nrow(tab) && L[i]){
+        if(tab2[i,1]!=tab[j,1]){ #number of pcpts dont match
+          j <- j+1
+        }else if(all(tab2[i,2+tab2[i,1]] == tab[j,2+tab[j,1]])){
+          #pcpts match, add freq to tab and mark as combined
+          tab[j,2] <- tab[j,2] + tab2[i,2] ##Add frequencies
+          L[i] <- FALSE
+        }else{
+          j <- j+1
+        }
+      }
+    }
+    ##Append uniqe draw from tab2 into tab.
+    tab <- rbind(tab, tab2[keep,,drop=FALSE])
+  }
+
+  #Put tab matrix into required format for results slot and assign
+  out <- as.list(tab)
+  names(out) <- 1
+  results(object) <- out
+
+  return(object)
+}
+
+Summarize_single_chain <- function(object,index){
+  return(Summarise_single_chain(object, index))
+}
+
+Summarise_single_chain <- function(object, index){
+
+  ##Tabulating chain samples
+  chain <- result(object, index)
+  ntaumax <- ncol(chain)
+  niter <- nrow(chain)
+  chain <- as.numeric(t(chain))
   BLANK <- -1
+  chain[is.na(chain)] <- BLANK
+  tally <- .C("Tally_pcpt", as.integer(chains), as.integer(niter), as.integer(ntaumax),
+              as.integer(BLANK), tally = vector("integer", length = niter))$tally
+  uniquedraws <- result(object,index)[tally>0,,drop=FALSE]
+  tally <- tally[tally>0]
+  m <- apply(!is.na(unique),1,sum)
+
+  ##Evaluating Sufficient Stats
+  SSnames <- names(param.prior(object))
+  L <- grepl("param.", SSnames)
+  nSuffStats <- sum(L)
+  phyp_names <- toupper(sub("param.","",SSnames[L]))
+
   offset <- start(data.set(object))[2]
   time <- seq(from = offset, by = 1, length.out = length(data.set(object)))
   time2C <- ((time - 1) %% periodlength(object)) + 1
-  drawtmp <- as.numeric(t(draws))
+  drawtmp <- as.numeric(t(uniquedraws))
   drawtmp[is.na(drawtmp)] <- BLANK
 
-
   C_SuffStats <- .C("PeriodCPT_EvaluateSufficientStats",
-        data    = as.numeric(data.set(object)),
-        time    = as.integer(time2C),
-        n       = as.integer(length(data.set(object))),
-        N       = as.integer(periodlength(object)),
-        Mdist   = as.character(pcpt.prior(object)$Mprior),
-        Pdist   = as.character(distribution(object)),
-        Phyp    = as.numeric(param.prior(object)),
-        draws   = as.integer(drawtmp),
-        ncdraws = as.integer(ncol(draws)),
-        nrdraws = as.integer(nrow(draws)),
-        nSuffStats = as.integer(nSuffStats),
-        blank   = as.numeric(BLANK),
-        error   = as.integer(0L),
-        out     = vector("numeric", nrow(draws)*nSuffStats*(ncol(draws)-2))
+                    data    = as.numeric(data.set(object)),
+                    time    = as.integer(time2C),
+                    n       = as.integer(length(data.set(object))),
+                    N       = as.integer(periodlength(object)),
+                    Mdist   = as.character(pcpt.prior(object)$Mprior),
+                    Pdist   = as.character(distribution(object)),
+                    Phyp    = as.numeric(param.prior(object)),
+                    draws   = as.integer(drawtmp),
+                    ncdraws = as.integer(ncol(uniquedraws)),
+                    nrdraws = as.integer(nrow(uniquedraws)),
+                    nSuffStats = as.integer(nSuffStats),
+                    blank   = as.numeric(BLANK),
+                    error   = as.integer(0L),
+                    out     = vector("numeric", nrow(uniquedraws)*nSuffStats*ncol(uniquedraws))
   )
 
-  SufStat <- matrix(C_SuffStats$out,nr=nrow(draws),byrow=TRUE)
+  SufStat <- matrix(C_SuffStats$out,nr=nrow(uniquedraws),byrow=TRUE)
   SufStat[SufStat == BLANK] <- NA
-  colnames(SufStat) <- paste0(rep(phyp_names,each=ncol(draws)-2),1:(ncol(draws)-2))
-  draws <- cbind(draws,SufStat)
-  attributes(draws)$info <- list(periodlength = periodlength(object), minseglen = minseglen(object),
-                        distribution = distribution(object))
-  return(draws)
+  tab <- cbind(m,tally,uniquedraws,SufStat)
+  colnames(tab) <- c("m", "freq", paste0(rep(c("tau",phyp_names), each=ncol(uniquedraws)),
+                                         1:ncol(uniquedraws)))
+
+  ####Assign summary table back to appropriate result slot
+  result(object, index) <- tab
+
+  return(object)
 }
 
-table_npcpt <- function(x){
-   N <- attributes(x)$info$periodlength
-   l <- attributes(x)$info$minseglen
-   maxM <- floor(N/l)
-   freq <- rep(0, maxM)
-   for(i in 1:nrow(x)){
-      freq[x[i,1]] <- freq[x[i,1]] + x[i,2]
-   }
-   names(freq) <- paste0("m=",1:maxM)
-   return(as.table(freq))
-}
+table_npcpt <- function(object){
+  if(!summarised(object)){
+    #results has chain
+    tab <- matrix(NA,nr=n.chains(object),nc=npcpts.max(object))
+    for(c in 1:nrow(tab)){
+      m_chain <- apply(!is.na(result(object,c)),1,sum)
+      tab[c,] <- as.numeric(table(c(m_chain,1:ncol(tab))))-1
+    }
+    colnames(tab) <- paste0("m",1:ncol(tab))
+    rownames(tab) <- paste0("Chain ",1:nrow(tab))
+    return(as.table(tab))
+  }
 
-table_pcpt <- function(x){
-   N <- attributes(x)$info$periodlength
-   freq <- rep(0,maxM)
-   for(i in 1:nrow(x)){
-      for(j in 1:x[i,1]){
-         freq[x[i,2+j]] <- freq[x[i,2+j]] + x[i,2]
-      }
-   }
-   names(freq) <- paste0("tau",1:N)
-   return(as.table(freq))
-}
+  #results has summary
+  x <- results(object)
+  tab <- matrix(0, nr=length(x),ncol=npcpts.max(object))
+  for(c in 1:length(x)){
+    xc <- x[[c]]
+    for(i in 1:nrow(x[[c]])){
+      m <- xc[i,1]
+      tab[c,m] <- tab[c,m] + xc[i,2]
+    }
+  }
 
-pcpt_mode <- function(x){
-  if(is.list(x)){
-    out <- lapply(x, pcpt_mode)
-    names(out) <- names(x)
-    return(x)
+  if(nrow(tab) == 1){
+    tab <- as.numeric(tab)
+    names(tab) <- paste0("m",1:ncol(tab))
+    return(as.table(tab))
   }else{
-    mode <- x[1,grepl("tau",colnames(x))]
-    return(mode[!is.na(mode)])
+    colnames(tab) <- paste0("m",1:ncol(tab))
+    rownames(tab) <- paste0("Chain ",1:nrow(tab))
+    return(as.table(tab))
   }
 }
 
-param_mode <- function(x){
-   if(is.list(x)){
-      out <- lapply(x, param_mode)
-   }else{
-      dist <- attributes(x)$info$distribution
-      ntau <- sum(grepl("tau",colnames(x)))
-      mode_SS <- matrix(x[1,-(1:(2+ntau))],nr=ntau)
-      mode_SS <- mode_SS[1:x[1,1], , drop=FALSE]
-      for(i in 1:nrow(mode_SS)){
-        outi <- eval(parse(text = paste0("param_mode_calc.",
-                                      dist,"(mode_SS[i,])")))
-        if(i==1){
-           out <- matrix(NA,nr=length(outi),nc=nrow(mode_SS))
-           rownames(out) <- names(outi)
-           colnames(out) <- paste0("seg",1:nrow(mode_SS))
-        }
-        out[,i] <- outi
+table_pcpt <- function(object){
+  periodlength(object) <- 1
+  if(!summarised(object)){
+    #results has chain
+    tab <- matrix(NA, nr=n.chains(object),nc=N + 1)
+    for(c in 1:nrow(tab)){
+      tau_chain <- result(object,c)
+      m1        <- apply(!is.na(result(object,c)),1,sum) == 1
+      if(all(m1)){
+        tab[c,] <- c(rep(0,N),sum(m1))
+      }else{
+        tau_chain <- as.numeric(tau_chain[!m1,])
+        tau_chain <- tau_chain[!is.na()]
+        tab[c,] <-  c(as.numeric(table(c(tau_chain,1:N)))-1, sum(m1))
       }
-   }
-   return(out)
+    }
+    colnames(tab) <- c(paste0("tau",1:N),"m1")
+    rownames(tab) <- paste0("Chain ",1:nrow(tab))
+    return(as.table(tab))
+  }
+
+  #results has summary
+  x <- results(object)
+  tab <- matrix(0, nr = length(x), ncol = N + 1)
+  for(c in 1:length(x)){
+    xc <- x[[c]]
+    for(i in 1:nrow(x[[c]])){
+      m <- xc[i,1]
+      if(m==1){
+        tab[c,N+1] <- tab[c,N+1] + x[i,c]
+      }else{
+        for(j in 1:m){
+          tau <- xc[i,2+j]
+          tab[c,tau] <- tab[c,tau] + xc[i,2]
+        }
+      }
+    }
+  }
+
+  if(nrow(tab) == 1){
+    tab <- as.numeric(tab)
+    names(tab) <- c(paste0("tau",1:N),"m1")
+    return(as.table(tab))
+  }else{
+    colnames(tab) <- c(paste0("tau",1:N),"m1")
+    rownames(tab) <- paste0("Chain ",1:nrow(tab))
+    return(as.table(tab))
+  }
 }
 
-
-Evaluate_pcpt_mode <- function(object, summary, combine = TRUE){
-   if(combine){
-      summary <- Summarise_EvalSS(object)
-   }else{
-      summary <- Summarise_EvalSS(object, index = 0)
-   }
-
-   value <- pcpt_mode(summary)
-   if(!is.list(value)){
-      value <- as.list(value)
-      names(value) <- 1
-   }
-   pcpt.mode(object) <- value
-   return(object)
+Calc_MCMC_last <- function(object){
+  if(summarised(object) == TRUE){
+    stop("Chains have been summarised, cannout use summarised data to determine last chain samples.")
+  }
+  out <- vector("list", n.chains(object))
+  names(out) <- names(MCMC.inits(object))
+  for(i in 1:n.chains(object)){
+    MCMC <- result(object, i)
+    tau <- MCMC[nrow(MCMC),]
+    out[[i]] <- unname(tau[!is.na(tau)])
+  }
+  return(out)
 }
 
-Evaluate_param_mode <- function(object, summary, combine = TRUE){
-   if(combine){
-      summary <- Summarise_EvalSS(object)
-   }else{
-      summary <- Summarise_EvalSS(object, index = 0)
-   }
+##---------------------------------------------------------------------
 
-   value <- param_mode(summary)
-   if(!is.list(value)){
-      value <- as.list(value)
-      names(value) <- 1
-   }
-   param.mode(object) <- value
-   return(object)
+plot_chain <- function(object, col, plot = TRUE){
+
+
+
+  if(!any(grepl("freq", names(result(object,1))))){
+    stop("Cannot create plot on summarised chain.")
+  }
+  tmp <- floor(log10(n.iter(object)))
+  if(tmp > 2){
+    by = 10^(tmp-2)
+    rng <- seq(from = 10^(tmp-2), to = n.iter(object), by = by)
+  }else{
+    rng <- 1:n.iter(object)
+  }
+  N <- periodlength(object)
+  out <- vector("list", n.chains(object))
+  for(c in 1:n.chains(object)){
+    mat <- matrix(0,nr=length(rng),nc=N+1)
+    colnames(mat) <- c(paste0("tau",1:N),"m1")
+    rownames(mat) <- rng
+    j <- 1
+    mcmc <- result(object, c)
+    for(i in 1:n.iter(object)){
+      tau <- mcmc[i, !is.na(mcmc[i,])]
+      if(length(tau)==1){
+        mat[j,N+1] <- mat[j,N+1] + 1
+      }else{
+        mat[j,tau] <- mat[j,tau] + 1
+      }
+      if(i == rng[j]){
+        j <- j + 1
+      }
+    }
+
+    out[[c]] <- mat/diff(c(0,rng))
+  }
+  names(out) <- 1:n.chains(out)
+
+  if(plot){
+    N <- periodlength(object)
+    n <- n.chains(object)
+
+    tmp3 <- matrix(0,nr=nrow(mat1),nc=n*ncol(mat1))
+    for(i in 1:n){
+      tmp <- out[[i]]
+      tmp3[,((1:ncol(tmp)) - 1) * n + i ] <- tmp  + 2*(i-1)*(tmp!=0)
+    }
+
+    if(missing(col)) col = 1:n
+    if(!is.character(COLS)){
+      COLS <- c("black","red","green","blue","cyan","magenta",
+                "yellow","grey")[(col - 1)%%8 + 1]
+    }else{
+      COLS <- col
+    }
+    colhexchar <- as.character(as.hexmode(col2rgb(COLS)))
+    for(i in 1:length(colhexchar)){
+      if(nchar(colhexchar[i]) == 1)
+        colhexchar[i] <- paste0("0",colhexchar[i])
+    }
+    hexcol <- paste0("#",apply(colhexchar,2,paste0,collapse=""))
+    UseCOLS <- NULL
+    levels <- as.character(as.hexmode(0:15))
+    for(i in 1:length(COLS)){
+      UseCOLS <- c(UseCOLS,paste0(hexcol[i],levels,levels),
+                   paste0(hexcol[i],"ff"),
+                   paste0("#000000",levels[-1],levels[-1]))
+    }
+    collegend <- paste0("#000000",levels,levels)
+
+    AT <- (0:N)*n
+    rng <- seq(from=0,by=100,length.out = nrow(tmp3))
+    fields::image.plot(rng,1:((N+1)*n),tmp3,zlim=c(0,n*2),col=UseCOLS,
+                       axis.args = list(col="white", at = c(0,n*2), labels=c("","")),
+                       xlab = "iteration", yaxt="n",ylab="")
+    axis(at = seq(from = mean(AT[1:2])+0.5, by = AT[2]-AT[1], len = N+1),
+         side=2, labels=c(paste0("tau",1:N),"m1"), las = 1)
+    fields::image.plot(NA,zlim=c(0,1),col=c("#FFFFFF","#FFFFFF"),
+                       legend.only = TRUE, axis.args = list(col="white", at = c(0,1),
+                                                            labels=c("","")))  ##To blank out legend
+    fields::image.plot(NA,zlim=c(0,1),col=collegend,legend.only = TRUE)
+    segments(diff(range(rng))*-0.005,AT + 0.5,rep(max(rng)*0.827,13),
+             AT + 0.5)
+    invisible(out)
+  }else{
+    return(out)
+  }
 }
 
 

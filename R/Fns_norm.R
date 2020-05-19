@@ -43,12 +43,13 @@ PeriodCPT.norm <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
                            cachesize=50, quiet=FALSE, ...){
 
   distribution <- "norm"
+  nsegparam <- 2
   if(!is.numeric(data))
     stop("Data is invalid for Normal sampling distribution.")
 
   Mprior <- match.arg(Mprior)
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
-                     distribution = distribution, Mprior = Mprior, Mhyp = Mhyp,
+                     distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,
                      n.burn = n.burn, cachesize = cachesize, quiet = quiet,
                      param.m = param.m, param.c = param.c, param.a = param.a,
@@ -58,16 +59,4 @@ PeriodCPT.norm <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   return(ans)
 }
 
-param_mode_calc.norm <- function(stats){
-  if(length(stats) != 4)
-    stop("Length of sufficient statistcs in param_mode_calc.norm is not 4.")
-  phi1 = stats[1]
-  phi2 = stats[4]/(stats[3] + 1.5)
-  names(phi) = c("mu","sig2")
-  return(phi)
-}
-
-SummariseOutput.norm <- function(object){
-  return(object)
-}
 

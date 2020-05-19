@@ -19,6 +19,9 @@ typedef double (Mprior_Ptr       )(int,     int*, double*);
 typedef double (Samp_Dist_Ptr    )(double*, int,  double*);
 typedef double **(Summary_Stats_Ptr)(double*, int*, int*, int*);
 typedef void   (Sufficient_Stats_Ptr)(double*, int, int, double*, double*);
+typedef void   (Fit_FN_Ptr)(double *, int , int *, double *, int*, double *);
+typedef void   (Param_Mode_Ptr)(double*, int, double*, double*, int*);
+
 
 
 struct segval {
