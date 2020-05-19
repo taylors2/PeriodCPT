@@ -411,34 +411,20 @@ setMethod("summary","pcpt",function(object, index, ...){
   pcpt_mode  <- pcpt.mode(object)
   param_mode <- param.mode(object)
   cat("Created Using changepoint version",object@version,'\n')
-  cat("Distribution           : ", distribution(object), '\n')
-  cat("Period length          : ", periodlength(object), "\n")
-  cat("Minimum Segment Length : ", minseglen(object),    "\n")
-  cat("Maximum no. of cpts    : ", npcpts.max(object),   "\n")
-  cat("Number of chains       : ", n.chains(object),     "\n")
-  if(length(pcpt_mode) != 0){
-    for(i in 1:n.chains(object)){
-      extra <- ""
-      if(length(pcpt_mode) > 1) extra <- paste0("Chain ",i,"/",n.chains(object))
-      cat("Periodic cpt locations : ", extra, " : (",
-          paste0(as.numeric(pcpt_mode[[i]]),collapse = ", "),")\n")
-    }
+  cat("Distribution            : ", distribution(object), '\n')
+  cat("Period length           : ", periodlength(object), "\n")
+  cat("Minimum Segment Length  : ", minseglen(object),    "\n")
+  cat("Maximum no. of cpts     : ", npcpts.max(object),   "\n")
+  cat("Number of chains        : ", n.chains(object),     "\n")
+  cat("Number of pcpts         : ", nsegs(object),        "\n")
+  if(nsegs(object) == 1){
+    cat("Periodic cpt locations  : (null)\n")
   }else{
-    cat("Periodic cpt locations : ...\n")
+    tau <- paste0(unname(as.numeric(pcpt.mode(object))), collapse = ", ")
+    cat("Periodic cpt locations  : ", tau,"\n")
   }
-  if(length(param_mode) != 0){
-    for(i in 1:n.chains(object)){
-      extra <- ""
-      if(length(param_mode) > 1) extra <- paste0("Chain ",i,"/",n.chains(object))
-      for(k in 1:nrow(param_mode[[i]])){
-        cat("Segment param ",k," mode   : ", extra, " : (",
-            paste0(as.numeric(param_mode[[i]][k,]),collapse = ", "),")\n")
-      }
-    }
-  }else{
-    cat("Segment param . mode   : ...\n")
-  }
-
+  cat("Seg. parameters at mode : \n")
+  print(param.mode(object))
 })
 
 setMethod("plot","pcpt",function(x, ...){
