@@ -19,16 +19,16 @@ PeriodCPT_extend <- function(object, newiters = 1e4){
   n.iter(object) <- newiters        ##Set n.iter to input value
   MCMC.last(object) <- list()
   pcpt.mode(object) <- numeric()
-  param.mode(object) <- numeric()
+  param.mode(object) <- array(NA, dim = c(0, 0))
   fit(object) <- numeric()
-  results(object) <- list()
+  results(object) <- initialise.MCMC.list(n.chains(object))
   summarised(object) <- FALSE
 
   ##Run new batch of iterations
   object <- PeriodCPT.main(object)
 
   ##Assign back relavent information
-  n.burn(object) <- lastburn
+  n.burn(object) <- newburn
   MCMC.inits(object) <- first.inits
   return(object)
 }

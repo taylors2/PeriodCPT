@@ -1,18 +1,19 @@
-\name{toggle.quiet}
-\alias{toggle.quiet}
+\name{result}
+\alias{result}
 \title{
-  Generic Function -- toggle.quiet
+  Generic Function -- result
 }
 \description{
   Generic function
 }
 \usage{
-  toggle.quiet(object)
+  result(object, index)
 }
 \arguments{
   \item{object}{
     Depending on the class of \code{object} depends on the method used (and if one exists)
   }
+  \item{index}{ Single positive integer giving chain index.}
 }
 \details{
   Generic Function
@@ -25,17 +26,12 @@
   Rebecca Killick
 }
 \seealso{
-  \code{\link{toggle.quiet-methods}}
+  \code{\link{result-methods}}
 }
 \examples{
 x = new("pcpt") # new pcpt object
-MCMC.options(x) = list(
-         n.iter = 1e6, n.chain = 1,
-         n.burn = 1e4, cachesize = 50,
-         quiet = FALSE)
-x@MCMC.options$quiet
-toggle.quiet(x) # inverts the logical item quiet in the MCMC.options slot.
-x@MCMC.options$quiet
+results(x) = list(`1` = NULL, `2` = NULL)
+result(x, 2) # retrieves the the second listed item from the results slot from x
 }
 \keyword{ methods }
 \keyword{ pcpt }

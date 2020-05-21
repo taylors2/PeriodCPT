@@ -12,11 +12,11 @@ setClass("pcpt", slots=list(
     MCMC.last    = "list",        ## List of chain values at last interation (filled at summarised)
     results      = "list",        ## MCMC output from chain / Summarised chain(s)
     summarised   = "logical",     ## Does results slot are the raw chain (FALSE) or are summaised (TRUE)
-    param.mode   = "numeric",     ## Mode estimates for segment parameters
+    param.mode   = "matrix",      ## Mode estimates for segment parameters
     pcpt.mode    = "numeric",     ## Mode estimates for pcpt paramters
     fit          = "numeric",     ## Fit metric, evaluated at summary
     date         = "character",   ## Date that the object was created
-    version      = "character"),   ## Version of code
+    version      = "character"),  ## Version of code
 
   prototype = prototype(
     date         = date(),
@@ -257,20 +257,23 @@ setReplaceMethod("n.burn", "pcpt", function(object, value) {
   return(object)
 })
 
-if(!isGeneric("toggle.quiet")) {
-  if(is.function("toggle.quiet")){
-    fun <- toggle.quiet
+if(!isGeneric("quiet")) {
+  if(is.function("quiet")){
+    fun <- quiet
   }else{
-    fun <- function(object){ standardGeneric("toggle.quiet") }
+    fun <- function(object){ standardGeneric("quiet") }
   }
-  setGeneric("toggle.quiet", fun)
+  setGeneric("quiet", fun)
 }
-setMethod("toggle.quiet","pcpt",function(object){
+setMethod("quiet","pcpt",function(object) object@MCMC.options$quiet)
+setGeneric("quiet<-", function(object, value) standardGeneric("quiet<-"))
+setReplaceMethod("quiet", "pcpt", function(object, value) {
   if(!any(names(object@MCMC.options) == "quiet"))
     stop("MCMC.options slot not initialised correctly for `quiet`.")
-  if(!is.logical(object@MCMC.options$quiet))
-    stop("`quiet` item in MCMC.options slot is not logical.")
-  object@MCMC.options$quiet <- !object@MCMC.options$quiet})
+  object@MCMC.options$quiet <- value
+  return(object)
+})
+
 
 # set/get and reset MCMC.inits slot
 if(!isGeneric("MCMC.inits")) {
@@ -397,8 +400,8 @@ setMethod("show","pcpt",function(object){
   cat("Class 'pcpt' : Changepoint Object\n")
   cat("        ~~   : S4 class containing", length(attributes(object))-1, "slots with names\n")
   cat("             ", names(attributes(object))[1:(length(attributes(object))-1)], "\n\n")
-  cat("Created on  :", object@date, "\n\n")
-  cat("summary(.)  :\n----------\n")
+  cat("Created on   :", object@date, "\n\n")
+  cat("summary(.)   :\n----------\n")
   summary(object)
 })
 
@@ -406,7 +409,7 @@ setMethod("print","pcpt",function(x, ...){
   show(x)
 })
 
-setMethod("summary","pcpt",function(object, index, ...){
+setMethod("summary","pcpt",function(object, ...){
 
   pcpt_mode  <- pcpt.mode(object)
   param_mode <- param.mode(object)
@@ -416,7 +419,7 @@ setMethod("summary","pcpt",function(object, index, ...){
   cat("Minimum Segment Length  : ", minseglen(object),    "\n")
   cat("Maximum no. of cpts     : ", npcpts.max(object),   "\n")
   cat("Number of chains        : ", n.chains(object),     "\n")
-  cat("Number of pcpts         : ", nsegs(object),        "\n")
+  cat("Number of periodic segs : ", nsegs(object),        "\n")
   if(nsegs(object) == 1){
     cat("Periodic cpt locations  : (null)\n")
   }else{
@@ -425,6 +428,10 @@ setMethod("summary","pcpt",function(object, index, ...){
   }
   cat("Seg. parameters at mode : \n")
   print(param.mode(object))
+})
+
+setMethod("quantile","pcpt",function(x, ...){
+  return(quantile_per_time_slot(object = x, ...))
 })
 
 setMethod("plot","pcpt",function(x, ...){
@@ -474,7 +481,7 @@ if(!isGeneric("fit")) {
   }
   setGeneric("fit", fun)
 }
-setMethod("fit","pcpt",function(object, index) object@fit)
+setMethod("fit","pcpt",function(object) object@fit)
 setGeneric("fit<-", function(object, value) standardGeneric("fit<-"))
 setReplaceMethod("fit", "pcpt", function(object, value) {
   object@fit <- value

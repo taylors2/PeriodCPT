@@ -57,12 +57,12 @@ extern void PeriodCPT_RJMCMC(
   MAKE_LOOK_TABLES(data, time, n, N, minseglen, maxM, Mdist, Mhyp,
                    spread, Pdist, Phyp, err, g1, g2);
   //PrintLookup(g1, g2, maxM, N);
-
   if(*err != 0) goto ESC1;
 
   int save;
   char str[50];
   char *progress_text = str;
+
   for(int ichain = 0; ichain < *nchains; ichain++){
     //initialise chain
     MCMCitem_t *current;
@@ -96,7 +96,8 @@ extern void PeriodCPT_RJMCMC(
   //  Must return void and be able to call from R
 
   if(*Eval_Fits == 1){
-    Mode_pcpt(draw, maxM, niter, nchains, blank, N, g1, g2, mode_pcpt);
+    int len = *nchains * *niter;
+    Mode_pcpt(draw, maxM, &len, blank, N, g1, g2, mode_pcpt);
     Mode_Fit_Calcuation(data, time, n, N, Pdist, Phyp, mode_pcpt, blank, maxM, err,
                         fits, nfits, mode_params, nsegparams);
   }
@@ -122,7 +123,7 @@ extern void PeriodCPT_EvaluateSufficientStats(
     int     *ncdraws,    //length of draw per case
     int     *nrdraws,    //number of cases in draw
     int     *nSuffStats, //number of (posterior) sufficient statistics
-    double  *blank,      //Holding number of blank or NA spaces in inits and draw
+    int     *blank,      //Holding number of blank or NA spaces in inits and draw
     int     *err,        //Error flag
     double  *out         //Vectorised output
 ){
@@ -139,30 +140,35 @@ extern void PeriodCPT_EvaluateSufficientStats(
   if(*err != 0){
     goto ESC1;
   }
-
   //flood output with blank character
-  for(int i = 0; i < *nSuffStats * (*ncdraws-2) * (*nrdraws); i++){
+  for(int i = 0; i < *nSuffStats * (*ncdraws) * (*nrdraws); i++){
     out[i] = *blank;
   }
 
   double **SumStats = Summary_Stats(data, time, n, N);
   int numSumStats = (int)SumStats[0][0];
 
-  int m, *tau, thistau, prevtau;
-  //int freq;
+  int thistau, prevtau;
   double *thisStats, *thisSuff;
+  MCMCitem_t *current;
+
   for(int i = 0; i < *nrdraws; i++){
-    m = draws[i * *ncdraws];
-    tau = (int *)my_calloc(m, sizeof(int));
-    for(int j = 0; j < m; j++) tau[j] = draws[i * *ncdraws + 2 + j];
-    for(int seg = (m-1); seg >= 0; seg--){
-      thistau = tau[seg];
+    int m = 0;
+    for(int j=0; j<*ncdraws; j++){
+      if(draws[i * *ncdraws + j] != *blank) m++;
+    }
+    current = Make_blank_MCMCitem(m, &(draws[i * *ncdraws]));
+
+    for(int seg = (current->m-1); seg >= 0; seg--){
+      thistau = current->tau[seg];
       if(seg == 0){
-        prevtau = tau[m-1];
+        prevtau = current->tau[current->m - 1];
       }else{
-        prevtau = tau[seg - 1];
+        prevtau = current->tau[seg - 1];
       }
+
       thisStats = (double *)my_calloc(numSumStats, sizeof(double));
+
       while(thistau != prevtau){
         for(int k = 0; k < numSumStats; k++){
           thisStats[k] += SumStats[k+1][thistau - 1];
@@ -176,13 +182,13 @@ extern void PeriodCPT_EvaluateSufficientStats(
       my_free(thisStats);
 
       for(int k = 0; k < *nSuffStats; k++){
-        out[i * *nSuffStats * (*ncdraws - 2) + k * (*ncdraws - 2) + seg] =
+        out[i * *nSuffStats * (*ncdraws) + k * (*ncdraws) + seg] =
           thisSuff[k];
       }
 
       my_free(thisSuff);
     }
-    my_free(tau);
+    Delete_MCMCitem(current);
   }
 
   Free_Summary_Stats(SumStats);
@@ -196,32 +202,13 @@ extern void PeriodCPT_EvaluateSufficientStats(
 
 extern void Tally_pcpt(int *chains, int *nrow, int *ncol, int *blank, int *tally){
   //Create table of unique pcpt samples, using the prob slot at counter
-  chain_t *unique;
-  MCMCitem_t *search = NULL;
+  chain_t *unique = Make_Chain();
   MCMCitem_t *current = NULL;
-  for(int i = 0; i < *nrow; i++){
-    current = my_calloc(1, sizeof(MCMCitem_t));
-    current->m = 0;
-    for(int j=0; j<*ncol; j++){
-      if(chains[i * *ncol + j] != *blank) current->m++;
-    }
-    current->tau = my_calloc(current->m, sizeof(int));
-    for(int j=0; j<current->m; j++) current->tau[j] = chains[i * *ncol + j];
-    current->j = i;        //indexed poisition within original list
-    current->prob = 1.0;   //Used for tally
-    search = Find_in_Chain(unique, current);
-    if(search == NULL){
-      //does not exist in list, so add a copy to chain
-      Push_to_chain(unique, Copy_MCMCitem(current));
-    }else{
-      //iterate counter for case in table
-      search->prob += 1.0;
-    }
-    Delete_MCMCitem(current);
-  }
+  List_unique_samples(chains, ncol, nrow, blank, unique);
+
   current = unique->first;
   while(current != NULL){
-    tally[current->j] = (int)current->value;
+    tally[current->j] = (int)current->prob;
     current = current->next;
   }
   Delete_Chain(unique);
@@ -239,7 +226,7 @@ void R_init_PeriodCPT_Cfunctions(DllInfo *info){
  R_CMethodDef cMethods[] = {
  {"PeriodCPT_RJMCMC", (DL_FUNC) &PeriodCPT_RJMCMC, 26},
  {"PeriodCPT_EvaluateSufficientStats", (DL_FUNC) &PeriodCPT_EvaluateSufficientStats, 13},
- {"Tally_pcpt", (DL_FUNC) &PeriodCPT_EvaluateSufficientStats, 5},
+ {"Tally_pcpt", (DL_FUNC) &Tally_pcpt, 5},
  {NULL,NULL,0}
  };
 

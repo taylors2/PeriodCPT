@@ -1,18 +1,19 @@
-\name{MCMC.chains<-}
-\alias{MCMC.chains<-}
+\name{results<-}
+\alias{results<-}
 \title{
-Generic Function - MCMC.chains<-
+Generic Function - results<-
 }
 \description{
 Generic function
 }
 \usage{
-MCMC.chains(object)<-value
+results(object)<-value
 }
 \arguments{
   \item{object}{
 	Depending on the class of \code{object} depends on the method used (and if one exists)
-}
+	}
+
   \item{value}{
 	Replacement value
 }
@@ -30,12 +31,12 @@ Rebecca Killick
 
 
 \seealso{
-\code{\link{MCMC.chains<--methods}}
+\code{\link{results<--methods}}
 }
 \examples{
 x=new("pcpt") # new pcpt object
-MCMC.chains(x) = list(`1` = NULL, `2` = NULL)
-    # replaces the existing MCMC.chains slot in x
+results(x) = list(`1` = NULL, `2` = NULL)
+result(x, 2) = 1  #assigns the number 1 to the second list item in results slot of x
 }
 
 \keyword{methods}

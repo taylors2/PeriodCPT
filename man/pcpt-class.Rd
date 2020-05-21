@@ -10,12 +10,23 @@
 \alias{pcpt-method,param.prior}
 \alias{pcpt-method,MCMC.options}
 \alias{pcpt-method,MCMC.inits}
-\alias{pcpt-method,MCMC.chain}
-\alias{pcpt-method,MCMC.chains}
 \alias{pcpt-method,n.chains}
 \alias{pcpt-method,n.iter}
 \alias{pcpt-method,n.burn}
 \alias{pcpt-method,toggle.quiet}
+\alias{pcpt-method,MCMC.last}
+\alias{pcpt-method,result}
+\alias{pcpt-method,results}
+\alias{pcpt-method,summarised}
+\alias{pcpt-method,summarized}
+\alias{pcpt-method,nsegparam}
+\alias{pcpt-method,pcpt.mode}
+\alias{pcpt-method,param.mode}
+\alias{pcpt-method,fit}
+\alias{pcpt-method,seglen}
+\alias{pcpt-method,nsegs}
+\alias{pcpt-method,npcpts}
+
 
 \alias{pcpt-method,data.set<-}
 \alias{pcpt-method,periodlength<-}
@@ -25,11 +36,19 @@
 \alias{pcpt-method,param.prior<-}
 \alias{pcpt-method,MCMC.options<-}
 \alias{pcpt-method,MCMC.inits<-}
-\alias{pcpt-method,MCMC.chain<-}
-\alias{pcpt-method,MCMC.chains<-}
 \alias{pcpt-method,n.chains<-}
 \alias{pcpt-method,n.iter<-}
 \alias{pcpt-method,n.burn<-}
+
+\alias{pcpt-method,MCMC.last<-}
+\alias{pcpt-method,result<-}
+\alias{pcpt-method,results<-}
+\alias{pcpt-method,summarised<-}
+\alias{pcpt-method,summarized<-}
+\alias{pcpt-method,nsegparam<-}
+\alias{pcpt-method,pcpt.mode<-}
+\alias{pcpt-method,param.mode<-}
+\alias{pcpt-method,fit<-}
 
 \title{Class "pcpt"}
 \description{
@@ -48,15 +67,19 @@ Objects can be created by calls of the form \code{new("pcpt", ...)}.
     \item{\code{minseglen}:}{Object of class \code{"numeric"}, the minimum segment length (no. of observations between changepoints) used in the analysis.}
     \item{\code{npcpts.max}:}{Object of class \code{"numeric"}, maximum number of within period changepoints that can be identified. }
     \item{\code{distribution}:}{Object of class \code{"character"}, the sampling distribution of the data being analysed. }
+    \item{\code{nsegparam}:}{Object of class \code{"numeric"}, the number of parameters for the sampling distribution per segment. }
     \item{\code{pcpt.prior}:}{Object of class \code{"list"}, containing the within period changepoint prior details.}
     \item{\code{param.prior}:}{Object of class \code{"numeric"},vector containing the within period segment parameter prior details.}
     \item{\code{MCMC.options}:}{Object of class \code{"list"}, containing algorithmic details to be supplied to the MCMC program.}
     \item{\code{MCMC.inits}:}{Object of class \code{"list"}, containing the within period changepoint positions for initiating each chain.}
-    \item{\code{MCMC.chains}:}{Object of class \code{"list"}, containing the sampled MCMC chains.}
-    \item{\code{param.est}:}{Object of class \code{"list"}, list where each element is a vector of parameter estimates, if requested. (TO BE IMPLEMENTED!)}
-    \item{\code{pcpt.est}:}{Object of class \code{"list"}, list where each element is a vector of parameter estimates, if requested. (TO BE IMPLEMENTED!)}
+    \item{\code{MCMC.last}:}{Object of class \code{"list"}, containing the last with period changepoint positions from each chain. Slot filled when asked to summarise chain output.}
+    \item{\code{results}:}{Object of class \code{"list"}, containing either the sampled MCMC chains (summarised slot = FALSE) or the table(s) summarising the samples (summarised slot = TRUE).}
+    \item{\code{summarised}:}{Object of class \code{"logical"}, flag indicating whether the results slot contains the summarise table of samples.}
+    \item{\code{param.mode}:}{Object of class \code{"matrix"}, most sampled within period changepoint vector from across all chains. (Nb, contains only one instance in the case of ties. See summmaised results for other modes.)}
+    \item{\code{pcpt.mode}:}{Object of class \code{"numeric"}, table containing the segment paramter mode estimates for the within period changepoint vector in the pcpt.mode slot.}
+    \item{\code{fit}:}{Object of class \code{"numeric"}, Estimates of 5 measures of fit (see fit() for further detials). }
     \item{\code{date}:}{Object of class \code{"character"}, date and time the changepoint analysis was run. }
-        \item{\code{version}:}{Object of class \code{"character"}, version number of the package used when the analysis was run.}
+    \item{\code{version}:}{Object of class \code{"character"}, version number of the package used when the analysis was run.}
 
   }
 }
@@ -76,13 +99,27 @@ Objects can be created by calls of the form \code{new("pcpt", ...)}.
     \item{n.burn}{\code{signature(object = "pcpt")}: retrieves from the MCMC.options slot the \code{n.burn} item. }
     \item{toggle.quiet}{\code{signature(object = "pcpt")}: inverts the logical item \code{quiet} in the MCMC.options slot. }
     \item{MCMC.inits}{\code{signature(object = "pcpt")}: retrieves MCMC.inits slot }
-    \item{MCMC.chains}{\code{signature(object = "pcpt")}: retrieves MCMC.chains slot }
-    \item{MCMC.chain}{\code{signature(object = "pcpt", index = "numeric")}: retrieves from the MCMC.chains slot the chain corresponding to the \code{index}-th chain. }
+    \item{results}{\code{signature(object = "pcpt")}: retrieves results slot }
+    \item{result}{\code{signature(object = "pcpt", index = "numeric")}: retrieves from the results slot the contents corresponding to the \code{index}-th chain. }
+    \item{MCMC.last}{\code{signature(object = "pcpt")}: retrieves MCMC.last slot }
+    \item{summarised}{\code{signature(object = "pcpt")}: retrieves summarised slot }
+    \item{summarized}{\code{signature(object = "pcpt")}: retrieves summarised slot }
+    \item{nsegparam}{\code{signature(object = "pcpt")}: retrieves nsegparam slot }
+    \item{pcpt.mode}{\code{signature(object = "pcpt")}: retrieves pcpt.mode slot }
+    \item{param.mode}{\code{signature(object = "pcpt")}: retrieves param.mode slot }
+    \item{fit}{\code{signature(object = "pcpt")}: retrieves fit slot }
+    \item{seglen}{\code{signature(object = "pcpt")}: Calculates the within period segment lengths from the pcpt.mode slot }
+    \item{nsegs}{\code{signature(object = "pcpt")}: Calculates the number of within period segments from the pcpt.mode slot }
+    \item{npcpts}{\code{signature(object = "pcpt")}: Calculates the number of within period changepoints from the pcpt.mode slot }
 
-    \item{print}{\code{signature(x = "cpt")}: prints details of the pcpt object including summary}
-    \item{show}{\code{signature(object = "cpt")}: prints details of the pcpt object including summary}
+    \item{print}{\code{signature(x = "pcpt")}: prints details of the pcpt object including summary}
+    \item{show}{\code{signature(object = "pcpt")}: prints details of the pcpt object including summary}
     \item{summary}{\code{signature(object = "pcpt", ...)}: prints a summary of the pcpt object }
+    \item{quantile}{\code{signature(x = "pcpt", ...)}: quantile estimate for the segment parameters for each within period time step.}
+
     \item{plot}{\code{signature(x = "pcpt", ...)}: plots the pcpt object}
+
+
 
   }
 }
@@ -113,7 +150,7 @@ summary(ans)
 ##\/TODO\/
 ##########
 ##plot(ans) # plots the data with change (vertical line) at 100
-##logLik(ans) # raw likelihood of the data with changepoints, second value is likelihood + penalty
+
 }
 \keyword{classes}
 \keyword{pcpt}

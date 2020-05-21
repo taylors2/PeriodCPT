@@ -77,6 +77,7 @@ Simon Taylor
 }
 
 \examples{
+  set.seed(1)
   data = ts( rnorm(120, mean = rep(c(-5, 5), each=6),
     sd = rep(c(1, 3), each=6)), freq = 12)
   ans  = PeriodCPT.norm(data)

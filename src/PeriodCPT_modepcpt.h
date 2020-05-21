@@ -5,17 +5,18 @@
 #include "PeriodCPT_MCMCgeneric.h"
 #include "PeriodCPT_MCMC.h"
 
-void Mode_pcpt(int *chains, int *maxM, int *niter, int *nchains,
-              int *blank, int *N, double *g1, segval_t *g2,
-              int *mode){
-
-  //Create table of unique pcpt samples, using the prob slot at counter
-  chain_t *unique;
+void List_unique_samples(int *chains, int *maxdrawlen, int *ndraws,
+                         int *blank, chain_t *unique){
   MCMCitem_t *search = NULL;
   MCMCitem_t *current = NULL;
-  for(int i = 0; i < (*nchains * *niter); i++){
-    current = GetInital_tau(&(chains[i * *maxM]), N, maxM, blank, g1, g2);
-    current->prob = 1.0;
+  for(int i = 0; i < *ndraws; i++){
+    int m = 0;
+    for(int j=0; j<*maxdrawlen; j++){
+      if(chains[i * *maxdrawlen + j] != *blank) m++;
+    }
+    current = Make_blank_MCMCitem(m, &(chains[i * *maxdrawlen]));
+    current->j    = i;   //position in chains
+    current->prob = 1.0; //tally data
     search = Find_in_Chain(unique, current);
     if(search == NULL){
       //does not exist in list, so add a copy to chain
@@ -25,6 +26,26 @@ void Mode_pcpt(int *chains, int *maxM, int *niter, int *nchains,
       search->prob += 1.0;
     }
     Delete_MCMCitem(current);
+  }
+  return;
+}
+
+
+
+
+void Mode_pcpt(int *chains, int *maxM, int *ndraws,
+              int *blank, int *N, double *g1, segval_t *g2,
+              int *mode){
+
+  //Create table of unique pcpt samples, using the prob slot at counter
+  chain_t *unique = Make_Chain();
+  MCMCitem_t *search = NULL;
+  MCMCitem_t *current = NULL;
+  List_unique_samples(chains, maxM, ndraws, blank, unique);
+  current = unique->first;
+  while(current != NULL){
+    current->value = Eval_at_CPT(current->tau, current->m, N, g1, g2);
+    current = current->next;
   }
 
 
@@ -57,13 +78,14 @@ void Mode_pcpt(int *chains, int *maxM, int *niter, int *nchains,
     current = current->next;
   }
 
+
   //Pass out mode pcpt (at search) and pad with blanks
   for(int j = 0; j < *maxM; j++) mode[j] = *blank;
   for(int j = 0; j < search->m; j++) mode[j] = search->tau[j];
 
+
   //clean-up
   Delete_Chain(unique);
-
   return;
 }
 
@@ -77,11 +99,11 @@ void Calc_Seg_SumStats(MCMCitem_t *mcmc, int seg, double **Stats,
   if(seg == 0){
     starttau = mcmc->tau[mcmc->m - 1];
   }else{
-    starttau = mcmc->tau[seg-1];
+    starttau = mcmc->tau[seg - 1];
   }
-  starttau++;
-  if(starttau > *N) starttau -= *N;
-  int t = thistau;
+  //starttau++;
+  //if(starttau > *N) starttau -= *N;
+
   while(thistau != starttau){
     for(int k = 0; k<nStats; k++){
       SegStats[k] += Stats[k+1][thistau-1];
@@ -103,7 +125,7 @@ void Evaluate_fits(MCMCitem_t *draw, char **Pdist, double *Phyp,
   //Initialise fits output
   for(int i = 0; i < *nfits; i++) fits[i] = 0.0;
 
-  int thistau, starttau;
+
   int nStats = (int)sumStats[0][0];
   for(int j = 0; j < draw->m; j++){
     //Evaluate summary stats for segment
@@ -113,6 +135,8 @@ void Evaluate_fits(MCMCitem_t *draw, char **Pdist, double *Phyp,
     Fit_FN(thisStats, nStats, N, Phyp, err, fits);
     my_free(thisStats);
   }
+
+  for(int i = 0; i < *nfits; i++) fits[i] *= -2;
   return;
 }
 
@@ -158,7 +182,6 @@ void Mode_Fit_Calcuation(double *data, int *time, int *n, int *N, char **Pdist, 
   Evaluate_SegParamMode(draw, Pdist, Phyp, N, maxM, blank, SumStats, nsegparams, params, err);
   Evaluate_fits(draw, Pdist, Phyp, SumStats, N, nfits, fits, err);
 
-
   Delete_MCMCitem(draw);
 
 }
@@ -166,3 +189,4 @@ void Mode_Fit_Calcuation(double *data, int *time, int *n, int *N, char **Pdist, 
 
 
 
+#endif //FILE_MODEPCPT

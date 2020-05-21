@@ -68,14 +68,14 @@ PeriodCPT.main <- function(object){
   ##Format C output and put into object
   len.chain.samples <- npcpts.max(object)*n.iter(object)
   for(i in 1:n.chains(object)){
-    MCMC.chain(object, i) <- populate.chain(object,
+    result(object, i) <- populate.chain(object,
                                             draw$draw[(i-1)*len.chain.samples + (1:len.chain.samples)],
                                             blank = BLANK)
   }
 
   if(Eval_Mode){
     pcpt.mode(object) <- draw$mode_pcpt[draw$mode_pcpt != BLANK]
-    mode_param <- matix(draw$mode_param[draw$mode_param != BLANK], nrow=nsegparam(object))
+    mode_param <- matrix(draw$mode_param[draw$mode_param != BLANK], nrow=nsegparam(object))
     rownames(mode_param) <- paste0("Param", 1:nsegparam(object))
     colnames(mode_param) <- paste0("Seg", 1:ncol(mode_param))
     param.mode(object) <- mode_param
@@ -90,7 +90,7 @@ PeriodCPT.main <- function(object){
 PeriodCPT_ErrorBank <- function(errorcode){
   if(errorcode == 1){
     stop("Mprior distribution not recognised, issue with not recognising pcpt number prior distribution.")
-  }else if(errocode == 2){
+  }else if(errorcode == 2){
     stop("Sampling distribution not recognised, issue with not recognising sampling distribution.")
   }else if(errorcode == 3){
     stop("Summary Statistic function not identified, issue with not recognising sampling distribution.")

@@ -1,13 +1,13 @@
-\name{MCMC.chains}
-\alias{MCMC.chains}
+\name{nsegs}
+\alias{nsegs}
 \title{
-  Generic Function -- MCMC.chains
+  Generic Function -- nsegs
 }
 \description{
   Generic function
 }
 \usage{
-  MCMC.chains(object)
+  nsegs(object)
 }
 \arguments{
   \item{object}{
@@ -25,11 +25,13 @@
   Rebecca Killick
 }
 \seealso{
-  \code{\link{MCMC.chains-methods}}
+  \code{\link{nsegs-methods}}
 }
 \examples{
 x = new("pcpt") # new pcpt object
-MCMC.chains(x) # retrieves the MCMC.chains slot from x
+periodlength(x) = 12
+pcpt.mode(x) = c(6, 12)
+nsegs(x)
 }
 \keyword{ methods }
 \keyword{ pcpt }

@@ -1,19 +1,18 @@
-\name{MCMC.chain<-}
-\alias{MCMC.chain<-}
+\name{nsegparam<-}
+\alias{nsegparam<-}
 \title{
-Generic Function - MCMC.chain<-
+Generic Function - nsegparam<-
 }
 \description{
 Generic function
 }
 \usage{
-MCMC.chain(object, index)<-value
+nsegparam(object)<-value
 }
 \arguments{
   \item{object}{
 	Depending on the class of \code{object} depends on the method used (and if one exists)
 	}
-	\item{index}{ Single positive integer giving chain index.}
 
   \item{value}{
 	Replacement value
@@ -32,12 +31,12 @@ Rebecca Killick
 
 
 \seealso{
-\code{\link{MCMC.chain<--methods}}
+\code{\link{nsegparam<--methods}}
 }
 \examples{
 x=new("pcpt") # new pcpt object
-MCMC.chains(x) = list(`1` = NULL, `2` = NULL)
-MCMC.chain(x, 2) = 1  #assigns the number 1 to the second list item in MCMC.chains slot of x
+nsegparam(x) = 1
+nsegparam(x)
 }
 
 \keyword{methods}

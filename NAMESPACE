@@ -10,14 +10,28 @@ export(PeriodCPT.mean)
 export(PeriodCPT.var)
 export(class_input)
 
+export(summarize_chains)
+export(summarise_chains)
+export(summarize_combine)
+export(summarise_combine)
+export(table_npcpt)
+export(table_pcpt)
+export(PeriodCPT_extend)
+
+
 exportClasses(pcpt)
 exportMethods(
   data.set, periodlength, minseglen, npcpts.max, distribution, pcpt.prior, param.prior,
-  MCMC.options, n.chains, n.iter, n.burn, toggle.quiet, MCMC.inits, MCMC.chain, MCMC.chains,
+  MCMC.options, n.chains, n.iter, n.burn, MCMC.inits,
   "data.set<-", "periodlength<-", "minseglen<-", "distribution<-", "pcpt.prior<-",
   "param.prior<-", "MCMC.options<-", "n.chains<-", "n.iter<-", "n.burn<-", "MCMC.inits<-",
-  "MCMC.chain<-", "MCMC.chains<-",
-  print, show, summary, plot
+  MCMC.last, result, results, summarised, summarized,
+  "MCMC.last<-","result<-", "results<-", "summarised<-","summarized<-",
+  nsegparam, pcpt.mode, param.mode, fit,
+  "nsegparam<-", "pcpt.mode<-", "param.mode<-", "fit<-",
+  quiet, "quiet<-",
+  seglen, nsegs, npcpts,
+  print, show, summary, plot, quantile
 )
 
 useDynLib(PeriodCPT, .registration = TRUE)

@@ -19,6 +19,19 @@ MCMCitem_t* Make_MCMCitem(int m, int *tau, int *N,
   return mcmc;
 }
 
+MCMCitem_t* Make_blank_MCMCitem(int m, int *tau){
+  MCMCitem_t *mcmc = my_calloc(1, sizeof(MCMCitem_t));
+  mcmc->tau = (int *)my_calloc(m, sizeof(MCMCitem_t));
+  for(int i = 0; i < m; i++) mcmc->tau[i] = tau[i];
+  mcmc->j = 0;
+  mcmc->m = m;
+  mcmc->value = 0;
+  mcmc->prob = 0;
+  mcmc->prev = NULL;
+  mcmc->next = NULL;
+  return mcmc;
+}
+
 void Delete_MCMCitem(MCMCitem_t *mcmc){
   //Rprintf("Delete_MCMCitem\n");
   my_free(mcmc->tau);
@@ -175,6 +188,7 @@ MCMCitem_t * Find_in_Chain(chain_t *chain, MCMCitem_t *mcmc){
     if(Compare_MCMCitem(mcmc, this, FALSE) == 1){
       return this;
     }
+    this = this->next;
   }
   return NULL;
 }

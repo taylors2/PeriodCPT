@@ -162,11 +162,11 @@ void Sufficient_Stats_bern(double *SumStats, int nSumm, int nSuff, double *Phyp,
 void Param_Mode_bern(double *SumStats, int nSumm, double *Phyp, double* Pmode, int *err){
   double *SuffStats = (double *)calloc(2, sizeof(double));
   Sufficient_Stats_bern(SumStats, nSumm, 2, Phyp, SuffStats);
-  if( SuffStats[0]>1 & SuffStats[1]>1 ){
+  if( (SuffStats[0]>1) & (SuffStats[1]>1) ){
     Pmode[0] = (SuffStats[0]-1)/(SuffStats[0] + SuffStats[1]-2);
-  }else if(SuffStats[0] <= 1 & SuffStats[1]>1){
+  }else if((SuffStats[0] <= 1) & (SuffStats[1]>1)){
     Pmode[0] = 0;
-  }else if(SuffStats[0] > 1 & SuffStats[1]<=1){
+  }else if((SuffStats[0] > 1) & (SuffStats[1]<=1)){
     Pmode[0] = 1;
   }else{
     Pmode[0] = 0;
@@ -191,8 +191,8 @@ void Fit_FN_bern(double *SumStats, int nSumm, int *N, double *Phyp, int *err, do
 
   //maximised (log-)joint of segment likelihood and segment prior (ie evaluated at posterior mode):
   //\max_\theta [ log\{f(y|\theta,\tau) \pi(\theta|\tau) \} ]
-  fits[1] += (sum_x + Phyp[0] - 1) * log(Pmode[0]) + (count_x - sum_x + Phyp[1] - 1) * log(1-Pmode[0]) +
-    lgamma(Phyp[0] + Phyp[1]) - lgammafn(Phyp[0]) - lgammafn(Phyp[1]);
+  fits[1] += (sum_x + alpha - 1) * log(Pmode[0]) + (count_x - sum_x + beta - 1) * log(1-Pmode[0]) +
+    lgamma(alpha + beta) - lgammafn(alpha) - lgammafn(beta);
 
   //(log-)integrated segment sampling distribution:
   // \log\{ \int f(y|\theta, \tau) d\theta \}
@@ -261,11 +261,11 @@ void Sufficient_Stats_binom(double *SumStats, int nSumm, int nSuff, double *Phyp
 void Param_Mode_binom(double *SumStats, int nSumm, double *Phyp, double* Pmode, int *err){
   double *SuffStats = (double *)calloc(2, sizeof(double));
   Sufficient_Stats_binom(SumStats, nSumm, 2, Phyp, SuffStats);
-  if( SuffStats[0]>1 & SuffStats[1]>1 ){
+  if( (SuffStats[0]>1) & (SuffStats[1]>1 )){
     Pmode[0] = (SuffStats[0]-1)/(SuffStats[0] + SuffStats[1]-2);
-  }else if(SuffStats[0] <= 1 & SuffStats[1]>1){
+  }else if((SuffStats[0] <= 1) & (SuffStats[1]>1)){
     Pmode[0] = 0;
-  }else if(SuffStats[0] > 1 & SuffStats[1]<=1){
+  }else if((SuffStats[0] > 1) & (SuffStats[1]<=1)){
     Pmode[0] = 1;
   }else{
     Pmode[0] = 0;
@@ -291,8 +291,8 @@ void Fit_FN_binom(double *SumStats, int nSumm, int *N, double *Phyp, int *err, d
 
   //maximised (log-)joint of segment likelihood and segment prior (ie evaluated at posterior mode):
   //\max_\theta [ log\{f(y|\theta,\tau) \pi(\theta|\tau) \} ]
-  fits[1] += (sum_x + Phyp[0] - 1) * log(Pmode[0]) + (sum_n - sum_x + Phyp[1] - 1) * log(1-Pmode[0]) +
-    lgamma(Phyp[0] + Phyp[1]) - lgammafn(Phyp[0]) - lgammafn(Phyp[1]) + sum_lchoose_nx;
+  fits[1] += (sum_x + alpha - 1) * log(Pmode[0]) + (sum_n - sum_x + beta - 1) * log(1-Pmode[0]) +
+    lgamma(alpha + beta) - lgammafn(alpha) - lgammafn(beta) + sum_lchoose_nx;
 
   //(log-)integrated segment sampling distribution:
   // \log\{ \int f(y|\theta, \tau) d\theta \}
@@ -381,8 +381,8 @@ void Fit_FN_pois(double *SumStats, int nSumm, int *N, double *Phyp, int *err, do
 
   //maximised (log-)joint of segment likelihood and segment prior (ie evaluated at posterior mode):
   //\max_\theta [ log\{f(y|\theta,\tau) \pi(\theta|\tau) \} ]
-  fits[1] += -sum_lfact + Phyp[0]*log(Phyp[1]) - lgammafn(Phyp[0]) + (sum_x + Phyp[0] - 1)*log(Pmode[0]) -
-    (Phyp[1] + count_x)*Pmode[0];
+  fits[1] += -sum_lfact + alpha*log(beta) - lgammafn(alpha) + (sum_x + alpha - 1)*log(Pmode[0]) -
+    (beta + count_x)*Pmode[0];
 
   //(log-)integrated segment sampling distribution:
   // \log\{ \int f(y|\theta, \tau) d\theta \}

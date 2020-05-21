@@ -11,7 +11,7 @@ This function is called by \code{PeriodCPT} and its distribution specific functi
 WARNING: Checks on inputs may not be comprehensive!
 }
 \usage{
-class_input(data, periodlength, minseglen, distribution,
+class_input(data, periodlength, minseglen, distribution, nsegparam,
                         Mprior, Mhyp, spread, inits, ...)
 }
 \arguments{
@@ -27,6 +27,9 @@ class_input(data, periodlength, minseglen, distribution,
 
   \item{distribution}{
     Character specifying the sampling distribution/statistic to investigate within period changepoint events.
+  }
+  \item{nsegparam}{
+    Number of segment parameters per segment.
   }
 
   \item{Mprior}{Character specifying the prior for the number of within period changepoint events.}

@@ -76,6 +76,7 @@ Simon Taylor
 }
 
 \examples{
+  set.seed(1)
   data = ts( rpois(120, lambda = rep(c(1, 5), each=6)), freq = 12)
   ans  = PeriodCPT.pois(data)
 }
