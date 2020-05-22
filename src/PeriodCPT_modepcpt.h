@@ -83,7 +83,6 @@ void Mode_pcpt(int *chains, int *maxM, int *ndraws,
   for(int j = 0; j < *maxM; j++) mode[j] = *blank;
   for(int j = 0; j < search->m; j++) mode[j] = search->tau[j];
 
-
   //clean-up
   Delete_Chain(unique);
   return;
@@ -104,6 +103,14 @@ void Calc_Seg_SumStats(MCMCitem_t *mcmc, int seg, double **Stats,
   //starttau++;
   //if(starttau > *N) starttau -= *N;
 
+  if(mcmc->m == 1){ //Do first outside loop to avoid failing while condition for first pcpt!
+    for(int k = 0; k<nStats; k++){
+      SegStats[k] += Stats[k+1][thistau-1];
+    }
+    thistau--;
+    if(thistau <= 0) thistau += *N;
+  }
+
   while(thistau != starttau){
     for(int k = 0; k<nStats; k++){
       SegStats[k] += Stats[k+1][thistau-1];
@@ -111,6 +118,8 @@ void Calc_Seg_SumStats(MCMCitem_t *mcmc, int seg, double **Stats,
     thistau--;
     if(thistau <= 0) thistau += *N;
   }
+
+
   return;
 }
 

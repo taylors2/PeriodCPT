@@ -22,7 +22,7 @@ param.prior.make.mean <- function(param.m, param.c, const.var, ...){
       stop("Known `const.var` parameter in distribution function is specified incorrectly.")
   }
 
-  out <- c("const.var" = const.var, "param.m" = param.m, "param.c" = param.c)
+  out <- c("param.m" = param.m, "param.c" = param.c, "const.var" = const.var)
   return(out)
 
 }

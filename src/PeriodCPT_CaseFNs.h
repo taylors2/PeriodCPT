@@ -447,7 +447,7 @@ void Sufficient_Stats_mean(double *SumStats, int nSumm, int nSuff, double *Phyp,
 void Param_Mode_mean(double *SumStats, int nSumm, double *Phyp, double* Pmode, int *err){
   double *SuffStats = (double *)calloc(2, sizeof(double));
   Sufficient_Stats_mean(SumStats, nSumm, 2, Phyp, SuffStats);
-  Pmode[0] = SumStats[0];
+  Pmode[0] = SuffStats[0];
   free(SuffStats);
   return;
 }
@@ -468,8 +468,8 @@ void Fit_FN_mean(double *SumStats, int nSumm, int *N, double *Phyp, int *err, do
 
   //maximised (log-)joint of segment likelihood and segment prior (ie evaluated at posterior mode):
   //\max_\theta [ log\{f(y|\theta,\tau) \pi(\theta|\tau) \} ]
-  fits[1] += 0.5*count_x*log(2*PI*var) - 0.5*(sum_xx - 2*sum_x*Pmode[0] + count_x*Pmode[0]*Pmode[0])/var +
-    0.5*log(2*PI*c) - (Pmode[0] - m)*(Pmode[0] - m)*0.5/c;
+  fits[1] += -0.5*count_x*log(2*PI*var) - 0.5*(sum_xx - 2*sum_x*Pmode[0] + count_x*Pmode[0]*Pmode[0])/var +
+    -0.5*log(2*PI*c) - (Pmode[0] - m)*(Pmode[0] - m)*0.5/c;
 
   //(log-)integrated segment sampling distribution:
   // \log\{ \int f(y|\theta, \tau) d\theta \}
@@ -477,10 +477,10 @@ void Fit_FN_mean(double *SumStats, int nSumm, int *N, double *Phyp, int *err, do
 
   //(log-)segment likelihood evaluated at posterior mode:
   // \log\{ f(y|\theta^*, \tau) \} where \theta^* = \argmax{\pi(\theta|y,\tau)}
-  fits[3] += 0.5*count_x*log(2*PI*var) - 0.5*(sum_xx - 2*sum_x*Pmode[0] + count_x*Pmode[0]*Pmode[0])/var;
+  fits[3] += -0.5*count_x*log(2*PI*var) - 0.5*(sum_xx - 2*sum_x*Pmode[0] + count_x*Pmode[0]*Pmode[0])/var;
 
   //maximised (log-)segment likelihood evaluated:
-  fits[4] += 0.5*count_x*log(2*PI*var) - 0.5*(sum_xx - sum_x*(sum_x/count_x))/var;
+  fits[4] += -0.5*count_x*log(2*PI*var) - 0.5*(sum_xx - sum_x*(sum_x/count_x))/var;
 
   free(Pmode);
   return;
@@ -531,16 +531,16 @@ void Sufficient_Stats_norm(double *SumStats, int nSumm, int nSuff, double *Phyp,
   out[0] = (c*sum_x + m) / tmp;
   out[1] = c/tmp;
   out[2] = alpha + 0.5 * count_x;
-  out[3] = beta + 0.5 * (sum_xx + sum_x * (sum_x/count_x)) +
-    0.5 * count_x * (sum_x/count_x + m) * (sum_x/count_x + m) / tmp;
+  out[3] = beta + 0.5 * (sum_xx - sum_x * (sum_x/count_x)) +
+    0.5 * count_x * ((sum_x/count_x) - m) * ((sum_x/count_x) - m) / tmp;
   return;
 }
 
 void Param_Mode_norm(double *SumStats, int nSumm, double *Phyp, double* Pmode, int *err){
-  double *SuffStats = (double *)calloc(2, sizeof(double));
-  Sufficient_Stats_mean(SumStats, nSumm, 2, Phyp, SuffStats);
-  Pmode[0] = SumStats[0];
-  Pmode[1] = SumStats[3]/(SumStats[2] + 1.5);
+  double *SuffStats = (double *)calloc(4, sizeof(double));
+  Sufficient_Stats_norm(SumStats, nSumm, 4, Phyp, SuffStats);
+  Pmode[0] = SuffStats[0];
+  Pmode[1] = SuffStats[3]/(SuffStats[2] + 1.5);
   free(SuffStats);
   return;
 }
@@ -584,7 +584,7 @@ void Fit_FN_norm(double *SumStats, int nSumm, int *N, double *Phyp, int *err, do
     count_x*Pmode[0]*Pmode[0])/Pmode[1];
 
   //maximised (log-)segment likelihood evaluated:
-  fits[5] += -0.5*count_x - 0.5*count_x*log(2 * PI *(sum_xx/count_x - (sum_x/count_x)*(sum_x/count_x)));
+  fits[4] += -0.5*count_x - 0.5*count_x*log(2 * PI *(sum_xx/count_x - (sum_x/count_x)*(sum_x/count_x)));
 
   free(Pmode);
   return;
@@ -610,14 +610,14 @@ double Samp_Dist_var(double *SumStats, int nStat, double *Phyp){
   //Rprintf("Samp_Dist_var\n");
   double count_x = SumStats[0];
   double sum_xx  = SumStats[1];
-  double alpha   = Phyp[2];
-  double beta    = Phyp[3];
+  double alpha   = Phyp[0];
+  double beta    = Phyp[1];
   return dmvstvar(count_x, 0.0, sum_xx, 0.0, alpha, beta, TRUE);
 }
 
 double ** Summary_Stats_var(double *data, int *time, int *n, int *N){
   //Rprintf("Summary_Stats_var\n");
-  double **SumStats = Make_Summary_Stats(3, *N);
+  double **SumStats = Make_Summary_Stats(2, *N);
   for(int i = 0; i < *n; i++){
     SumStats[1][time[i] - 1] += 1;                  //0: count_xi
     SumStats[2][time[i] - 1] += data[i]*data[i];    //1: sum_xi^2
@@ -629,8 +629,8 @@ void Sufficient_Stats_var(double *SumStats, int nSumm, int nSuff, double *Phyp, 
   //Rprintf("Sufficient_Stats_var\n");
   double count_x = SumStats[0];
   double sum_xx  = SumStats[1];
-  double alpha   = Phyp[2];
-  double beta    = Phyp[3];
+  double alpha   = Phyp[0];
+  double beta    = Phyp[1];
   out[0] = alpha + 0.5 * count_x;
   out[1] = beta + 0.5 * sum_xx;
   return;
@@ -638,7 +638,7 @@ void Sufficient_Stats_var(double *SumStats, int nSumm, int nSuff, double *Phyp, 
 
 void Param_Mode_var(double *SumStats, int nSumm, double *Phyp, double* Pmode, int *err){
   double *SuffStats = (double *)calloc(2, sizeof(double));
-  Sufficient_Stats_mean(SumStats, nSumm, 2, Phyp, SuffStats);
+  Sufficient_Stats_var(SumStats, nSumm, 2, Phyp, SuffStats);
   Pmode[0] = SuffStats[1]/(SuffStats[0]+1);
   free(SuffStats);
   return;
@@ -647,8 +647,8 @@ void Param_Mode_var(double *SumStats, int nSumm, double *Phyp, double* Pmode, in
 void Fit_FN_var(double *SumStats, int nSumm, int *N, double *Phyp, int *err, double *fits){
   double count_x = SumStats[0];
   double sum_xx  = SumStats[1];
-  double alpha   = Phyp[2];
-  double beta    = Phyp[3];
+  double alpha   = Phyp[0];
+  double beta    = Phyp[1];
   double *Pmode = (double *)calloc(1, sizeof(double));
   Param_Mode_var(SumStats, nSumm, Phyp, Pmode, err);
 

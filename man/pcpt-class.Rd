@@ -142,13 +142,14 @@ periodlength(x) <- 12 # replaces the periodlength slot from x with 12
 # Example of a within period change in probability in simulated bernoulli data
 set.seed(1)
 x = ts(rbinom(n = 120, size = 1, rep( c(0.2,0.5), each = 6)), freq = 12)
-ans = PeriodCPT(x, distribution = "bern")
+ans = PeriodCPT(x, distribution = "bern", niter = 1e3)
 
 print(ans) # prints details of the analysis including a summary
 summary(ans)
 
 ##\/TODO\/
 ##########
+##quantile(ans)
 ##plot(ans) # plots the data with change (vertical line) at 100
 
 }

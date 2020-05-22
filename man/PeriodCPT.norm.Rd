@@ -80,7 +80,7 @@ Simon Taylor
   set.seed(1)
   data = ts( rnorm(120, mean = rep(c(-5, 5), each=6),
     sd = rep(c(1, 3), each=6)), freq = 12)
-  ans  = PeriodCPT.norm(data)
+  ans  = PeriodCPT.norm(data, niter = 1e3)
 }
 
 \keyword{methods}

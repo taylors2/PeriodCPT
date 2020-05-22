@@ -39,8 +39,8 @@ Simon Taylor
 \examples{
   set.seed(1)
   data = ts( rbinom(120, size = 1, prob = rep(c(0.2, 0.8), each=6)), freq = 12)
-  ans  = PeriodCPT.bern(data, niter = 1e4)
-  ans  = PeriodCPT_extend(ans, newiters = 1e4)
+  ans  = PeriodCPT.bern(data, niter = 1e3)
+  ans  = PeriodCPT_extend(ans, newiters = 1e3)
 }
 
 \keyword{methods}

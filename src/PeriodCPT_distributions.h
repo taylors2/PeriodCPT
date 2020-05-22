@@ -45,9 +45,9 @@ double dbbinom(double sum, double size, double alpha, double beta, int log_p){
   return out;
 }
 
-double dmvnorm( double n, double x, double xx, double precision, double loc, double sq_rate, int log_p){
-  double pt1 = -precision*0.5*(xx - x*x/n);
-  double pt2 = -precision*n*sq_rate*0.5*(x*x/(n*n) - 2*loc*x/n + loc*loc)/(n*precision+sq_rate);
+double dmvnorm( double n, double x, double xx, double loc, double sq_rate, double precision, int log_p){
+  double pt1 = -precision*0.5*(xx - x*(x/n));
+  double pt2 = -precision*n*sq_rate*0.5*(loc - (x/n))*(loc - (x/n))/(n*precision+sq_rate);
   double cnst = 0.5*n*(log(precision)-log(2*PI)) + 0.5*(log(sq_rate) - log(n*precision+sq_rate));
   double value = cnst + pt1 + pt2;
   if(log_p != TRUE) value = exp(value);

@@ -79,7 +79,7 @@ Simon Taylor
 \examples{
   set.seed(1)
   data = ts( rnorm(120, mean = rep(c(-5, 5), each=6), sd = 1), freq = 12)
-  ans  = PeriodCPT.mean(data)
+  ans  = PeriodCPT.mean(data, niter = 1e3)
 }
 
 \keyword{methods}
