@@ -7,7 +7,7 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
   data.set(ans)     = data
   if(!missing(periodlength)){
     periodlength(ans) = periodlength
-  }if(!is.ts(data)){
+  }else if(!is.ts(data)){
     periodlength(ans) = frequency(data)
   }else{
     stop("Period length is not defined either via data as `ts` object or explicitly given as input.")
