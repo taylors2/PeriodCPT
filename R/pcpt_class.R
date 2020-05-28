@@ -66,7 +66,6 @@ setReplaceMethod("data.set", "pcpt", function(object, value) {
     object@data.set <- value
   }else{
     object@data.set <- ts(value)
-    object@periodlength <- frequency(value)
   }
   return(object)
 })
