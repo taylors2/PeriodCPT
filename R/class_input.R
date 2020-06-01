@@ -5,17 +5,21 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
 
   ans               = methods::new("pcpt")
   data.set(ans)     = data
-  if(!missing(periodlength)){
+
+  if(missing(periodlength)) periodlength <- NULL
+  if(!is.null(periodlength)){
     periodlength(ans) = periodlength
-  }else if(!is.ts(data)){
+  }else if(is.ts(data)){
     periodlength(ans) = frequency(data)
   }else{
     stop("Period length is not defined either via data as `ts` object or explicitly given as input.")
   }
-  if(!missing(minseglen)){
-    minseglen(ans)    = minseglen;
+  if(missing(minseglen)){
+    minseglen(ans)    = 1
+  }else if(is.null(minseglen)){
+    minseglen(ans)    = 1
   }else{
-    minseglen(ans)    = 1;
+    minseglen(ans)    = minseglen;
   }
   distribution(ans) = distribution
   nsegparam(ans)    = nsegparam
@@ -191,7 +195,7 @@ Definie.inits <- function(object, inits, ...){
   for(i in 1:n.chains(object)){
     if(any(floor(inits.pcpt[[i]]) != inits.pcpt[[i]]))
       stop("In inits, within period cpts must be whole numbers.")
-    if(inits.pcpt[[i]][1] < 1 || inits.pcpt[[i]][1] > npcpts.max(object))
+    if(min(inits.pcpt[[i]]) < 1 || max(inits.pcpt[[i]]) > periodlength(object))
       stop("In inits, within period cpts must be within [1, period length].")
     if(any(diff(c(inits.pcpt[[i]], inits.pcpt[[i]][1]+periodlength(object))) < minseglen(object)))
       stop("In inits, within period cpts does not satisfy minimum segment length condition.")
