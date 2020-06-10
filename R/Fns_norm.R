@@ -7,28 +7,28 @@ param.prior.make.norm <- function(param.m, param.c, param.a, param.b, ...){
     param.m <- 0
   }else{
     if(!is.numeric(param.m) || length(param.m) != 1)
-      stop("Normal-InvGamma `param.m` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.m` specified incorrectly.")
   }
 
   if(missing(param.c)){
     param.c <- 1
   }else{
     if(!is.numeric(param.c) || length(param.c) != 1 || any(param.c <= 0))
-      stop("Normal-InvGamma `param.c` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.c` specified incorrectly.")
   }
 
   if(missing(param.a)){
     param.a <- 1
   }else{
     if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0))
-      stop("Normal-InvGamma `param.a` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.a` specified incorrectly.")
   }
 
   if(missing(param.b)){
     param.b <- 1
   }else{
     if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0))
-      stop("Normal-InvGamma `param.b` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.b` specified incorrectly.")
   }
 
   out <- c("param.m" = param.m, "param.c" = param.c,
@@ -44,10 +44,7 @@ PeriodCPT.norm <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
 
   distribution <- "norm"
   nsegparam <- 2
-  if(!is.numeric(data))
-    stop("Data is invalid for Normal sampling distribution.")
-
-  Mprior <- match.arg(Mprior)
+  Mprior <- Mprior[1]
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
                      distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,
@@ -59,4 +56,8 @@ PeriodCPT.norm <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   return(ans)
 }
 
+data_value_check.norm <- function(object){
+  if(!is.numeric(data.set(object)))
+    stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+}
 

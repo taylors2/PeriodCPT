@@ -7,7 +7,7 @@
   Wrapper function for evaluating within period changepoint events for a specified sampling distribution.
 }
 \usage{
-PeriodCPT(data, distribution = c("bern","pois","norm","norm","mean","var"), ...)
+PeriodCPT(data, distribution = c("bern","pois","norm","mean","var"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

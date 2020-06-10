@@ -4,14 +4,14 @@ param.prior.make.bern <- function(param.a, param.b, ...){
     param.a <- 1
   }else{
     if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0))
-      stop("Beta `param.a` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.a` specified incorrectly.")
   }
 
   if(missing(param.b)){
     param.b <- 1
   }else{
     if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0))
-      stop("Beta `param.b` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.a` specified incorrectly.")
   }
   out <- c("param.a" = param.a, "param.b" = param.b)
   return(out)
@@ -25,12 +25,7 @@ PeriodCPT.bern <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
 
   distribution <- "bern"
   nsegparam <- 1
-  if(!is.numeric(data))
-    stop("Data is invalid for Bernoulli sampling distribution.")
-  if(!all(data == 0L | data == 1L))
-    stop("Data is invalid for Bernoulli sampling distribution.")
-
-  Mprior <- match.arg(Mprior)
+  Mprior <- Mprior[1]
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
                      distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,
@@ -38,6 +33,13 @@ PeriodCPT.bern <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
                      param.a = param.a, param.b = param.b, ...)
 
   ans <- PeriodCPT.main(ans)
+
   return(ans)
 }
 
+data_value_check.bern <- function(object){
+  if(!is.numeric(data.set(object)))
+    stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+  if(!all(data.set(object) == 0L | data.set(object) == 1L))
+    stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+}

@@ -4,7 +4,9 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
                         Mprior, Mhyp, spread, inits, ...){
 
   ans               = methods::new("pcpt")
+  distribution(ans) = distribution
   data.set(ans)     = data
+  eval(parse(text = paste0("PeriodCPT:::data_value_check.", distribution(ans), "(object = ans)")))
 
   if(missing(periodlength)) periodlength <- NULL
   if(!is.null(periodlength)){
@@ -14,6 +16,10 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
   }else{
     stop("Period length is not defined either via data as `ts` object or explicitly given as input.")
   }
+
+  if(length(data.set(ans)) < periodlength(ans))
+    stop("Length of data is too short or period length is too long.")
+
   if(missing(minseglen)){
     minseglen(ans)    = 1
   }else if(is.null(minseglen)){
@@ -21,7 +27,7 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
   }else{
     minseglen(ans)    = minseglen;
   }
-  distribution(ans) = distribution
+
   nsegparam(ans)    = nsegparam
   pcpt.prior(ans)   = pcpt.prior.make(Mprior, Mhyp, spread)
   param.prior(ans)  = param.prior.make(distribution, ...)
@@ -35,7 +41,7 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
 }
 
 ## Create/check within cpt prior info for slot
-pcpt.prior.make <- function(Mprior = c("unif","pois"), Mhyp, spread = 1){
+pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
 
   Mprior <- match.arg(Mprior)
 
@@ -49,7 +55,7 @@ pcpt.prior.make <- function(Mprior = c("unif","pois"), Mhyp, spread = 1){
         stop(paste0("Mhyp specified incorrectly for Mprior `",Mprior,"`"))
     }
   }else{
-    stop("Implementation Error: Mprior `",Mprior,"` is not supported.")
+    stop(paste0("Implementation Error: Mprior `",Mprior,"` is not supported."))
   }
 
   if(!is.numeric(spread) || length(spread) != 1)
@@ -168,14 +174,14 @@ Definie.inits <- function(object, inits, ...){
     ##Generate inits according to provided function
     for(i in 1:n.chains(object)){
       if(any(c("pcpt.object", "chain.index") %in% names(list(...))))
-        stop("Cannot pass arguments `pcpt.object` and `chain.index` from `...` into inits().
-             These inputs to inits() are managed internally.")
+        stop(paste0("Cannot pass arguments `pcpt.object` and `chain.index` from `...` into inits().",
+             " These inputs to inits() are managed internally."))
       inits.pcpt[[i]] <- inits(pcpt.object = object, chain.index = i, ...)
     }
   }else if(is.list(inits)){
     ##Inits defined within a list
     if(length(inits) < n.chains(object)){
-      stop("Too few inital values provided for specified number of chains")
+      stop("Too few inital values provided for specified number of chains.")
     }
     inits.pcpt[1:n.chains(object)] <- inits[1:n.chains(object)]
   }else if(is.numeric(inits)){

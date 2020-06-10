@@ -5,14 +5,14 @@ param.prior.make.var <- function(param.a, param.b, ...){
     param.a <- 1
   }else{
     if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0))
-      stop("InvGamma `param.a` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.a` specified incorrectly.")
   }
 
   if(missing(param.b)){
     param.b <- 1
   }else{
     if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0))
-      stop("InvGamma `param.b` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.b` specified incorrectly.")
   }
   out <- c("param.a" = param.a, "param.b" = param.b)
   return(out)
@@ -26,10 +26,7 @@ PeriodCPT.var <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("
 
   distribution <- "var"
   nsegparam <- 1
-  if(!is.numeric(data))
-    stop("Data is invalid for Normal sampling distribution.")
-
-  Mprior <- match.arg(Mprior)
+  Mprior <- Mprior[1]
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
                      distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,
@@ -38,6 +35,11 @@ PeriodCPT.var <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("
 
   ans <- PeriodCPT.main(ans)
   return(ans)
+}
+
+data_value_check.var <- function(object){
+  if(!is.numeric(data.set(object)))
+    stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
 }
 
 param_mode_calc.var <- function(stats){

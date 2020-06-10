@@ -1,6 +1,6 @@
 ##Wrapper function for PeriodCPT
 PeriodCPT <- function(data,
-                      distribution = c("bern","pois","norm","norm","mean","var"),
+                      distribution = c("bern","pois","norm","mean","var"),
                       ...){
   distribution = match.arg(distribution)
   if(missing(data)) stop("data is missing.")

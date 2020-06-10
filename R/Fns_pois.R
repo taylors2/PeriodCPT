@@ -4,14 +4,14 @@ param.prior.make.pois <- function(param.a, param.b, ...){
     param.a <- 1
   }else{
     if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0))
-      stop("Gamma `param.a` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.a` specified incorrectly.")
   }
 
   if(missing(param.b)){
     param.b <- 1
   }else{
     if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0))
-      stop("Gamma `param.b` hyper parameter specified incorrectly.")
+      stop("Hyper-parameter `param.b` specified incorrectly.")
   }
   out <- c("param.a" = param.a, "param.b" = param.b)
   return(out)
@@ -24,14 +24,7 @@ PeriodCPT.pois <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
 
   distribution <- "pois"
   nsegparam <- 1
-  if(!is.numeric(data))
-    stop("Data is invalid for Poisson sampling distribution.")
-  if(any(data < 0))
-    stop("Data is invalid for Poisson sampling distribution.")
-  if(any(data != floor(data)))
-    stop("Data is invalid for Poisson sampling distribution.")
-
-  Mprior <- match.arg(Mprior)
+  Mprior <- Mprior[1]
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
                      distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,
@@ -41,6 +34,17 @@ PeriodCPT.pois <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   ans <- PeriodCPT.main(ans)
   return(ans)
 }
+
+data_value_check.pois <- function(object){
+  if(!is.numeric(data.set(object)))
+    stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+  if(any(data.set(object) < 0))
+    stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+  if(any(data.set(object) != floor(data.set(object))))
+    stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+}
+
+
 
 param_mode_calc.pois <- function(stats){
   if(length(stats) != 2)

@@ -87,7 +87,8 @@ setReplaceMethod("periodlength", "pcpt", function(object, value) {
       stop("Cannot find and assign period length.")
     }else{
       N <- frequency(data.set(object))
-      if(floor(N) != N) stop("data frequency must be an integer.")
+      if(floor(N) != N) stop("Data frequency must be an integer.")
+      if(N == 1) stop("Period length must be greater than 1.")
       object@periodlength <- N
     }
   }else{
@@ -95,6 +96,7 @@ setReplaceMethod("periodlength", "pcpt", function(object, value) {
       stop("Period length specified incorrectly.")
     if(floor(value) != value || value < 0)
       stop("Period length specified incorrectly.")
+    if(value == 1) stop("Period length must be greater than 1.")
     object@periodlength <- value
   }
   if(length(object@minseglen) == 1){
