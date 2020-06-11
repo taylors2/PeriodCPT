@@ -79,9 +79,11 @@ make_test_data <- function(dist, caseid){
   }else if(caseid == 11){  #factor
     data <- ts(as.factor(c("A","B")[(data>mean(data)) + 1]), frequency = periodlength)
   }else if(caseid == 12){ ##non-integer data frequency
-    frequency(data) <- 5.5
+    data <- ts(data, frequency = 5.5)
   }else if(caseid == 13){ ##frequency of 1 (ie no period)
-    frequency(data) <- 1
+    data <- ts(data, frequency = 1)
+  }else if(caseid == 14){
+    data <- ts(cbind(data,data), frequency = frequency(data))
   }else{  #NULL
     data <- NULL
   }
@@ -93,11 +95,11 @@ make_test_data <- function(dist, caseid){
 
 options_distribution <- list("bern","pois","mean","var","norm","invalid")
 
-options_periodlength <- list(12, #valid
+options_periodlength <- list(24, #valid
                              NULL, #Invalid only if data is not ts
-                             1, NA, -1, 12.5, 121, "A") #Invalid
+                             1, NA, -1, 24.5, 241, "A") #Invalid
 options_minseglen <- list( 2, #valid
-                           NA, NULL, -1, 0.1, 1+12, "A") #invalid
+                           NA, NULL, -1, 0.1, 1+24, "A") #invalid
 options_Mprior <- list("pois","unif",          #valid
                        "invalid", 1, NA, NULL) #invalid
 options_Mhyp <- list(1, #valid
@@ -157,7 +159,7 @@ ErrorMessages <- c(
   "Period length is not defined either via data as `ts` object or explicitly given as input.",
   "Mhyp specified incorrectly for Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$`.",
   "Implementation Error: Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$` is not supported.",
-  "pcpt: spread specified incorrectly.",
+  "Hyper-parameter `spread` specified incorrectly.",
   "MCMC option - n.iter not specified.",
   "MCMC option - n.chains specified incorrectly.",    ###10
   "MCMC option - n.burn specified incorrectly.",
@@ -191,7 +193,10 @@ ErrorMessages <- c(
   "Can only assign logical to summarised slot.",
   "Assignment to nseglen slot is not a single positive integer.",    ###40
   "Length of data is too short or period length is too long.",
-  "Period length must be greater than 1."
+  "Period length must be greater than 1.",
+  "Minimum segment length longer than period length.",
+  "'arg' must be NULL or a character vector",
+  "Mprior cannot be NULL."
   )
 
 ##Function to perform the testthat commands

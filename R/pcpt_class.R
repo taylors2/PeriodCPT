@@ -60,9 +60,11 @@ setMethod("data.set","pcpt",function(object) object@data.set)
 setGeneric("data.set<-", function(object, value) standardGeneric("data.set<-"))
 setReplaceMethod("data.set", "pcpt", function(object, value) {
   ##Input check
-  if(!is.numeric(value)) stop("Data must contain numeric values.")
-  if(anyNA(value)) stop("Data must not contain missing values.")
+  if(is.null(value) | missing(value)) stop("Data is missing.")
+  if(anyNA(value)) stop("Data must not contain NA missing values.")
   if(is.ts(value)){
+    if(floor(frequency(value)) != frequency(value))
+      stop("Data frequency must be an integer.")
     object@data.set <- value
   }else{
     object@data.set <- ts(value)
@@ -83,13 +85,12 @@ setMethod("periodlength","pcpt",function(object) object@periodlength)
 setGeneric("periodlength<-", function(object, value) standardGeneric("periodlength<-"))
 setReplaceMethod("periodlength", "pcpt", function(object, value) {
   if(is.null(value)){
-    if(!is.ts(data.set(object))){
-      stop("Cannot find and assign period length.")
-    }else{
+    if(is.ts(data.set(object))){
       N <- frequency(data.set(object))
-      if(floor(N) != N) stop("Data frequency must be an integer.")
       if(N == 1) stop("Period length must be greater than 1.")
       object@periodlength <- N
+    }else{
+      stop("Cannot find and assign period length.")
     }
   }else{
     if(length(value) != 1 || !is.numeric(value))
@@ -100,6 +101,9 @@ setReplaceMethod("periodlength", "pcpt", function(object, value) {
     object@periodlength <- value
   }
   if(length(object@minseglen) == 1){
+    if(object@minseglen > object@periodlength){
+      stop("Minimum segment length longer than period length.")
+    }
     object@npcpts.max <- floor(object@periodlength / object@minseglen)
   }
   return(object)
@@ -123,6 +127,9 @@ setReplaceMethod("minseglen", "pcpt", function(object, value) {
     stop("Minimum segment length specifed incorrectly.")
   object@minseglen <- value
   if(length(object@periodlength) == 1){
+    if(value > periodlength(object)){
+      stop("Minimum segment length longer than period length.")
+    }
     object@npcpts.max <- floor(object@periodlength / object@minseglen)
   }
   return(object)

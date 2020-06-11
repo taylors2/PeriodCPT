@@ -40,6 +40,16 @@ PeriodCPT.var <- function(data, periodlength = NULL, minseglen = 1, Mprior = c("
 data_value_check.var <- function(object){
   if(!is.numeric(data.set(object)))
     stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+  if("levels" %in% names(attributes(data.set(object))))
+    stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+  if(is.matrix(data.set(object))){
+    if(ncol(data.set(object)) > 1){
+      stop(paste0("Data is invalid for '",distribution(object),"' sampling distribution."))
+    }else{
+      data.set(object) <- data.set(object)[,1]
+    }
+  }
+  return(object)
 }
 
 param_mode_calc.var <- function(stats){

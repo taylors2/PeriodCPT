@@ -9,7 +9,7 @@ ErrorMessages <- c(
   "Period length is not defined either via data as `ts` object or explicitly given as input.",
   "Mhyp specified incorrectly for Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$`.",
   "Implementation Error: Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$` is not supported.",     ##<= is this a printed error!!!
-  "pcpt: spread specified incorrectly.",
+  "Hyper-parameter `spread` specified incorrectly.",
   "MCMC option - n.iter not specified.",
   "MCMC option - n.chains specified incorrectly.",    ###10
   "MCMC option - n.burn specified incorrectly.",
@@ -43,7 +43,10 @@ ErrorMessages <- c(
   "Can only assign logical to summarised slot.",
   "Assignment to nseglen slot is not a single positive integer.",    ###40
   "Length of data is too short or period length is too long.",
-  "Period length must be greater than 1."
+  "Period length must be greater than 1.",
+  "Minimum segment length longer than period length.",
+  "'arg' must be NULL or a character vector",
+  "Mprior cannot be NULL."
 )
 
 

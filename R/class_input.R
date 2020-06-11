@@ -6,7 +6,7 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
   ans               = methods::new("pcpt")
   distribution(ans) = distribution
   data.set(ans)     = data
-  eval(parse(text = paste0("PeriodCPT:::data_value_check.", distribution(ans), "(object = ans)")))
+  ans <- eval(parse(text = paste0("data_value_check.", distribution(ans), "(object = ans)")))
 
   if(missing(periodlength)) periodlength <- NULL
   if(!is.null(periodlength)){
@@ -43,24 +43,26 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
 ## Create/check within cpt prior info for slot
 pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
 
+  if(is.null(Mprior)) stop("Mprior cannot be NULL.")
   Mprior <- match.arg(Mprior)
 
   if(Mprior == "unif"){
     Mhyp <- 0  ##This is not used, set as zero for holding space.
   }else if(Mprior == "pois"){
-    if(missing(Mhyp)){
+    if(missing(Mhyp) | is.null(Mhyp)){
       Mhyp <- 1
     }else{
-      if(length(Mhyp) != 1 || !is.numeric(Mhyp) || any(Mhyp <= 0))
-        stop(paste0("Mhyp specified incorrectly for Mprior `",Mprior,"`"))
+      if(length(Mhyp) != 1 || !is.numeric(Mhyp) || any(Mhyp <= 0) || anyNA(Mhyp))
+        stop(paste0("Mhyp specified incorrectly for Mprior `",Mprior,"`."))
     }
   }else{
     stop(paste0("Implementation Error: Mprior `",Mprior,"` is not supported."))
   }
 
-  if(!is.numeric(spread) || length(spread) != 1)
-    stop("pcpt: spread specified incorrectly.")
-  if(spread <= 0) stop("pcpt: spread specified incorrectly.")
+  if(missing(spread) | is.null(spread)) spread = 1
+  if(!is.numeric(spread) || length(spread) != 1 || anyNA(spread))
+    stop("Hyper-parameter `spread` specified incorrectly.")
+  if(spread <= 0) stop("Hyper-parameter `spread` specified incorrectly.")
 
   return(list(Mprior = Mprior, Mhyp = Mhyp, spread = spread))
 }
