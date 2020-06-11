@@ -46,7 +46,8 @@ ErrorMessages <- c(
   "Period length must be greater than 1.",
   "Minimum segment length longer than period length.",
   "'arg' must be NULL or a character vector",
-  "Mprior cannot be NULL."
+  "Mprior cannot be NULL.",
+  "MCMC option - n.iter not specified."
 )
 
 

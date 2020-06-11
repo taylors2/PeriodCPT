@@ -1,17 +1,17 @@
 param.prior.make.bern <- function(param.a, param.b, ...){
   ##y~bern(theta), theta~beta(param.a, param.b)
-  if(missing(param.a)){
+  if(missing(param.a) || is.null(param.a)){
     param.a <- 1
   }else{
-    if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0))
+    if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0) || anyNA(param.a))
       stop("Hyper-parameter `param.a` specified incorrectly.")
   }
 
-  if(missing(param.b)){
+  if(missing(param.b) || is.null(param.b)){
     param.b <- 1
   }else{
-    if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0))
-      stop("Hyper-parameter `param.a` specified incorrectly.")
+    if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0) || anyNA(param.b))
+      stop("Hyper-parameter `param.b` specified incorrectly.")
   }
   out <- c("param.a" = param.a, "param.b" = param.b)
   return(out)

@@ -3,31 +3,31 @@ param.prior.make.norm <- function(param.m, param.c, param.a, param.b, ...){
   ##theta[1] ~ Norm(param.m, param.c * theta[2])
   ##theta[2] ~ IGamma(param.a, param.b)
 
-  if(missing(param.m)){
+  if(missing(param.m) || is.null(param.m)){
     param.m <- 0
   }else{
-    if(!is.numeric(param.m) || length(param.m) != 1)
+    if(!is.numeric(param.m) || length(param.m) != 1 || anyNA(param.m))
       stop("Hyper-parameter `param.m` specified incorrectly.")
   }
 
-  if(missing(param.c)){
+  if(missing(param.c) || is.null(param.c)){
     param.c <- 1
   }else{
-    if(!is.numeric(param.c) || length(param.c) != 1 || any(param.c <= 0))
+    if(!is.numeric(param.c) || length(param.c) != 1 || any(param.c <= 0) || anyNA(param.c))
       stop("Hyper-parameter `param.c` specified incorrectly.")
   }
 
-  if(missing(param.a)){
+  if(missing(param.a) || is.null(param.a)){
     param.a <- 1
   }else{
-    if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0))
+    if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0) || anyNA(param.a))
       stop("Hyper-parameter `param.a` specified incorrectly.")
   }
 
-  if(missing(param.b)){
+  if(missing(param.b) || is.null(param.b)){
     param.b <- 1
   }else{
-    if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0))
+    if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0) || anyNA(param.b))
       stop("Hyper-parameter `param.b` specified incorrectly.")
   }
 

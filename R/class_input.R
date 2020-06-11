@@ -78,43 +78,43 @@ param.prior.make <- function(distribution, ...){
 MCMC.options.make <- function(n.iter, n.chains, n.burn,
                               cachesize, quiet, ...){
 
-  if(missing(n.iter)){
+  if(missing(n.iter) || is.null(n.iter)){
     stop("MCMC option - n.iter not specified.")
   }else{
     if(!is.numeric(n.iter) || length(n.iter) != 1 ||
-       any(n.iter <= 0) || any(floor(n.iter) != n.iter) )
-      stop("MCMC option - n.iter specified incorrectly")
+       any(n.iter <= 0) || any(floor(n.iter) != n.iter) || anyNA(n.iter))
+      stop("MCMC option - n.iter specified incorrectly.")
   }
 
-  if(missing(n.chains)){
+  if(missing(n.chains) || is.null(n.chains)){
     n.chains <- 1
   }else{
-    if(!is.numeric(n.chains) || length(n.chains) != 1 ||
+    if(!is.numeric(n.chains) || length(n.chains) != 1 || anyNA(n.chains) ||
        any(n.chains <= 0) || any(floor(n.chains) != n.chains) )
-      stop("MCMC option - n.chains specified incorrectly")
+      stop("MCMC option - n.chains specified incorrectly.")
   }
 
-  if(missing(n.burn)){
+  if(missing(n.burn) || is.null(n.burn)){
     n.burn <- 0
   }else{
-    if(!is.numeric(n.burn) || length(n.burn) != 1 ||
+    if(!is.numeric(n.burn) || length(n.burn) != 1 || anyNA(n.burn) ||
        any(n.burn < 0) || any(floor(n.burn) != n.burn) )
-      stop("MCMC option - n.burn specified incorrectly")
+      stop("MCMC option - n.burn specified incorrectly.")
   }
 
-  if(missing(cachesize)){
+  if(missing(cachesize) || is.null(cachesize)){
     cachesize <- 50
   }else{
-    if(!is.numeric(cachesize) || length(cachesize) != 1 ||
+    if(!is.numeric(cachesize) || length(cachesize) != 1 || anyNA(cachesize) ||
        any(cachesize <= 0) || any(floor(cachesize) != cachesize) )
-      stop("MCMC option - cachesize specified incorrectly")
+      stop("MCMC option - cachesize specified incorrectly.")
   }
 
-  if(missing(quiet)){
+  if(missing(quiet) || is.null(quiet)){
     quiet <- FALSE
   }else{
     if(length(quiet) != 1 || !is.logical(quiet) || anyNA(quiet))
-      stop("MCMC option - quiet specified incorrectly")
+      stop("MCMC option - quiet specified incorrectly.")
   }
 
   return(

@@ -1,24 +1,24 @@
 param.prior.make.mean <- function(param.m, param.c, const.var, ...){
   ##y ~ Norm(theta, const.var), theta~Norm(param.m, param.c)
 
-  if(missing(param.m)){
+  if(missing(param.m) || is.null(param.m)){
     param.m <- 0
   }else{
-    if(!is.numeric(param.m) || length(param.m) != 1)
-      stop("Hyper-param `param.m` specified incorrectly.")
+    if(!is.numeric(param.m) || length(param.m) != 1 || anyNA(param.m))
+      stop("Hyper-parameter `param.m` specified incorrectly.")
   }
 
-  if(missing(param.c)){
+  if(missing(param.c) || is.null(param.c)){
     param.c <- 1
   }else{
-    if(!is.numeric(param.c) || length(param.c) != 1 || any(param.c <= 0))
+    if(!is.numeric(param.c) || length(param.c) != 1 || any(param.c <= 0) || anyNA(param.c))
       stop("Hyper-parameter `param.c` specified incorrectly.")
   }
 
-  if(missing(const.var)){
+  if(missing(const.var) || is.null(const.var)){
     const.var <- 1
   }else{
-    if(!is.numeric(const.var) || length(const.var) != 1 || any(const.var <= 0))
+    if(!is.numeric(const.var) || length(const.var) != 1 || any(const.var <= 0) || anyNA(const.var))
       stop("Known constant `const.var` is specified incorrectly.")
   }
 

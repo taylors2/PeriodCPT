@@ -1,17 +1,17 @@
 param.prior.make.var <- function(param.a, param.b, ...){
   ##y ~ Norm(0, theta), theta ~ InvGama(param.a, param.b)
 
-  if(missing(param.a)){
+  if(missing(param.a) || is.null(param.a)){
     param.a <- 1
   }else{
-    if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0))
+    if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0) || anyNA(param.a))
       stop("Hyper-parameter `param.a` specified incorrectly.")
   }
 
-  if(missing(param.b)){
+  if(missing(param.b) || is.null(param.b)){
     param.b <- 1
   }else{
-    if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0))
+    if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0) || anyNA(param.b))
       stop("Hyper-parameter `param.b` specified incorrectly.")
   }
   out <- c("param.a" = param.a, "param.b" = param.b)

@@ -137,15 +137,15 @@ options_DOTDOTDOT <- list(inits_fn_args = 0,  #valid
                           pcpt.object=new("pcpt"), chain.index=1) #invalid
 
 options_n.chains <- list(1,2, #valid
-                        NA,NULL,0,-1,"A") #invlaid
+                        NA,NULL,0,-1,"A",1.1) #invlaid
 options_n.iter <- list(100,   #valid
-                      NA,NULL,0,-1,"A") #invalid
+                      NA,NULL,0,-1,"A",1.5) #invalid
 options_n.burn <- list(100,0,   #valid
-                      NA,NULL,-1,"A") #invalid
+                      NA,NULL,-1,"A",5.5) #invalid
 options_cachesize <- list(50,  #valid
-                         NA,NULL,0,-1,"A") #invalid
+                         NA,NULL,0,-1,"A",50.5) #invalid
 options_quiet <- list(TRUE, FALSE,  #valid
-                     NA,NULL,0,-1,"A") #invalid
+                     NA,NULL,0,-1,"A",0.5) #invalid
 
 
 ##Error messages:
@@ -160,7 +160,7 @@ ErrorMessages <- c(
   "Mhyp specified incorrectly for Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$`.",
   "Implementation Error: Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$` is not supported.",
   "Hyper-parameter `spread` specified incorrectly.",
-  "MCMC option - n.iter not specified.",
+  "MCMC option - n.iter specified incorrectly.",
   "MCMC option - n.chains specified incorrectly.",    ###10
   "MCMC option - n.burn specified incorrectly.",
   "MCMC option - cachesize specified incorrectly.",
@@ -196,7 +196,8 @@ ErrorMessages <- c(
   "Period length must be greater than 1.",
   "Minimum segment length longer than period length.",
   "'arg' must be NULL or a character vector",
-  "Mprior cannot be NULL."
+  "Mprior cannot be NULL.",
+  "MCMC option - n.iter not specified."
   )
 
 ##Function to perform the testthat commands
@@ -220,7 +221,7 @@ PeriodCPT_TEST <- function(case){
                           inits        = options_inits[[        case[13] ]],
                           n.iter       = options_n.iter[[       case[14] ]],
                           n.chains     = options_n.chains[[     case[15] ]],
-                          n.burn       = options_n.burn[[       case[19] ]],
+                          n.burn       = options_n.burn[[       case[16] ]],
                           cachesize    = options_cachesize[[    case[17] ]],
                           quiet        = options_quiet[[        case[18] ]]),
                 "pcpt")
@@ -248,7 +249,7 @@ PeriodCPT_TEST <- function(case){
                           inits        = options_inits[[        case[13] ]],
                           n.iter       = options_n.iter[[       case[14] ]],
                           n.chains     = options_n.chains[[     case[15] ]],
-                          n.burn       = options_n.burn[[       case[19] ]],
+                          n.burn       = options_n.burn[[       case[16] ]],
                           cachesize    = options_cachesize[[    case[17] ]],
                           quiet        = options_quiet[[        case[18] ]]),
                   throws_error(msg))
@@ -267,3 +268,13 @@ if(FALSE){
   }
 }
 
+##TODO
+#n.chains == 2 --> creates BOMB!!!
+#check iter input
+#  -- periodlength
+#  -- minseglen
+#  -- n.chains
+#  -- DOTDOTDOT!!!
+#  -- (internal sim) Mprior
+#  -- (internal sim) Mhyp
+#  -- (internal sim) spread
