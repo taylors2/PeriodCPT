@@ -258,7 +258,8 @@ PeriodCPT_TEST <- function(case){
 
 #Table containing all of the test cases
 #if(FALSE){
-  testcases <- read.csv("tests/testthat/testcases.csv")
+#  testcases <- read.csv("tests/testthat/testcases.csv")
+  testcases <- read.csv("testcases.csv")
   for(index in 2:nrow(testcases)){
     case <- as.numeric(testcases[index,-c(1,ncol(testcases))])
     test_that(
