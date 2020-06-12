@@ -260,12 +260,14 @@ PeriodCPT_TEST <- function(case){
 #if(FALSE){
 #  testcases <- read.csv("tests/testthat/testcases.csv")
   testcases <- read.csv("testcases.csv")
-  for(index in 2:nrow(testcases)){
-    case <- as.numeric(testcases[index,-c(1,ncol(testcases))])
-    test_that(
-      paste0("Scenario: ", testcases[index,1], " --- ", testcases[index,ncol(testcases)]),
-      PeriodCPT_TEST(case)
-    )
+  for(index in 1:nrow(testcases)){
+    if(testcases[index,1] > 0){
+      case <- as.numeric(testcases[index,-c(1,ncol(testcases))])
+      test_that(
+        paste0("Scenario: ", testcases[index,1], " --- ", testcases[index,ncol(testcases)]),
+        PeriodCPT_TEST(case)
+      )
+    }
   }
 #}
 
