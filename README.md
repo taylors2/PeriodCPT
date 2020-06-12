@@ -1,4 +1,4 @@
-##CKECKS
+## CHECKS
 
 [![Codecov test coverage](https://codecov.io/gh/taylors2/PeriodCPT/branch/master/graph/badge.svg)](https://codecov.io/gh/taylors2/PeriodCPT?branch=master)
 

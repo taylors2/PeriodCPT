@@ -152,8 +152,8 @@ options_quiet <- list(TRUE, FALSE,  #valid
 # statements like $(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$ are used for general messages where an appropriate
 #    substitution is made for the given case.
 ErrorMessages <- c(
-  "'arg' should be one of “bern”, “pois”, “norm”, “mean”, “var”",
-  "'arg' should be one of “pois”, “unif”",
+  "gettextf('%s should be one of %s', \"'arg'\", paste(dQuote(c('bern', 'pois', 'norm', 'mean', 'var')), collapse = ', '))",
+  "gettextf('%s should be one of %s', \"'arg'\", paste(dQuote(c('pois','unif')), collapse = ', '))",
   "Data is missing.",
   "Data must not contain NA missing values.",
   "Period length is not defined either via data as `ts` object or explicitly given as input.",
