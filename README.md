@@ -1,3 +1,7 @@
+##CKECKS
+
+[![Codecov test coverage](https://codecov.io/gh/taylors2/PeriodCPT/branch/master/graph/badge.svg)](https://codecov.io/gh/taylors2/PeriodCPT?branch=master)
+
 ## Package information
 
 This package implements the within period changepoint detection algorith that is based on a paper that is under review which focuses on periodic (eg daily) binary time series data.
