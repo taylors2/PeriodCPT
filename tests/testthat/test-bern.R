@@ -257,7 +257,7 @@ PeriodCPT_TEST <- function(case){
 }
 
 #Table containing all of the test cases
-if(FALSE){
+#if(FALSE){
   testcases <- read.csv("tests/testthat/testcases.csv")
   for(index in 2:nrow(testcases)){
     case <- as.numeric(testcases[index,-c(1,ncol(testcases))])
@@ -266,10 +266,9 @@ if(FALSE){
       PeriodCPT_TEST(case)
     )
   }
-}
+#}
 
 ##TODO
-#n.chains == 2 --> creates BOMB!!!
 #check iter input
 #  -- periodlength
 #  -- minseglen

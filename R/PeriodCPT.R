@@ -27,7 +27,7 @@ PeriodCPT.main <- function(object){
 
   for(i in 1:n.chains(object)){ ##Vectorise inital values
     tau <- MCMC.inits(object)[[as.character(i)]]
-    inits2C[(n.chains(object))*(i-1) + (1:length(tau))] <- tau
+    inits2C[(npcpts.max(object))*(i-1) + (1:length(tau))] <- tau
   }
 
   ##--Run C code--
