@@ -17,4 +17,4 @@ notifications:
 r_packages:
   - covr
 after_success:
-  - Rscript -e 'library(covr); codecov()'
+  - Rscript -e 'library(covr); codecov()' -t 'aa422d9e-ff83-4262-8e2c-8e45b36817f1'
