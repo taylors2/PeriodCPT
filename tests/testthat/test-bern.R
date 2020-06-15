@@ -169,7 +169,7 @@ ErrorMessages <- c(
   "Cannot pass arguments `pcpt.object` and `chain.index` from `...` into inits(). These inputs to inits() are managed internally.",
   "Too few inital values provided for specified number of chains.",
   "Incorrect number of initial values for specified number of chains.",
-  "Class of at least one inits is not numeric or interger.",
+  "Class of at least one inits is not numeric.",
   "Incorrect number of within period changepoints specified by inits.",
   "In inits, within period cpts must be whole numbers.",    ###20
   "In inits, within period cpts must be within [1, period length].",
@@ -272,6 +272,7 @@ PeriodCPT_TEST <- function(case){
 #}
 
 ##TODO
+##ERROR IN define.inits() FUNCTION WHEN NUM CHAINS > 1 !!!
 #check iter input
 #  -- periodlength
 #  -- minseglen

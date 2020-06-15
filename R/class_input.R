@@ -52,7 +52,7 @@ pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
     if(missing(Mhyp) | is.null(Mhyp)){
       Mhyp <- 1
     }else{
-      if(length(Mhyp) != 1 || !is.numeric(Mhyp) || any(Mhyp <= 0) || anyNA(Mhyp))
+      if(length(Mhyp) != 1 | !is.numeric(Mhyp) | any(Mhyp <= 0) | anyNA(Mhyp))
         stop(paste0("Mhyp specified incorrectly for Mprior `",Mprior,"`."))
     }
   }else{
@@ -60,7 +60,7 @@ pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
   }
 
   if(missing(spread) | is.null(spread)) spread = 1
-  if(!is.numeric(spread) || length(spread) != 1 || anyNA(spread))
+  if(!is.numeric(spread) | length(spread) != 1 | anyNA(spread))
     stop("Hyper-parameter `spread` specified incorrectly.")
   if(spread <= 0) stop("Hyper-parameter `spread` specified incorrectly.")
 
@@ -78,42 +78,42 @@ param.prior.make <- function(distribution, ...){
 MCMC.options.make <- function(n.iter, n.chains, n.burn,
                               cachesize, quiet, ...){
 
-  if(missing(n.iter) || is.null(n.iter)){
+  if(missing(n.iter) | is.null(n.iter)){
     stop("MCMC option - n.iter not specified.")
   }else{
-    if(!is.numeric(n.iter) || length(n.iter) != 1 ||
-       any(n.iter <= 0) || any(floor(n.iter) != n.iter) || anyNA(n.iter))
+    if(!is.numeric(n.iter) | length(n.iter) != 1 |
+       any(n.iter <= 0) | any(floor(n.iter) != n.iter) | anyNA(n.iter))
       stop("MCMC option - n.iter specified incorrectly.")
   }
 
-  if(missing(n.chains) || is.null(n.chains)){
+  if(missing(n.chains) | is.null(n.chains)){
     n.chains <- 1
   }else{
-    if(!is.numeric(n.chains) || length(n.chains) != 1 || anyNA(n.chains) ||
-       any(n.chains <= 0) || any(floor(n.chains) != n.chains) )
+    if(!is.numeric(n.chains) | length(n.chains) != 1 | anyNA(n.chains) |
+       any(n.chains <= 0) | any(floor(n.chains) != n.chains) )
       stop("MCMC option - n.chains specified incorrectly.")
   }
 
-  if(missing(n.burn) || is.null(n.burn)){
+  if(missing(n.burn) | is.null(n.burn)){
     n.burn <- 0
   }else{
-    if(!is.numeric(n.burn) || length(n.burn) != 1 || anyNA(n.burn) ||
-       any(n.burn < 0) || any(floor(n.burn) != n.burn) )
+    if(!is.numeric(n.burn) | length(n.burn) != 1 | anyNA(n.burn) |
+       any(n.burn < 0) | any(floor(n.burn) != n.burn) )
       stop("MCMC option - n.burn specified incorrectly.")
   }
 
-  if(missing(cachesize) || is.null(cachesize)){
+  if(missing(cachesize) | is.null(cachesize)){
     cachesize <- 50
   }else{
-    if(!is.numeric(cachesize) || length(cachesize) != 1 || anyNA(cachesize) ||
-       any(cachesize <= 0) || any(floor(cachesize) != cachesize) )
+    if(!is.numeric(cachesize) | length(cachesize) != 1 | anyNA(cachesize) |
+       any(cachesize <= 0) | any(floor(cachesize) != cachesize) )
       stop("MCMC option - cachesize specified incorrectly.")
   }
 
-  if(missing(quiet) || is.null(quiet)){
+  if(missing(quiet) | is.null(quiet)){
     quiet <- FALSE
   }else{
-    if(length(quiet) != 1 || !is.logical(quiet) || anyNA(quiet))
+    if(length(quiet) != 1 | !is.logical(quiet) | anyNA(quiet))
       stop("MCMC option - quiet specified incorrectly.")
   }
 
@@ -195,15 +195,15 @@ Definie.inits <- function(object, inits, ...){
 
   if(length(inits.pcpt) != n.chains(object))
     stop("Incorrect number of initial values for specified number of chains.")
-  if(!all(unlist(lapply(inits.pcpt, class)) %in% c("numeric","integer")))
-    stop("Class of at least one inits is not numeric or interger.")
+  if(!all(unlist(lapply(inits.pcpt, is.numeric))))
+    stop("Class of at least one inits is not numeric.")
   m <- unlist(lapply(inits.pcpt, length))
-  if(any(m<1 || m>npcpts.max(object)))
+  if(any(m<1 | m>npcpts.max(object)))
     stop("Incorrect number of within period changepoints specified by inits.")
   for(i in 1:n.chains(object)){
     if(any(floor(inits.pcpt[[i]]) != inits.pcpt[[i]]))
       stop("In inits, within period cpts must be whole numbers.")
-    if(min(inits.pcpt[[i]]) < 1 || max(inits.pcpt[[i]]) > periodlength(object))
+    if((min(inits.pcpt[[i]]) < 1) | (max(inits.pcpt[[i]]) > periodlength(object)))
       stop("In inits, within period cpts must be within [1, period length].")
     if(any(diff(c(inits.pcpt[[i]], inits.pcpt[[i]][1]+periodlength(object))) < minseglen(object)))
       stop("In inits, within period cpts does not satisfy minimum segment length condition.")

@@ -428,14 +428,20 @@ setMethod("summary","pcpt",function(object, ...){
   cat("Maximum no. of cpts     : ", npcpts.max(object),   "\n")
   cat("Number of chains        : ", n.chains(object),     "\n")
   cat("Number of periodic segs : ", nsegs(object),        "\n")
-  if(nsegs(object) == 1){
+  if(anyNA(nsegs(object))){
+    cat("Periodic cpt locations  : NA\n")
+  }else if(nsegs(object) == 1){
     cat("Periodic cpt locations  : (null)\n")
   }else{
     tau <- paste0(unname(as.numeric(pcpt.mode(object))), collapse = ", ")
     cat("Periodic cpt locations  : ", tau,"\n")
   }
-  cat("Seg. parameters at mode : \n")
-  print(param.mode(object))
+  if(anyNA(nsegs(object))){
+    cat("Seg. parameters at mode : NA\n")
+  }else{
+    cat("Seg. parameters at mode : \n")
+    print(param.mode(object))
+  }
 })
 
 setMethod("quantile","pcpt",function(x, ...){
