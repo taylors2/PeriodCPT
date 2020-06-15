@@ -85,7 +85,7 @@ make_test_data <- function(dist, caseid){
   }else if(caseid == 14){
     data <- ts(cbind(data,data), frequency = frequency(data))
   }else if(caseid == 15){
-    data <- ts(cbind(data,data), frequency = frequency(data))
+    data <- ts(matrix(data,nc=1), frequency = frequency(data))
   }else{  #NULL
     data <- NULL
   }
@@ -233,9 +233,13 @@ PeriodCPT_TEST <- function(case){
 
       #Format error message for case
       msg <- ErrorMessages[case[length(case)]]
-      msg <- gsub('$(sub_st)$', '",', msg, fixed=TRUE)
-      msg <- gsub('$(sub_ed)$', ',"', msg, fixed=TRUE)
-      msg <- eval(parse(text = paste0('paste0("',msg,'")')))
+      if(case[length(case)] <= 2){
+        msg <- eval(parse(text = msg))
+      }else{
+        msg <- gsub('$(sub_st)$', '",', msg, fixed=TRUE)
+        msg <- gsub('$(sub_ed)$', ',"', msg, fixed=TRUE)
+        msg <- eval(parse(text = paste0('paste0("',msg,'")')))
+      }
 
       expect_that(PeriodCPT(data = data,
                           distribution = options_distribution[[ case[01] ]],
