@@ -55,8 +55,6 @@ pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
       if(length(Mhyp) != 1 | !is.numeric(Mhyp) | any(Mhyp <= 0) | anyNA(Mhyp))
         stop(paste0("Mhyp specified incorrectly for Mprior `",Mprior,"`."))
     }
-  }else{
-    stop(paste0("Implementation Error: Mprior `",Mprior,"` is not supported."))
   }
 
   if(missing(spread) | is.null(spread)) spread = 1

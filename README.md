@@ -1,8 +1,6 @@
 ## CHECKS
 
-[![Build Status](https://travis-ci.com/taylors2/PeriodCPT.svg?token=m8aKb1xsE6ZMGUKbKdHG&branch=master)](https://travis-ci.com/taylors2/PeriodCPT)
-
-[![Codecov test coverage](https://codecov.io/gh/taylors2/PeriodCPT/branch/master/graph/badge.svg)](https://codecov.io/gh/taylors2/PeriodCPT)
+[![Build Status](https://travis-ci.com/taylors2/PeriodCPT.svg?token=m8aKb1xsE6ZMGUKbKdHG&branch=master)](https://travis-ci.com/taylors2/PeriodCPT) [![Codecov test coverage](https://codecov.io/gh/taylors2/PeriodCPT/branch/master/graph/badge.svg)](https://codecov.io/gh/taylors2/PeriodCPT)
 
 ## Package information
 

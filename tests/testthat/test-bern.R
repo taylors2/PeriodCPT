@@ -264,6 +264,7 @@ PeriodCPT_TEST <- function(case){
 #  testcases <- read.csv("tests/testthat/testcases.csv")
   testcases <- read.csv("testcases.csv")
 
+  test_that("Minimal example", {expect_s4_class(PeriodCPT(data = make_test_data("bern", 1), distribution = "bern"), "pcpt")})
   test_that("Bad data", {expect_that(PeriodCPT(), throws_error(ErrorMessages[3]))})
   test_that("Bad class", {expect_that(PeriodCPT:::PeriodCPT.main(1), throws_error(ErrorMessages[47]))})
 
