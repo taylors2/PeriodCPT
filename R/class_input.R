@@ -78,8 +78,10 @@ param.prior.make <- function(distribution, ...){
 MCMC.options.make <- function(n.iter, n.chains, n.burn,
                               cachesize, quiet, ...){
 
-  if(missing(n.iter) | is.null(n.iter) | !is.numeric(n.iter)){
+  if(missing(n.iter) | is.null(n.iter)){
     stop("MCMC option - n.iter not specified.")
+  }else if(!is.numeric(n.iter)){
+    stop("MCMC option - n.iter specified incorrectly.")
   }else if( length(n.iter) != 1 | any(n.iter <= 0) | anyNA(n.iter) |
             any(floor(n.iter) != n.iter) ){
     stop("MCMC option - n.iter specified incorrectly.")
