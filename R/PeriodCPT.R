@@ -3,7 +3,7 @@ PeriodCPT <- function(data,
                       distribution = c("bern","pois","norm","mean","var"),
                       ...){
   distribution = match.arg(distribution)
-  if(missing(data)) stop("data is missing.")
+  if(missing(data)) stop("Data is missing.")
   ans <- eval(parse(text=paste0("PeriodCPT.",distribution,"(data = data, ...)")))
   return(ans)
 }

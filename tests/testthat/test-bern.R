@@ -84,6 +84,8 @@ make_test_data <- function(dist, caseid){
     data <- ts(data, frequency = 1)
   }else if(caseid == 14){
     data <- ts(cbind(data,data), frequency = frequency(data))
+  }else if(caseid == 15){
+    data <- ts(cbind(data,data), frequency = frequency(data))
   }else{  #NULL
     data <- NULL
   }
@@ -197,7 +199,8 @@ ErrorMessages <- c(
   "Minimum segment length longer than period length.",
   "'arg' must be NULL or a character vector",
   "Mprior cannot be NULL.",
-  "MCMC option - n.iter not specified."
+  "MCMC option - n.iter not specified.",
+  "Unexpected class of `object`."
   )
 
 ##Function to perform the testthat commands
@@ -260,6 +263,10 @@ PeriodCPT_TEST <- function(case){
 #if(FALSE){
 #  testcases <- read.csv("tests/testthat/testcases.csv")
   testcases <- read.csv("testcases.csv")
+
+  test_that("Bad data", {expect_that(PeriodCPT(), throws_error(ErrorMessages[3]))})
+  test_that("Bad class", {expect_that(PeriodCPT:::PeriodCPT.main(1), throws_error(ErrorMessages[47]))})
+
   for(index in 1:nrow(testcases)){
     if(testcases[index,1] > 0){
       case <- as.numeric(testcases[index,-c(1,ncol(testcases))])

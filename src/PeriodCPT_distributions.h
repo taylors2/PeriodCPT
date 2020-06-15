@@ -12,13 +12,8 @@ double dTpois(int m, int max, double rate, int log_p){
   //Truncated poisson(rate) density with range 1--max
   double out, area;
   area = ppois((double) max, rate, TRUE, FALSE) - ppois(0.0, rate, TRUE, FALSE);
-  if(log_p == TRUE) area = log(area);
-  out = dpois((double) m, rate, log_p);
-  if(log_p == TRUE){
-    out -= area;
-  }else{
-    out /= area;
-  }
+  out = dpois((double) m, rate, TRUE) - log(area);
+  if(log_p != TRUE) out = exp(out);
   return out;
 }
 

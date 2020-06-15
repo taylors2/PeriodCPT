@@ -139,7 +139,7 @@ double Eval_at_CPT(int *tau, int m, int *N, double *g1, segval_t *g2){
   return out;
 }
 
-
+/*
 void PrintLookup(double *g1, segval_t *g2, int *maxM, int *N){
   //Rprintf("PrintLookup\n");
   FILE *f;
@@ -165,7 +165,7 @@ void PrintLookup(double *g1, segval_t *g2, int *maxM, int *N){
   //---------------------------------------
   return;
 }
-
+*/
 
 
 #endif //FILE_LOOKUP
