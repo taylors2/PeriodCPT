@@ -52,14 +52,14 @@ data_value_check.var <- function(object){
   return(object)
 }
 
-param_mode_calc.var <- function(stats){
-  if(length(stats) != 2)
-    stop("Length of sufficient statistcs in param_mode_calc.var is not 2.")
-  phi = stats[2]/(stats[1]+1)
-  names(phi) = "lambda"
-  return(phi)
-}
+#param_mode_calc.var <- function(stats){
+#  if(length(stats) != 2)
+#    stop("Length of sufficient statistcs in param_mode_calc.var is not 2.")
+#  phi = stats[2]/(stats[1]+1)
+#  names(phi) = "lambda"
+#  return(phi)
+#}
 
-SummariseOutput.var <- function(object){
-  return(object)
-}
+#SummariseOutput.var <- function(object){
+#  return(object)
+#}
