@@ -177,16 +177,16 @@ ErrorMessages <- c(
   "Data must not contain NA missing values.",
   "Period length is not defined either via data as `ts` object or explicitly given as input.",
   "Mhyp specified incorrectly for Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$`.",
-  "Implementation Error: Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$` is not supported.",
+  "",
   "Hyper-parameter `spread` specified incorrectly.",
   "MCMC option - n.iter specified incorrectly.",
   "MCMC option - n.chains specified incorrectly.",    ###10
   "MCMC option - n.burn specified incorrectly.",
   "MCMC option - cachesize specified incorrectly.",
   "MCMC option - quiet specified incorrectly.",
-  "Unrecognised prior for the number of within period changepoints.",
+  "",
   "Cannot pass arguments 'pcpt.object' and 'chain.index' from '...' into inits(). These inputs to inits() are managed internally.",
-  "Too few inital values provided for specified number of chains.",
+  "",
   "Incorrect number of initial values for specified number of chains.",
   "Class of at least one inits is not numeric.",
   "Incorrect number of within period changepoints specified by inits.",
@@ -199,18 +199,18 @@ ErrorMessages <- c(
   "Hyper-parameter `param.m` specified incorrectly.",
   "Known constant `const.var` is specified incorrectly.",
   "Data is invalid for '$(sub_st)$options_distribution[[case[1]]]$(sub_ed)$' sampling distribution.",
-  "Data must contain numeric values.",
-  "Cannot find and assign period length.",    ###30
+  "",
+  "",         ###30
   "Data frequency must be an integer.",
   "Period length specified incorrectly.",
   "Minimum segment length specifed incorrectly.",
-  "MCMC.options slot not initialised correctly for `n.chains`.",
-  "MCMC.options slot not initialised correctly for `n.iter`.",
-  "MCMC.options slot not initialised correctly for `n.burn`.",
-  "MCMC.options slot not initialised correctly for `quiet`.",
-  "Index `$(sub_st-ish)$index$(sub_ed-ish)$` not found in list.",   ##I have no idea how to invoke this error message!!!
+  "",
+  "",
+  "",
+  "",
+  "",
   "Can only assign logical to summarised slot.",
-  "Assignment to nseglen slot is not a single positive integer.",    ###40
+  "Assignment to nsegparam slot is not a single positive integer.",    ###40
   "Length of data is too short or period length is too long.",
   "Period length must be greater than 1.",
   "Minimum segment length longer than period length.",
@@ -296,5 +296,60 @@ if(RUN){
       )
     }
   }
+
+
+  options_summarise_slot <- list(TRUE, FALSE, NA, NULL, 0, -1, "A", 0.5, c(TRUE, FALSE))
+  summarise_test_function <- function(value){
+    x <- new("pcpt")
+    summarised(x) <- value
+    return(x)
+  }
+  for(i in 1:length(options_summarise_slot)){
+    test_that(paste0("summarise_slot: ",i), {
+      if(i<=2){
+        expect_s4_class(summarise_test_function(options_summarise_slot[[i]]), "pcpt")
+      }else{
+        expect_that(summarise_test_function(options_summarise_slot[[i]]),
+                    throws_error(ErrorMessages[39], fixed = TRUE))
+      }
+    })
+  }
+
+
+  options_nsegparam_slot <- list(1, TRUE, NA, NULL, 0, -1, "A", 0.5, c(1, 2))
+  nsegparam_test_function <- function(value){
+    x <- new("pcpt")
+    nsegparam(x) <- value
+    return(x)
+  }
+  for(i in 1:length(options_nsegparam_slot)){
+    test_that(paste0("nsegparam_slot: ",i), {
+      if(i==1){
+        expect_s4_class(nsegparam_test_function(options_nsegparam_slot[[i]]), "pcpt")
+      }else{
+        expect_that(nsegparam_test_function(options_nsegparam_slot[[i]]),
+                    throws_error(ErrorMessages[40], fixed = TRUE))
+      }
+    })
+  }
+
+  result_index_function <- function(LIST, index){
+    x <- new("pcpt")
+    results(x) <- LIST
+    result(x, index) <- 1
+    return(x)
+  }
+  RES_LIST <- RES_LIST_ERR <- list(0,0)
+  names(RES_LIST) <- as.character(1:2)
+
+  test_that("Results_list: 1",expect_s4_class(result_index_function(RES_LIST,1),"pcpt"))
+  test_that("Results_list: 2",expect_s4_class(result_index_function(RES_LIST,"1"),"pcpt"))
+  test_that("Results_list: 3",expect_that(result_index_function(RES_LIST,"A"),    throws_error("Index `A` not found in results list.")))
+  test_that("Results_list: 4",expect_that(result_index_function(RES_LIST_ERR,1),  throws_error("Index `1` not found in results list.")))
+  test_that("Results_list: 5",expect_that(result_index_function(RES_LIST_ERR,"1"),throws_error("Index `1` not found in results list.")))
+  test_that("Results_list: 6",expect_that(result_index_function(RES_LIST_ERR,"A"),throws_error("Index `A` not found in results list.")))
+
 }
+
+
 

@@ -139,7 +139,7 @@ rMprior <- function(n, object){
                lambda = lam)
     return(m)
   }else{
-    stop("Unrecognised prior for the number of within period changepoints.")
+    return(0)
   }
 }
 
@@ -151,13 +151,15 @@ rpcpt_single <- function(object){
   m <- rMprior(1, object)
   if(m == 1){
     tau <- 1
-  }else{
+  }else if(m > 1){
     Delta <- N - l*m
     p     <- rgamma(n = m, shape = a, rate = 1)
     delta <- rmultinom(n = 1, size = Delta, prob = p/sum(p))[,1]
     tau0  <- sample.int(n = N, size = 1)
     tau   <- tau0 + cumsum(c(0,delta[-m] + l))
     tau   <- sort(tau %% N) + 1
+  }else{
+    tau <- 0
   }
   return(tau)
 }
@@ -192,11 +194,11 @@ Definie.inits <- function(object, inits, ...){
     inits.pcpt[[1]] <- 1
     inits.pcpt[[2]] <- seq(from = 1, by = minseglen(object), len = npcpts.max(object))
   }else if(is.list(inits)){
-    ##Inits defined within a list
-    if(length(inits) < n.chains(object)){
-      stop("Too few inital values provided for specified number of chains.")
+   if(length(inits) >= n.chains(object)){
+      inits.pcpt[1:n.chains(object)] <- inits[1:n.chains(object)]
+    }else{
+      inits.pcpt <- inits
     }
-    inits.pcpt[1:n.chains(object)] <- inits[1:n.chains(object)]
   }else if(is.numeric(inits)){
     ##Init defined in vector (running only one chain)
     if(n.chains(object) != 1)

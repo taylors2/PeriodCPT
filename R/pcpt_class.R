@@ -84,22 +84,18 @@ if(!isGeneric("periodlength")) {
 setMethod("periodlength","pcpt",function(object) object@periodlength)
 setGeneric("periodlength<-", function(object, value) standardGeneric("periodlength<-"))
 setReplaceMethod("periodlength", "pcpt", function(object, value) {
-  if(is.null(value)){
-    if(is.ts(data.set(object))){
-      N <- frequency(data.set(object))
-      if(N == 1) stop("Period length must be greater than 1.")
-      object@periodlength <- N
-    }else{
-      stop("Cannot find and assign period length.")
-    }
-  }else{
-    if(length(value) != 1 || !is.numeric(value))
-      stop("Period length specified incorrectly.")
-    if(floor(value) != value || value < 0)
-      stop("Period length specified incorrectly.")
-    if(value == 1) stop("Period length must be greater than 1.")
-    object@periodlength <- value
+  if(is.null(value) & is.ts(data.set(object))){
+    N <- frequency(data.set(object))
+    if(N == 1) stop("Period length must be greater than 1.")
+    value <- N
   }
+  if(length(value) != 1 || !is.numeric(value))
+    stop("Period length specified incorrectly.")
+  if(floor(value) != value || value < 0)
+    stop("Period length specified incorrectly.")
+  if(value == 1) stop("Period length must be greater than 1.")
+  object@periodlength <- value
+
   if(length(object@minseglen) == 1){
     if(object@minseglen > object@periodlength){
       stop("Minimum segment length longer than period length.")
@@ -223,9 +219,7 @@ if(!isGeneric("n.chains")) {
 setMethod("n.chains","pcpt",function(object) object@MCMC.options$n.chains)
 setGeneric("n.chains<-", function(object, value) standardGeneric("n.chains<-"))
 setReplaceMethod("n.chains", "pcpt", function(object, value) {
-  if(!any(names(object@MCMC.options) == "n.chains"))
-    stop("MCMC.options slot not initialised correctly for `n.chains`.")
-  object@MCMC.options$n.chains <- value
+  object@MCMC.options[["n.chains"]] <- value
   return(object)
 })
 
@@ -241,9 +235,7 @@ if(!isGeneric("n.iter")) {
 setMethod("n.iter","pcpt",function(object) object@MCMC.options$n.iter)
 setGeneric("n.iter<-", function(object, value) standardGeneric("n.iter<-"))
 setReplaceMethod("n.iter", "pcpt", function(object, value) {
-  if(!any(names(object@MCMC.options) == "n.iter"))
-    stop("MCMC.options slot not initialised correctly for `n.iter`.")
-  object@MCMC.options$n.iter <- value
+  object@MCMC.options[["n.iter"]] <- value
   return(object)
 })
 
@@ -259,9 +251,7 @@ if(!isGeneric("n.burn")) {
 setMethod("n.burn","pcpt",function(object) object@MCMC.options$n.burn)
 setGeneric("n.burn<-", function(object, value) standardGeneric("n.burn<-"))
 setReplaceMethod("n.burn", "pcpt", function(object, value) {
-  if(!any(names(object@MCMC.options) == "n.burn"))
-    stop("MCMC.options slot not initialised correctly for `n.burn`.")
-  object@MCMC.options$n.burn <- value
+  object@MCMC.options[["n.burn"]] <- value
   return(object)
 })
 
@@ -276,9 +266,7 @@ if(!isGeneric("quiet")) {
 setMethod("quiet","pcpt",function(object) object@MCMC.options$quiet)
 setGeneric("quiet<-", function(object, value) standardGeneric("quiet<-"))
 setReplaceMethod("quiet", "pcpt", function(object, value) {
-  if(!any(names(object@MCMC.options) == "quiet"))
-    stop("MCMC.options slot not initialised correctly for `quiet`.")
-  object@MCMC.options$quiet <- value
+  object@MCMC.options[["quiet"]] <- value
   return(object)
 })
 
@@ -325,11 +313,15 @@ if(!isGeneric("result")) {
   }
   setGeneric("result", fun)
 }
-setMethod("result","pcpt",function(object, index) object@results[[as.character(index)]])
+setMethod("result","pcpt",function(object, index){
+  if(!(index %in% as.numeric(names(object@results))))
+    stop(paste0("Index `",index,"` not found in results list."))
+  object@results[[as.character(index)]]
+})
 setGeneric("result<-", function(object, index, value) standardGeneric("result<-"))
 setReplaceMethod("result", "pcpt", function(object, index, value) {
   if(!(index %in% as.numeric(names(object@results))))
-    stop(paste0("Index `",index,"` not found in list."))
+    stop(paste0("Index `",index,"` not found in results list."))
   object@results[[as.character(index)]] <- value
   return(object)
 })
@@ -361,7 +353,8 @@ if(!isGeneric("summarised")) {
 setMethod("summarised","pcpt",function(object) object@summarised)
 setGeneric("summarised<-", function(object, value) standardGeneric("summarised<-"))
 setReplaceMethod("summarised", "pcpt", function(object, value) {
-  if(!is.logical(value)) stop("Can only assign logical to summarised slot.")
+  if(!is.logical(value) | anyNA(value) | length(value)!=1)
+    stop("Can only assign logical to summarised slot.")
   object@summarised <- value
   return(object)
 })
@@ -393,8 +386,10 @@ if(!isGeneric("nsegparam")) {
 setMethod("nsegparam","pcpt",function(object) object@nsegparam)
 setGeneric("nsegparam<-", function(object, value) standardGeneric("nsegparam<-"))
 setReplaceMethod("nsegparam", "pcpt", function(object, value) {
-  if(length(value)!=1 | !is.numeric(value) | any(value<1) | any(value != floor(value))){
-    stop("Assignment to nseglen slot is not a single positive integer.")
+  if(length(value)!=1 | !is.numeric(value) | any(value<1) | anyNA(value)){
+    stop("Assignment to nsegparam slot is not a single positive integer.")
+  }else if(any(value != floor(value))){
+    stop("Assignment to nsegparam slot is not a single positive integer.")
   }
   object@nsegparam <- value
   return(object)
