@@ -111,32 +111,49 @@ options_spread <- list(1, #valid
 options_param.a <- options_param.b <- options_param.m <-
   options_param.c <- options_const.var <- list(1, #valid
                                            NA, NULL, 0, -1, "A") #invalid
-valid_inits_fn1   <- function( ... ) return(1)
-valid_inits_fn2   <- function( pcpt.object, chain.index, ... ) return(1)
-invalid_inits_fn1 <- function(unspecified_input) return(0)
-invalid_inits_fn2 <- function(pcpt.object) return(0)
-invalid_inits_fn3 <- function(chain.index) return(0)
+inits_fn1   <- function( ... ){
+  return(1)
+}
+
+inits_fn2   <- function(pcpt.object, chain.index, ... ){
+  if(chain.index == 1){
+      return(c(1, round(periodlength(object = pcpt.object)/2)))
+  }else{
+    return(1)
+  }
+}
+
+inits_fn3 <- function(unspecified_input){
+  return(unspecified_input)
+}
+
+inits_fn4 <- function(unspecified_input, ...){
+  return(unspecified_input)
+}
 
 options_inits <- list(
   NULL,                            ##should simulate from prior
   "ends",                          ##should over-ride n.chain
-  valid_inits_fn1,                 ##should define value from function
-  valid_inits_fn2,                 ##should define value from function
-  list(1,1),                       #Valid if n.chain == 2
+  list(1,1),                       #Valid if n.chain <= 2
   c(1,2),                          #valid if minseglen == 1
-  invalid_inits_fn1,               #invalid
-  invalid_inits_fn2,               #invalid
-  invalid_inits_fn3,               #invalid
-  c(0,12/2),             #invalid
-  c(1,12 + 1),           #invalid
-  c(0,12/2),             #invalid
-  c(12,12/2),  #invalid
-  c(1,12),               #invalid
-  1:(12+1)               #invalid
+  c(0,24/2),                       #invalid
+  c(1,24+1),                       #invalid
+  c(24,24/2),                      #invalid
+  rep(1,24+1),                     #invalid
+  c(1, 24/2 + 0.5),                #invalid
+  c("1", "12"),                    #invalid
+  list(1,numeric(0)),              #invalid
+  c(1,NA,24/2),                    #invalid
+  inits_fn1,                 ##should define value from function
+  inits_fn2,                 ##should define value from function
+  inits_fn3,                  #invalid
+  list(1),                     #invalid for nchains>1
+  list(1,"1"),
+  inits_fn4                  #invalid
 )
 
-options_DOTDOTDOT <- list(inits_fn_args = 0,  #valid
-                          pcpt.object=new("pcpt"), chain.index=1) #invalid
+#options_DOTDOTDOT <- list(inits_fn_args = 0,  #valid
+#                          pcpt.object=new("pcpt"), chain.index=1) #invalid
 
 options_n.chains <- list(1,2, #valid
                         NA,NULL,0,-1,"A",1.1) #invlaid
@@ -168,14 +185,14 @@ ErrorMessages <- c(
   "MCMC option - cachesize specified incorrectly.",
   "MCMC option - quiet specified incorrectly.",
   "Unrecognised prior for the number of within period changepoints.",
-  "Cannot pass arguments `pcpt.object` and `chain.index` from `...` into inits(). These inputs to inits() are managed internally.",
+  "Cannot pass arguments 'pcpt.object' and 'chain.index' from '...' into inits(). These inputs to inits() are managed internally.",
   "Too few inital values provided for specified number of chains.",
   "Incorrect number of initial values for specified number of chains.",
   "Class of at least one inits is not numeric.",
   "Incorrect number of within period changepoints specified by inits.",
   "In inits, within period cpts must be whole numbers.",    ###20
-  "In inits, within period cpts must be within [1, period length].",
-  "In inits, within period cpts does not satisfy minimum segment length condition.",
+  "In inits, within period cpts must be between 1 and period length.",
+  "In inits, within period cpts are not ordered or do not satisfy minimum segment length condition.",
   "Hyper-parameter `param.a` specified incorrectly.",
   "Hyper-parameter `param.b` specified incorrectly.",
   "Hyper-parameter `param.c` specified incorrectly.",
@@ -200,38 +217,50 @@ ErrorMessages <- c(
   "'arg' must be NULL or a character vector",
   "Mprior cannot be NULL.",
   "MCMC option - n.iter not specified.",
-  "Unexpected class of `object`."
+  "Unexpected class of `object`.",
+  "Inits must not contain missing NA values.",
+  "Inital values have been specified incorrectly.",
+  "Passing unused arguments to inits function, consider adding '...' to the inputs of your function.",  ###50
+  "I DO NOT KNOW WHAT THIS ERROR IS!!!"
   )
 
 ##Function to perform the testthat commands
 PeriodCPT_TEST <- function(case){
   ##Generate data
   data <- make_test_data(options_distribution[[case[1]]], case[2])
+
+  FNSTR <- paste0("PeriodCPT(data = data, ",
+            "distribution = options_distribution[[ case[01] ]], ",
+            "periodlength = options_periodlength[[ case[03] ]], ",
+            "minseglen    = options_minseglen[[    case[04] ]], ",
+            "Mprior       = options_Mprior[[       case[05] ]], ",
+            "Mhyp         = options_Mhyp[[         case[06] ]], ",
+            "spread       = options_spread[[       case[07] ]], ",
+            "param.a      = options_param.a[[      case[08] ]], ",
+            "param.b      = options_param.b[[      case[09] ]], ",
+            "param.c      = options_param.c[[      case[10] ]], ",
+            "param.m      = options_param.m[[      case[11] ]], ",
+            "const.var    = options_const.var[[    case[12] ]], ",
+            "inits        = options_inits[[        case[13] ]], ",
+            "n.iter       = options_n.iter[[       case[14] ]], ",
+            "n.chains     = options_n.chains[[     case[15] ]], ",
+            "n.burn       = options_n.burn[[       case[16] ]], ",
+            "cachesize    = options_cachesize[[    case[17] ]], ")
+  if(case[length(case)-1] == 2){
+    FNSTR <- paste0(FNSTR," pcpt.object = new(\"pcpt\"), ")
+  }else if(case[length(case)-1] == 3){
+    FNSTR <- paste0(FNSTR, "  chain.index = 1, ")
+  }else if(case[length(case)-1] == 4){
+    FNSTR <- paste0(FNSTR, "  unspecified_input = 1, ")
+  }
+  FNSTR <- paste0(FNSTR, "quiet        = options_quiet[[        case[18] ]])")
+
+
   if(case[length(case)]==0){
       #Expect function to be valid, returning a "pcpt" class object
-      expect_s4_class(PeriodCPT(data = data,
-                          distribution = options_distribution[[ case[01] ]],
-                          periodlength = options_periodlength[[ case[03] ]],
-                          minseglen    = options_minseglen[[    case[04] ]],
-                          Mprior       = options_Mprior[[       case[05] ]],
-                          Mhyp         = options_Mhyp[[         case[06] ]],
-                          spread       = options_spread[[       case[07] ]],
-                          param.a      = options_param.a[[      case[08] ]],
-                          param.b      = options_param.b[[      case[09] ]],
-                          param.c      = options_param.c[[      case[10] ]],
-                          param.m      = options_param.m[[      case[11] ]],
-                          const.var    = options_const.var[[    case[12] ]],
-                          inits        = options_inits[[        case[13] ]],
-                          n.iter       = options_n.iter[[       case[14] ]],
-                          n.chains     = options_n.chains[[     case[15] ]],
-                          n.burn       = options_n.burn[[       case[16] ]],
-                          cachesize    = options_cachesize[[    case[17] ]],
-                          quiet        = options_quiet[[        case[18] ]]),
-                "pcpt")
+      expect_s4_class(eval(parse(text = FNSTR)), "pcpt")
   }else{
       #Expect test to return error message
-
-      #Format error message for case
       msg <- ErrorMessages[case[length(case)]]
       if(case[length(case)] <= 2){
         msg <- eval(parse(text = msg))
@@ -240,33 +269,19 @@ PeriodCPT_TEST <- function(case){
         msg <- gsub('$(sub_ed)$', ',"', msg, fixed=TRUE)
         msg <- eval(parse(text = paste0('paste0("',msg,'")')))
       }
-
-      expect_that(PeriodCPT(data = data,
-                          distribution = options_distribution[[ case[01] ]],
-                          periodlength = options_periodlength[[ case[03] ]],
-                          minseglen    = options_minseglen[[    case[04] ]],
-                          Mprior       = options_Mprior[[       case[05] ]],
-                          Mhyp         = options_Mhyp[[         case[06] ]],
-                          spread       = options_spread[[       case[07] ]],
-                          param.a      = options_param.a[[      case[08] ]],
-                          param.b      = options_param.b[[      case[09] ]],
-                          param.c      = options_param.c[[      case[10] ]],
-                          param.m      = options_param.m[[      case[11] ]],
-                          const.var    = options_const.var[[    case[12] ]],
-                          inits        = options_inits[[        case[13] ]],
-                          n.iter       = options_n.iter[[       case[14] ]],
-                          n.chains     = options_n.chains[[     case[15] ]],
-                          n.burn       = options_n.burn[[       case[16] ]],
-                          cachesize    = options_cachesize[[    case[17] ]],
-                          quiet        = options_quiet[[        case[18] ]]),
-                  throws_error(msg))
+      expect_that(eval(parse(text = FNSTR)), throws_error(msg, fixed = TRUE))
   }
 }
 
 #Table containing all of the test cases
-#if(FALSE){
-#  testcases <- read.csv("tests/testthat/testcases.csv")
-  testcases <- read.csv("testcases.csv")
+RUN <- TRUE
+if(RUN){
+  if(!RUN){
+    library(testthat)
+    testcases <- read.csv("tests/testthat/testcases.csv")
+  }else{
+    testcases <- read.csv("testcases.csv")
+  }
 
   test_that("Minimal example", {expect_s4_class(PeriodCPT(data = make_test_data("bern", 1), distribution = "bern"), "pcpt")})
   test_that("Bad data", {expect_that(PeriodCPT(), throws_error(ErrorMessages[3]))})
@@ -281,15 +296,5 @@ PeriodCPT_TEST <- function(case){
       )
     }
   }
-#}
+}
 
-##TODO
-##ERROR IN define.inits() FUNCTION WHEN NUM CHAINS > 1 !!!
-#check iter input
-#  -- periodlength
-#  -- minseglen
-#  -- n.chains
-#  -- DOTDOTDOT!!!
-#  -- (internal sim) Mprior
-#  -- (internal sim) Mhyp
-#  -- (internal sim) spread

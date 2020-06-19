@@ -170,19 +170,27 @@ Definie.inits <- function(object, inits, ...){
   if(missing(inits) | is.null(inits)){
     ##Generate inits from prior
     for(i in 1:n.chains(object)) inits.pcpt[[i]] <- rpcpt_single(object)
-  }else if(any(inits == "ends")){
-    ##Define two chains that are initiated at the ends of the parameter space
-    n.chains(object) <- 2
-    inits.pcpt[[1]] <- 1
-    inits.pcpt[[2]] <- seq(from = 1, by = minseglen(object), len = npcpts.max(object))
   }else if(is.function(inits)){
     ##Generate inits according to provided function
     for(i in 1:n.chains(object)){
       if(any(c("pcpt.object", "chain.index") %in% names(list(...))))
-        stop(paste0("Cannot pass arguments `pcpt.object` and `chain.index` from `...` into inits().",
-             " These inputs to inits() are managed internally."))
-      inits.pcpt[[i]] <- inits(pcpt.object = object, chain.index = i, ...)
+        stop("Cannot pass arguments 'pcpt.object' and 'chain.index' from '...' into inits(). These inputs to inits() are managed internally.")
+      g_try <- try(inits(pcpt.object = object, chain.index = i, ...), silent = TRUE)
+      if(class(g_try) == "try-error"){
+        if(grepl("unused argument", g_try)){
+          stop("Passing unused arguments to inits function, consider adding '...' to the inputs of your function.")
+        }else{
+          stop(paste0(strsplit(g_try[1],": ")[[1]][-1], collapse = ": "))
+        }
+      }else{
+        inits.pcpt[[i]] <- g_try
+      }
     }
+  }else if(any(inits == "ends", na.rm = TRUE)){
+    ##Define two chains that are initiated at the ends of the parameter space
+    n.chains(object) <- 2
+    inits.pcpt[[1]] <- 1
+    inits.pcpt[[2]] <- seq(from = 1, by = minseglen(object), len = npcpts.max(object))
   }else if(is.list(inits)){
     ##Inits defined within a list
     if(length(inits) < n.chains(object)){
@@ -194,12 +202,16 @@ Definie.inits <- function(object, inits, ...){
     if(n.chains(object) != 1)
       stop("Too few inital values provided for specified number of chains.")
     inits.pcpt[[1]] <- inits
+  }else{
+    stop("Inital values have been specified incorrectly.")
   }
 
   if(length(inits.pcpt) != n.chains(object))
     stop("Incorrect number of initial values for specified number of chains.")
   if(!all(unlist(lapply(inits.pcpt, is.numeric))))
     stop("Class of at least one inits is not numeric.")
+  if(anyNA(unlist(inits.pcpt)))
+    stop("Inits must not contain missing NA values.")
   m <- unlist(lapply(inits.pcpt, length))
   if(any(m<1 | m>npcpts.max(object)))
     stop("Incorrect number of within period changepoints specified by inits.")
@@ -207,9 +219,9 @@ Definie.inits <- function(object, inits, ...){
     if(any(floor(inits.pcpt[[i]]) != inits.pcpt[[i]]))
       stop("In inits, within period cpts must be whole numbers.")
     if((min(inits.pcpt[[i]]) < 1) | (max(inits.pcpt[[i]]) > periodlength(object)))
-      stop("In inits, within period cpts must be within [1, period length].")
+      stop("In inits, within period cpts must be between 1 and period length.")
     if(any(diff(c(inits.pcpt[[i]], inits.pcpt[[i]][1]+periodlength(object))) < minseglen(object)))
-      stop("In inits, within period cpts does not satisfy minimum segment length condition.")
+      stop("In inits, within period cpts are not ordered or do not satisfy minimum segment length condition.")
   }
   names(inits.pcpt) <- as.character(1:n.chains(object))
   return(inits.pcpt)
