@@ -63,9 +63,8 @@ setReplaceMethod("data.set", "pcpt", function(object, value) {
   if(is.null(value) | missing(value)) stop("Data is missing.")
   if(anyNA(value)) stop("Data must not contain NA missing values.")
   if(is.ts(value)){
-    if(floor(frequency(value)) != frequency(value))
-      stop("Data frequency must be an integer.")
     object@data.set <- value
+    periodlength(object) <- frequency(value)
   }else{
     object@data.set <- ts(value)
   }
@@ -85,15 +84,13 @@ setMethod("periodlength","pcpt",function(object) object@periodlength)
 setGeneric("periodlength<-", function(object, value) standardGeneric("periodlength<-"))
 setReplaceMethod("periodlength", "pcpt", function(object, value) {
   if(is.null(value) & is.ts(data.set(object))){
-    N <- frequency(data.set(object))
-    if(N == 1) stop("Period length must be greater than 1.")
-    value <- N
+    value <- frequency(data.set(object))
   }
   if(length(value) != 1 || !is.numeric(value))
     stop("Period length specified incorrectly.")
-  if(floor(value) != value || value < 0)
+  if(floor(value) != value || value <= 0)
     stop("Period length specified incorrectly.")
-  if(value == 1) stop("Period length must be greater than 1.")
+  #if(value == 1) stop("Period length must be greater than 1.")
   object@periodlength <- value
 
   if(length(object@minseglen) == 1){

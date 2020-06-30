@@ -201,7 +201,7 @@ ErrorMessages <- c(
   "Data is invalid for '$(sub_st)$options_distribution[[case[1]]]$(sub_ed)$' sampling distribution.",
   "",
   "",         ###30
-  "Data frequency must be an integer.",
+  "",
   "Period length specified incorrectly.",
   "Minimum segment length specifed incorrectly.",
   "",
@@ -221,7 +221,7 @@ ErrorMessages <- c(
   "Inits must not contain missing NA values.",
   "Inital values have been specified incorrectly.",
   "Passing unused arguments to inits function, consider adding '...' to the inputs of your function.",  ###50
-  "I DO NOT KNOW WHAT THIS ERROR IS!!!"
+  "\n  argument \"unspecified_input\" is missing, with no default\n"
   )
 
 ##Function to perform the testthat commands
@@ -264,7 +264,7 @@ PeriodCPT_TEST <- function(case){
       msg <- ErrorMessages[case[length(case)]]
       if(case[length(case)] <= 2){
         msg <- eval(parse(text = msg))
-      }else{
+      }else if( case[length(case)] != 51){
         msg <- gsub('$(sub_st)$', '",', msg, fixed=TRUE)
         msg <- gsub('$(sub_ed)$', ',"', msg, fixed=TRUE)
         msg <- eval(parse(text = paste0('paste0("',msg,'")')))
@@ -275,81 +275,103 @@ PeriodCPT_TEST <- function(case){
 
 #Table containing all of the test cases
 RUN <- TRUE
+#RUN <- FALSE
 if(RUN){
-  if(!RUN){
-    library(testthat)
-    testcases <- read.csv("tests/testthat/testcases.csv")
-  }else{
-    testcases <- read.csv("testcases.csv")
-  }
-
-  test_that("Minimal example", {expect_s4_class(PeriodCPT(data = make_test_data("bern", 1), distribution = "bern"), "pcpt")})
-  test_that("Bad data", {expect_that(PeriodCPT(), throws_error(ErrorMessages[3]))})
-  test_that("Bad class", {expect_that(PeriodCPT:::PeriodCPT.main(1), throws_error(ErrorMessages[47]))})
-
-  for(index in 1:nrow(testcases)){
-    if(testcases[index,1] > 0){
-      case <- as.numeric(testcases[index,-c(1,ncol(testcases))])
-      test_that(
-        paste0("Scenario: ", testcases[index,1], " --- ", testcases[index,ncol(testcases)]),
-        PeriodCPT_TEST(case)
-      )
-    }
-  }
-
-
-  options_summarise_slot <- list(TRUE, FALSE, NA, NULL, 0, -1, "A", 0.5, c(TRUE, FALSE))
-  summarise_test_function <- function(value){
-    x <- new("pcpt")
-    summarised(x) <- value
-    return(x)
-  }
-  for(i in 1:length(options_summarise_slot)){
-    test_that(paste0("summarise_slot: ",i), {
-      if(i<=2){
-        expect_s4_class(summarise_test_function(options_summarise_slot[[i]]), "pcpt")
-      }else{
-        expect_that(summarise_test_function(options_summarise_slot[[i]]),
-                    throws_error(ErrorMessages[39], fixed = TRUE))
-      }
-    })
-  }
-
-
-  options_nsegparam_slot <- list(1, TRUE, NA, NULL, 0, -1, "A", 0.5, c(1, 2))
-  nsegparam_test_function <- function(value){
-    x <- new("pcpt")
-    nsegparam(x) <- value
-    return(x)
-  }
-  for(i in 1:length(options_nsegparam_slot)){
-    test_that(paste0("nsegparam_slot: ",i), {
-      if(i==1){
-        expect_s4_class(nsegparam_test_function(options_nsegparam_slot[[i]]), "pcpt")
-      }else{
-        expect_that(nsegparam_test_function(options_nsegparam_slot[[i]]),
-                    throws_error(ErrorMessages[40], fixed = TRUE))
-      }
-    })
-  }
-
-  result_index_function <- function(LIST, index){
-    x <- new("pcpt")
-    results(x) <- LIST
-    result(x, index) <- 1
-    return(x)
-  }
-  RES_LIST <- RES_LIST_ERR <- list(0,0)
-  names(RES_LIST) <- as.character(1:2)
-
-  test_that("Results_list: 1",expect_s4_class(result_index_function(RES_LIST,1),"pcpt"))
-  test_that("Results_list: 2",expect_s4_class(result_index_function(RES_LIST,"1"),"pcpt"))
-  test_that("Results_list: 3",expect_that(result_index_function(RES_LIST,"A"),    throws_error("Index `A` not found in results list.")))
-  test_that("Results_list: 4",expect_that(result_index_function(RES_LIST_ERR,1),  throws_error("Index `1` not found in results list.")))
-  test_that("Results_list: 5",expect_that(result_index_function(RES_LIST_ERR,"1"),throws_error("Index `1` not found in results list.")))
-  test_that("Results_list: 6",expect_that(result_index_function(RES_LIST_ERR,"A"),throws_error("Index `A` not found in results list.")))
-
+  testcases <- read.csv("testcases.csv")
+}else{
+  library(testthat)
+  testcases <- read.csv("tests/testthat/testcases.csv")
 }
+
+test_that("Minimal example", {expect_s4_class(PeriodCPT(data = make_test_data("bern", 1), distribution = "bern"), "pcpt")})
+test_that("Bad data", {expect_that(PeriodCPT(), throws_error(ErrorMessages[3]))})
+test_that("Bad class", {expect_that(PeriodCPT:::PeriodCPT.main(1), throws_error(ErrorMessages[47]))})
+
+for(index in 1:nrow(testcases)){
+  if(testcases[index,1] > 0){
+    case <- as.numeric(testcases[index,-c(1,ncol(testcases))])
+    test_that(
+      paste0("Scenario: ", testcases[index,1], " --- ", testcases[index,ncol(testcases)]),
+      PeriodCPT_TEST(case)
+    )
+  }
+}
+
+
+options_summarise_slot <- list(TRUE, FALSE, NA, NULL, 0, -1, "A", 0.5, c(TRUE, FALSE))
+summarise_test_function <- function(value){
+  x <- new("pcpt")
+  summarised(x) <- value
+  return(x)
+}
+
+for(i in 1:length(options_summarise_slot)){
+  test_that(paste0("summarise_slot: ",i), {
+    if(i<=2){
+      expect_s4_class(summarise_test_function(options_summarise_slot[[i]]), "pcpt")
+    }else{
+      expect_that(summarise_test_function(options_summarise_slot[[i]]),
+                  throws_error(ErrorMessages[39], fixed = TRUE))
+    }
+  })
+}
+
+
+options_nsegparam_slot <- list(1, TRUE, NA, NULL, 0, -1, "A", 1.5, c(1, 2))
+nsegparam_test_function <- function(value){
+  x <- new("pcpt")
+  PeriodCPT:::nsegparam(x) <- value
+  return(x)
+}
+for(i in 1:length(options_nsegparam_slot)){
+  test_that(paste0("nsegparam_slot: ",i), {
+    if(i==1){
+      expect_s4_class(nsegparam_test_function(options_nsegparam_slot[[i]]), "pcpt")
+    }else{
+      expect_that(nsegparam_test_function(options_nsegparam_slot[[i]]),
+                  throws_error(ErrorMessages[40], fixed = TRUE))
+    }
+  })
+}
+
+result_index_function <- function(LIST, index){
+  x <- new("pcpt")
+  results(x) <- LIST
+  result(x, index) <- 1
+  return(x)
+}
+RES_LIST <- RES_LIST_ERR <- list(0,0)
+names(RES_LIST) <- as.character(1:2)
+
+test_that("Results_list: 1",expect_s4_class(result_index_function(RES_LIST,1),"pcpt"))
+test_that("Results_list: 2",expect_s4_class(result_index_function(RES_LIST,"1"),"pcpt"))
+test_that("Results_list: 3",expect_that(result_index_function(RES_LIST,"A"),    throws_error("Index `A` not found in results list.")))
+test_that("Results_list: 4",expect_that(result_index_function(RES_LIST_ERR,1),  throws_error("Index `1` not found in results list.")))
+test_that("Results_list: 5",expect_that(result_index_function(RES_LIST_ERR,"1"),throws_error("Index `1` not found in results list.")))
+test_that("Results_list: 6",expect_that(result_index_function(RES_LIST_ERR,"A"),throws_error("Index `A` not found in results list.")))
+
+test_that("Edits with periodlength and minseglen", expect_that({
+    x <- new("pcpt")
+    data.set(x) <- ts(rbinom(100, size = 1, prob = 0.5), frequency = 5)
+    periodlength(x) <- 20
+    minseglen(x) <- 7
+    periodlength(x) <- NULL
+  }, throws_error( ErrorMessages[43] )))
+
+test_that("Additional iterations", expect_s4_class(
+  {
+    x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+    ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
+    PeriodCPT_extend(ans, newiters = 100)
+  }, "pcpt"))
+
+test_that("Summarise chains", expect_s4_class(
+  {
+    x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+    ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
+    PeriodCPT::summarise_chains(ans)
+  }, "pcpt"))
+
 
 
 

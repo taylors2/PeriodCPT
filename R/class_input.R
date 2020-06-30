@@ -19,10 +19,9 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
 
   if(length(data.set(ans)) < periodlength(ans))
     stop("Length of data is too short or period length is too long.")
+  if(periodlength(ans) == 1) stop("Period length must be greater than 1.")
 
-  if(missing(minseglen)){
-    minseglen(ans)    = 1
-  }else if(is.null(minseglen)){
+  if(missing(minseglen) | is.null(minseglen)){
     minseglen(ans)    = 1
   }else{
     minseglen(ans)    = minseglen;
@@ -31,7 +30,7 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
   nsegparam(ans)    = nsegparam
   pcpt.prior(ans)   = pcpt.prior.make(Mprior, Mhyp, spread)
   param.prior(ans)  = param.prior.make(distribution, ...)
-  MCMC.options(ans) = MCMC.options.make(...)
+  ans               = MCMC.options.make(object = ans, ...)
   MCMC.inits(ans)   = Definie.inits(ans, inits, ...)
   results(ans)      = initialise.MCMC.list(n.chains(ans))
   summarised(ans)   = FALSE
@@ -73,8 +72,9 @@ param.prior.make <- function(distribution, ...){
 }
 
 ## Create/check MCMC options for slot
-MCMC.options.make <- function(n.iter, n.chains, n.burn,
+MCMC.options.make <- function(object, n.iter, n.chains, n.burn,
                               cachesize, quiet, ...){
+  MCMC.options(object) <- list()
 
   if(missing(n.iter) | is.null(n.iter)){
     stop("MCMC option - n.iter not specified.")
@@ -84,6 +84,7 @@ MCMC.options.make <- function(n.iter, n.chains, n.burn,
             any(floor(n.iter) != n.iter) ){
     stop("MCMC option - n.iter specified incorrectly.")
   }
+  n.iter(object) <- n.iter
 
   if(missing(n.chains) | is.null(n.chains)){
     n.chains <- 1
@@ -93,6 +94,7 @@ MCMC.options.make <- function(n.iter, n.chains, n.burn,
             any(floor(n.chains) != n.chains) ){
     stop("MCMC option - n.chains specified incorrectly.")
   }
+  n.chains(object) <- n.chains
 
   if(missing(n.burn) | is.null(n.burn)){
     n.burn <- 0
@@ -102,6 +104,7 @@ MCMC.options.make <- function(n.iter, n.chains, n.burn,
             any(floor(n.burn) != n.burn) ){
     stop("MCMC option - n.burn specified incorrectly.")
   }
+  n.burn(object) <- n.burn
 
   if(missing(cachesize) | is.null(cachesize)){
     cachesize <- 50
@@ -111,6 +114,7 @@ MCMC.options.make <- function(n.iter, n.chains, n.burn,
            any(floor(cachesize) != cachesize) ){
     stop("MCMC option - cachesize specified incorrectly.")
   }
+  object@MCMC.options[["cachesize"]] <- cachesize
 
   if(missing(quiet) | is.null(quiet)){
     quiet <- FALSE
@@ -119,12 +123,9 @@ MCMC.options.make <- function(n.iter, n.chains, n.burn,
   }else if(length(quiet) != 1 | anyNA(quiet)){
     stop("MCMC option - quiet specified incorrectly.")
   }
+  quiet(object) <- quiet
 
-  return(
-    list(n.iter = n.iter, n.chains = n.chains,
-         n.burn = n.burn, cachesize = cachesize,
-         quiet = quiet)
-  )
+  return(object)
 }
 
 ## Simulate the number of within period changepoints given pcpt.prior info
@@ -201,8 +202,6 @@ Definie.inits <- function(object, inits, ...){
     }
   }else if(is.numeric(inits)){
     ##Init defined in vector (running only one chain)
-    if(n.chains(object) != 1)
-      stop("Too few inital values provided for specified number of chains.")
     inits.pcpt[[1]] <- inits
   }else{
     stop("Inital values have been specified incorrectly.")
