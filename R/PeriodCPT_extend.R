@@ -1,8 +1,8 @@
 PeriodCPT_extend <- function(object, newiters = 1e4){
   ##--Input check--
   if(class(object) != "pcpt") stop("Unexpected class of `object`.")
-  if(length(newiters) != 1 | !is.numeric(newiters)) stop("Invalid newiters.")
-  if(newiters <= 0 | floor(newiters) != newiters) stop("newiters must be a positive integer.")
+  if(length(newiters) != 1 | !is.numeric(newiters)) stop("Argument `newiters` must be a single positive integer.")
+  if(newiters <= 0 | floor(newiters) != newiters) stop("Argument `newiters` must be a single positive integer.")
 
   ##Evaluate inital values as last case from last scenario.
   first.inits <- MCMC.inits(object)

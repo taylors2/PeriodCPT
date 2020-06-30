@@ -177,16 +177,16 @@ ErrorMessages <- c(
   "Data must not contain NA missing values.",
   "Period length is not defined either via data as `ts` object or explicitly given as input.",
   "Mhyp specified incorrectly for Mprior `$(sub_st)$options_Mprior[[case[5]]]$(sub_ed)$`.",
-  "",
+  "Unexpected class of `object`.",
   "Hyper-parameter `spread` specified incorrectly.",
   "MCMC option - n.iter specified incorrectly.",
   "MCMC option - n.chains specified incorrectly.",    ###10
   "MCMC option - n.burn specified incorrectly.",
   "MCMC option - cachesize specified incorrectly.",
   "MCMC option - quiet specified incorrectly.",
-  "",
+  "Argument `newiters` must be a single positive integer.",
   "Cannot pass arguments 'pcpt.object' and 'chain.index' from '...' into inits(). These inputs to inits() are managed internally.",
-  "",
+  "Cannot determine last sample to initiate next batch.",
   "Incorrect number of initial values for specified number of chains.",
   "Class of at least one inits is not numeric.",
   "Incorrect number of within period changepoints specified by inits.",
@@ -273,7 +273,34 @@ PeriodCPT_TEST <- function(case){
   }
 }
 
-#Table containing all of the test cases
+options_summarise_slot <- list(TRUE, FALSE, NA, NULL, 0, -1, "A", 0.5, c(TRUE, FALSE))
+summarise_test_function <- function(value){
+  x <- new("pcpt")
+  summarised(x) <- value
+  return(x)
+}
+
+options_nsegparam_slot <- list(1, TRUE, NA, NULL, 0, -1, "A", 1.5, c(1, 2))
+nsegparam_test_function <- function(value){
+  x <- new("pcpt")
+  PeriodCPT:::nsegparam(x) <- value
+  return(x)
+}
+
+result_index_function <- function(LIST, index){
+  x <- new("pcpt")
+  results(x) <- LIST
+  result(x, index) <- 1
+  return(x)
+}
+RES_LIST <- RES_LIST_ERR <- list(0,0)
+names(RES_LIST) <- as.character(1:2)
+
+
+################################################################
+################################################################
+
+####TESTTHAT: PeriodCPT()
 RUN <- TRUE
 #RUN <- FALSE
 if(RUN){
@@ -297,14 +324,6 @@ for(index in 1:nrow(testcases)){
   }
 }
 
-
-options_summarise_slot <- list(TRUE, FALSE, NA, NULL, 0, -1, "A", 0.5, c(TRUE, FALSE))
-summarise_test_function <- function(value){
-  x <- new("pcpt")
-  summarised(x) <- value
-  return(x)
-}
-
 for(i in 1:length(options_summarise_slot)){
   test_that(paste0("summarise_slot: ",i), {
     if(i<=2){
@@ -316,13 +335,6 @@ for(i in 1:length(options_summarise_slot)){
   })
 }
 
-
-options_nsegparam_slot <- list(1, TRUE, NA, NULL, 0, -1, "A", 1.5, c(1, 2))
-nsegparam_test_function <- function(value){
-  x <- new("pcpt")
-  PeriodCPT:::nsegparam(x) <- value
-  return(x)
-}
 for(i in 1:length(options_nsegparam_slot)){
   test_that(paste0("nsegparam_slot: ",i), {
     if(i==1){
@@ -333,15 +345,6 @@ for(i in 1:length(options_nsegparam_slot)){
     }
   })
 }
-
-result_index_function <- function(LIST, index){
-  x <- new("pcpt")
-  results(x) <- LIST
-  result(x, index) <- 1
-  return(x)
-}
-RES_LIST <- RES_LIST_ERR <- list(0,0)
-names(RES_LIST) <- as.character(1:2)
 
 test_that("Results_list: 1",expect_s4_class(result_index_function(RES_LIST,1),"pcpt"))
 test_that("Results_list: 2",expect_s4_class(result_index_function(RES_LIST,"1"),"pcpt"))
@@ -358,18 +361,51 @@ test_that("Edits with periodlength and minseglen", expect_that({
     periodlength(x) <- NULL
   }, throws_error( ErrorMessages[43] )))
 
-test_that("Additional iterations", expect_s4_class(
+
+
+####TESTTHAT: PeriodCPT_extend()
+
+test_that("Additional iterations -- do once", expect_s4_class(
   {
     x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
     ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
     PeriodCPT_extend(ans, newiters = 100)
   }, "pcpt"))
 
+test_that("Additional iterations -- do twice", expect_s4_class(
+  {
+    x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+    ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
+    PeriodCPT_extend(ans, newiters = 100)
+    PeriodCPT_extend(ans, newiters = 100)
+  }, "pcpt"))
+
+test_that("Additional iterations -- invalid object class", expect_that(
+  {PeriodCPT_extend(1, newiters = 100)}, throws_error(ErrorMessages[7])))
+
+for(i in 1:length(options_n.iter)){
+  test_that(paste0("Additional iterations -- newiter (",i,")"), expect_that({
+    x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+    ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
+    PeriodCPT_extend(ans, newiters = options_n.iter[i])
+    }, throws_error(ErrorMessages[14])))
+}
+
+test_that("Additional iterations -- no last chain value in object", expect_that(
+  {
+    ans <- new("pcpt")
+    summarised(ans) <- TRUE
+    PeriodCPT_extend(ans, newiters = 100)
+  }, throws_error(ErrorMessages[16])))
+
+
+####TESTTHAT: summarise_chains()
+
 test_that("Summarise chains", expect_s4_class(
   {
     x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
     ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
-    PeriodCPT::summarise_chains(ans)
+    summarise_chains(ans)
   }, "pcpt"))
 
 
