@@ -4,6 +4,9 @@ summarize_chains <- function(object, all = TRUE){
 
 summarise_chains <- function(object, all = TRUE){
 
+  if(length(all)!=1 | !is.logical(all) | anyNA(all))
+    stop("Argument `all` is not a single logical value.")
+
   if(summarised(object) == TRUE){
     #Already summarised, perform combine if requested
     if(all) object <- summarise_combine(object)
@@ -51,13 +54,13 @@ summarise_combine <- function(object){
     keep <- rep(TRUE,nrow(tab2)) #tab2 rows not in tab == TRUE (needed for appending)
     for(i in 1:nrow(tab2)){
       j <- 1
-      while(j<=nrow(tab) && L[i]){
+      while(j<=nrow(tab) && keep[i]){
         if(tab2[i,1]!=tab[j,1]){ #number of pcpts dont match
           j <- j+1
         }else if(all(tab2[i,2+tab2[i,1]] == tab[j,2+tab[j,1]])){
           #pcpts match, add freq to tab and mark as combined
           tab[j,2] <- tab[j,2] + tab2[i,2] ##Add frequencies
-          L[i] <- FALSE
+          keep[i] <- FALSE
         }else{
           j <- j+1
         }

@@ -199,7 +199,7 @@ ErrorMessages <- c(
   "Hyper-parameter `param.m` specified incorrectly.",
   "Known constant `const.var` is specified incorrectly.",
   "Data is invalid for '$(sub_st)$options_distribution[[case[1]]]$(sub_ed)$' sampling distribution.",
-  "",
+  "Argument `all` is not a single logical value.",
   "",         ###30
   "",
   "Period length specified incorrectly.",
@@ -383,11 +383,11 @@ test_that("Additional iterations -- do twice", expect_s4_class(
 test_that("Additional iterations -- invalid object class", expect_that(
   {PeriodCPT_extend(1, newiters = 100)}, throws_error(ErrorMessages[7])))
 
-for(i in 1:length(options_n.iter)){
+for(i in 2:length(options_n.iter)){
   test_that(paste0("Additional iterations -- newiter (",i,")"), expect_that({
     x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
     ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
-    PeriodCPT_extend(ans, newiters = options_n.iter[i])
+    PeriodCPT_extend(ans, newiters = options_n.iter[[i]])
     }, throws_error(ErrorMessages[14])))
 }
 
@@ -398,16 +398,80 @@ test_that("Additional iterations -- no last chain value in object", expect_that(
     PeriodCPT_extend(ans, newiters = 100)
   }, throws_error(ErrorMessages[16])))
 
-
-####TESTTHAT: summarise_chains()
-
-test_that("Summarise chains", expect_s4_class(
+test_that("Additional iterations -- performed intrim summary", expect_s4_class(
   {
     x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
     ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
-    summarise_chains(ans)
+    ans <- summarise_chains(ans)
+    PeriodCPT_extend(ans, newiters = 100)
   }, "pcpt"))
 
 
+####TESTTHAT: summarise_chains()
+
+options_all <- list(TRUE, FALSE,  #valid
+                     NA,NULL,0,-1,"A",0.5) #invalid
+
+for(i in 1:length(options_all)){
+  if(i<=2){
+  test_that("SummariSe -- one chain", expect_s4_class(
+    {
+      x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+      ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
+      summarise_chains(ans, all = options_all[[i]])
+    }, "pcpt"))
+
+  test_that("SummariZe -- one chain", expect_s4_class(
+    {
+      x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+      ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
+      summarize_chains(ans, all = options_all[[i]])
+    }, "pcpt"))
+  }else{
+    test_that(paste0("SummariSe -- one chain, invalid `all` argument (",i,")"),
+      expect_that({
+        x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+        ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
+        summarise_chains(ans, all = options_all[[i]])
+      },throws_error(ErrorMessages[29])))
+
+    test_that(paste0("SummariZe -- one chain, invalid `all` argument (",i,")"),
+      expect_s4_class({
+        x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+        ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
+        summarize_chains(ans, all = options_all[[i]])
+      }, "pcpt"))
+  }
+}
+
+test_that("SummariSe -- two chains", expect_s4_class(
+  {
+    x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+    ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, n.chains = 2, quiet = TRUE)
+    summarise_chains(ans)
+  }, "pcpt"))
+
+test_that("SummariZe -- two chains", expect_s4_class(
+  {
+    x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+    ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, n.chains = 2, quiet = TRUE)
+    summarize_chains(ans)
+  }, "pcpt"))
+
+
+test_that("Summarise -- two chains, summarise first only", expect_s4_class(
+  {
+    x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+    ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, n.chains = 2, quiet = TRUE)
+    summarise_single_chain(ans, index = 1)
+  }, "pcpt"))
+
+test_that("Summarise -- two chains, summarise both individually", expect_s4_class(
+  {
+    x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+    ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, n.chains = 2, quiet = TRUE)
+    ans <- summarise_single_chain(ans, index = 1)
+    summarise_single_chain(ans, index = 2)
+  }, "pcpt"))
 
 
