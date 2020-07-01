@@ -5,13 +5,10 @@ PeriodCPT_extend <- function(object, newiters = 1e4){
   if(newiters <= 0 | floor(newiters) != newiters) stop("Argument `newiters` must be a single positive integer.")
 
   ##Evaluate inital values as last case from last scenario.
+  if((length(MCMC.last(object)) == 0) | (length(MCMC.last(object)) != n.chains(object)))
+    stop("Cannot determine initial values from previous run.")
   first.inits <- MCMC.inits(object)
-  if(summarised(object) == TRUE){
-    MCMC.inits(object) <- MCMC.last(object)
-    if(length(MCMC.inits(object)) == 0) stop("Cannot determine last sample to initiate next batch.")
-  }else{
-    MCMC.inits(object) <- Calc_MCMC_last(object)
-  }
+  MCMC.inits(object) <- MCMC.last(object)
   newburn <- n.burn(object) + n.iter(object) ##add last iters to burn (hold in temp variable)
 
   ##Reset slots

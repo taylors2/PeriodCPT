@@ -1,24 +1,18 @@
 summarize_chains <- function(object, all = TRUE){
-  return(summarise_chains(object, all = TRUE))
+  return(summarise_chains(object, all))
 }
 
 summarise_chains <- function(object, all = TRUE){
 
+  if(class(object) != "pcpt") stop("Unexpected class of `object`.")
+
   if(length(all)!=1 | !is.logical(all) | anyNA(all))
     stop("Argument `all` is not a single logical value.")
 
-  if(summarised(object) == TRUE){
-    #Already summarised, perform combine if requested
-    if(all) object <- summarise_combine(object)
-    return(object)
-  }
-
-  MCMC.last(object) <- Calc_MCMC_last(object)    ##Store the last iteration
   for(index in 1:n.chains(object)){ ##Perform summary per chain
     object <- summarise_single_chain(object, index)
   }
-  summarised(object) <- TRUE
-  if(all) object <- summarise_combine(object) #combine if requested
+  if(all) object <- summarise_combine(object)
   return(object)
 }
 
@@ -27,13 +21,15 @@ summarize_combine <- function(object){
 }
 
 summarise_combine <- function(object){
-  if(!summarised(object)){
-    return(summarise_chains(object, all = TRUE))
-  }
-  if(length(results(object)) == 1 | n.chains(object)==1){
-    #Either already combined or n.chains(object)==1
+
+  #if(any(!summarised(object))){
+  #  ##There are some chains that are not summarised?
+  #  return(summarise_chains(object, all = TRUE))
+  #}
+  if(n.chains(object) == 1) #There is only one summarised chain, done!
     return(object)
-  }
+  if(length(summarised(object)) == 1) #Summarised chains have already been combined
+    return(object)
 
   tab <- result(object, 1)
   for(c in 2:n.chains(object)){
@@ -76,15 +72,23 @@ summarise_combine <- function(object){
   out <- as.list(tab)
   names(out) <- 1
   results(object) <- out
-
+  summarised(object) <- TRUE
   return(object)
 }
 
-summarize_single_chain <- function(object,index){
+summarize_single_chain <- function(object, index){
   return(summarise_single_chain(object, index))
 }
 
-summarise_single_chain <- function(object, index){
+summarise_single_chain <- function(object, index = 1){
+
+#  if(length(index)!=1 | !is.numeric(index) | anyNA(index))
+#    stop("Argument `index` is not a single integer value for a identifying chain.")
+#  if(index<=0 | index>n.chains(object) | floor(index)!=index)
+#    stop("Argument `index` is not a single integer value for a identifying chain.")
+
+  if(summarised(object)[index]) return(object) #chain already summarised!!!
+
 
   ##Tabulating chain samples
   chain <- result(object, index)
@@ -137,6 +141,9 @@ summarise_single_chain <- function(object, index){
 
   ####Assign summary table back to appropriate result slot
   result(object, index) <- tab
+  summarise_logical <- summarised(object)
+  summarise_logical[index] <- TRUE
+  summarised(object) <- summarise_logical
 
   return(object)
 }
@@ -226,19 +233,7 @@ table_pcpt <- function(object){
   }
 }
 
-Calc_MCMC_last <- function(object){
-  if(summarised(object) == TRUE){
-    stop("Chains have been summarised, cannout use summarised data to determine last chain samples.")
-  }
-  out <- vector("list", n.chains(object))
-  names(out) <- names(MCMC.inits(object))
-  for(i in 1:n.chains(object)){
-    MCMC <- result(object, i)
-    tau <- MCMC[nrow(MCMC),]
-    out[[i]] <- unname(tau[!is.na(tau)])
-  }
-  return(out)
-}
+
 
 ##---------------------------------------------------------------------
 quantile_per_time_slot <- function(object, ...){

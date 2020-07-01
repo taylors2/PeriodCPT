@@ -12,8 +12,6 @@ export(class_input)
 
 export(summarize_chains)
 export(summarise_chains)
-export(summarize_combine)
-export(summarise_combine)
 export(table_npcpt)
 export(table_pcpt)
 export(PeriodCPT_extend)

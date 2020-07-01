@@ -31,7 +31,7 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
   pcpt.prior(ans)   = pcpt.prior.make(Mprior, Mhyp, spread)
   param.prior(ans)  = param.prior.make(distribution, ...)
   ans               = MCMC.options.make(object = ans, ...)
-  MCMC.inits(ans)   = Definie.inits(ans, inits, ...)
+  ans               = Definie.inits(ans, inits, ...)
   results(ans)      = initialise.MCMC.list(n.chains(ans))
   summarised(ans)   = FALSE
 
@@ -225,7 +225,8 @@ Definie.inits <- function(object, inits, ...){
       stop("In inits, within period cpts are not ordered or do not satisfy minimum segment length condition.")
   }
   names(inits.pcpt) <- as.character(1:n.chains(object))
-  return(inits.pcpt)
+  MCMC.inits(object) <- inits.pcpt
+  return(object)
 
 }
 

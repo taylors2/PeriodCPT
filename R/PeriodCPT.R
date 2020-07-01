@@ -72,6 +72,9 @@ PeriodCPT.main <- function(object){
                                             draw$draw[(i-1)*len.chain.samples + (1:len.chain.samples)],
                                             blank = BLANK)
   }
+  ##Extract last sample per chain and store
+  MCMC.last(object) <- Calc_MCMC_last(object)
+  summarised(object)   = rep(FALSE, n.chains(object))
 
   if(Eval_Mode){
     pcpt.mode(object) <- draw$mode_pcpt[draw$mode_pcpt != BLANK]
@@ -83,6 +86,17 @@ PeriodCPT.main <- function(object){
   }
 
   return(object)
+}
+
+Calc_MCMC_last <- function(object){
+  out <- vector("list", n.chains(object))
+  names(out) <- names(MCMC.inits(object))
+  for(i in 1:n.chains(object)){
+    MCMC <- result(object, i)
+    tau <- MCMC[nrow(MCMC),]
+    out[[i]] <- unname(tau[!is.na(tau)])
+  }
+  return(out)
 }
 
 ##################################################

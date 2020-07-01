@@ -350,7 +350,7 @@ if(!isGeneric("summarised")) {
 setMethod("summarised","pcpt",function(object) object@summarised)
 setGeneric("summarised<-", function(object, value) standardGeneric("summarised<-"))
 setReplaceMethod("summarised", "pcpt", function(object, value) {
-  if(!is.logical(value) | anyNA(value) | length(value)!=1)
+  if(!is.logical(value) | anyNA(value))
     stop("Can only assign logical to summarised slot.")
   object@summarised <- value
   return(object)
