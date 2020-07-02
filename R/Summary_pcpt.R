@@ -17,9 +17,9 @@ summarise_chains <- function(object, all = TRUE){
   return(object)
 }
 
-summarize_combine <- function(object){
-  return(summarise_combine(object))
-}
+#summarize_combine <- function(object){
+#  return(summarise_combine(object))
+#}
 
 summarise_combine <- function(object){
 
@@ -77,9 +77,9 @@ summarise_combine <- function(object){
   return(object)
 }
 
-summarize_single_chain <- function(object, index){
-  return(summarise_single_chain(object, index))
-}
+#summarize_single_chain <- function(object, index){
+#  return(summarise_single_chain(object, index))
+#}
 
 summarise_single_chain <- function(object, index = 1){
 
