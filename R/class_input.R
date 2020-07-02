@@ -21,7 +21,7 @@ class_input <- function(data, periodlength = NULL, minseglen = 1, distribution =
     stop("Length of data is too short or period length is too long.")
   if(periodlength(ans) == 1) stop("Period length must be greater than 1.")
 
-  minseglen(ans)    = minseglen;
+  minseglen(ans)    = minseglen
   nsegparam(ans)    = nsegparam
   pcpt.prior(ans)   = pcpt.prior.make(Mprior, Mhyp, spread)
   param.prior(ans)  = param.prior.make(distribution, ...)
