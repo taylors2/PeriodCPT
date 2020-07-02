@@ -3,8 +3,6 @@
 \alias{summarize}
 \alias{summarise_chains}
 \alias{summarize_chains}
-\alias{summarise_combine}
-\alias{summarize_combine}
 
 \title{
   ~~functions to summarise the pcpt chain results.~~
@@ -15,8 +13,6 @@
 \usage{
   summarise_chains(object, all = TRUE)
   summarize_chains(object, all = TRUE)
-  summarise_combine(object)
-  summarize_combine(object)
 }
 
 \arguments{
@@ -37,11 +33,10 @@
   }
   The following columns contain the posterior sufficient statistics for the segment parameters for the the corresponding segments depending on the specified sampling distribution.
 
-  If \code{all=FALSE}, then the table is evaluated for each chain, and the results slot will contain a list of tables in the appropriate order. Otherwise, if \code{all=TRUE} then the tables from each chain is combined into a single overall table. In this case, the results slot will contain a list with only one item of the overall table. The \code{summarise_combine()} function provides the utility to subsequently combine multiple summarised tables if \code{all = FALSE} when \code{summaise_chains()} was first called.
+  If \code{all=FALSE}, then the table is evaluated for each chain, and the results slot will contain a list of tables in the appropriate order. Otherwise, if \code{all=TRUE} then the tables from each chain (whether previously summarised or not) is combined into a single overall table. In this case, the results slot will contain a list with only one item of the overall table.
 
   Note that \code{summarise_chains()} changes logical flag of the summarise slot of the pcpt object to indicate that the results slot contains the summarised values rather than the raw chains. Also, the MCMC.last slot is populated with the last sample per chain to permit more MCMC samples to be drawn.
 
-  The functions \code{summarize_chains()} and \code{summarize_combine()} implements the corresponding procedures.
 
 }
 
