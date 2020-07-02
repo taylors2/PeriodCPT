@@ -440,12 +440,12 @@ test_that("SummariZe -- two chains", expect_s4_class(summarize_chains(ans), "pcp
 test_that("SummariSe -- two chains, twice",
           expect_s4_class({
             tmp <- summarise_chains(ans)
-            summarise_chains(ans)
+            summarise_chains(tmp)
           },"pcpt"))
 test_that("SummariSe -- two chains, individually and then combine",
           expect_s4_class({
             tmp <- summarise_chains(ans, all = FALSE)
-            summarise_chains(ans, all = TRUE)
+            summarise_chains(tmp, all = TRUE)
           },"pcpt"))
 test_that("SummariZe -- two chains, twice",
           expect_s4_class({
@@ -455,16 +455,17 @@ test_that("SummariZe -- two chains, twice",
 test_that("SummariZe -- two chains, individually and then combine",
           expect_s4_class({
             tmp <- summarize_chains(ans, all = FALSE)
-            summarize_chains(ans, all = TRUE)
+            summarize_chains(tmp, all = TRUE)
           },"pcpt"))
 
+x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
 ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE, inits = "ends")
 test_that("SummariSe -- two chains, ncol(tab1) < ncol(tab2)",
           expect_s4_class(summarise_chains(ans, all = TRUE),"pcpt"))
 test_that("SummariZe -- two chains, ncol(tab1) < ncol(tab2)",
           expect_s4_class(summarize_chains(ans, all = TRUE),"pcpt"))
 inits_rev <- list(1:periodlength(ans),1)
-ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE, inits = inits_rev)
+ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE, inits = inits_rev, n.chains = 2)
 test_that("SummariSe -- two chains, ncol(tab1) > ncol(tab2)",
           expect_s4_class(summarise_chains(ans, all = TRUE),"pcpt"))
 test_that("SummariZe -- two chains, ncol(tab1) > ncol(tab2)",
