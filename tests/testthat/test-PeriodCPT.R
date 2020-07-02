@@ -101,7 +101,7 @@ options_periodlength <- list(24, #valid
                              NULL, #Invalid only if data is not ts
                              1, NA, -1, 24.5, 241, "A") #Invalid
 options_minseglen <- list( 2, #valid
-                           NA, NULL, -1, 0.1, 1+24, "A") #invalid
+                           NA, NULL, -1, 0.1, 1+24, "A", 1) #invalid
 options_Mprior <- list("pois","unif",          #valid
                        "invalid", 1, NA, NULL) #invalid
 options_Mhyp <- list(1, #valid
@@ -186,7 +186,7 @@ ErrorMessages <- c(
   "MCMC option - quiet specified incorrectly.",
   "Argument `newiters` must be a single positive integer.",
   "Cannot pass arguments 'pcpt.object' and 'chain.index' from '...' into inits(). These inputs to inits() are managed internally.",
-  "Cannot determine initial values from previous run.",
+  "Argument `object` does not appear to be an output from a PeriodCPT funciton.",
   "Incorrect number of initial values for specified number of chains.",
   "Class of at least one inits is not numeric.",
   "Incorrect number of within period changepoints specified by inits.",
@@ -311,8 +311,13 @@ if(RUN){
 }
 
 test_that("Minimal example", {expect_s4_class(PeriodCPT(data = make_test_data("bern", 1), distribution = "bern"), "pcpt")})
-test_that("Bad data", {expect_that(PeriodCPT(), throws_error(ErrorMessages[3]))})
 test_that("Bad class", {expect_that(PeriodCPT:::PeriodCPT.main(1), throws_error(ErrorMessages[47]))})
+test_that("Bad data - master", {expect_that(PeriodCPT(),      throws_error(ErrorMessages[3]))})
+test_that("Bad data - bern",   {expect_that(PeriodCPT.bern(), throws_error(ErrorMessages[3]))})
+test_that("Bad data - mean",   {expect_that(PeriodCPT.mean(), throws_error(ErrorMessages[3]))})
+test_that("Bad data - norm",   {expect_that(PeriodCPT.norm(), throws_error(ErrorMessages[3]))})
+test_that("Bad data - pois",   {expect_that(PeriodCPT.pois(), throws_error(ErrorMessages[3]))})
+test_that("Bad data - var",    {expect_that(PeriodCPT.var(),  throws_error(ErrorMessages[3]))})
 
 for(index in 1:nrow(testcases)){
   if(testcases[index,1] > 0){
@@ -402,10 +407,14 @@ test_that("SummeriSe - missing input",
           expect_that(summarise_chains(all=TRUE), throws_error(ErrorMessages[30])))
 test_that("SummeriSe - class error",
           expect_that(summarise_chains(object = 1), throws_error(ErrorMessages[7])))
+test_that("SummeriSe - object not an output from PeriodCPT",
+          expect_that(summarise_chains(object = new("pcpt")), throws_error(ErrorMessages[16])))
 test_that("SummeriZe - missing input",
           expect_that(summarize_chains(), throws_error(ErrorMessages[30])))
 test_that("SummeriZe - class error",
           expect_that(summarize_chains(object = 1), throws_error(ErrorMessages[7])))
+test_that("SummeriZe - object not an output from PeriodCPT",
+          expect_that(summarize_chains(object = new("pcpt")), throws_error(ErrorMessages[16])))
 
 for(i in 1:length(options_all)){
   if(i<=2){
@@ -431,6 +440,8 @@ test_that("SummariZe -- two chains", expect_s4_class(summarize_chains(ans), "pcp
 
 test_that("Summarise -- two chains, summarise first only",
           expect_s4_class(PeriodCPT:::summarise_single_chain(ans, index = 1), "pcpt"))
+
+
 
 
 

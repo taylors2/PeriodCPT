@@ -19,7 +19,6 @@ setClass("pcpt", slots=list(
     version      = "character"),  ## Version of code
 
   prototype = prototype(
-    date         = date(),
     version      = as(packageVersion("PeriodCPT"), 'character') ) )
 
 ############################################################################################
@@ -60,7 +59,7 @@ setMethod("data.set","pcpt",function(object) object@data.set)
 setGeneric("data.set<-", function(object, value) standardGeneric("data.set<-"))
 setReplaceMethod("data.set", "pcpt", function(object, value) {
   ##Input check
-  if(is.null(value) | missing(value)) stop("Data is missing.")
+  if(is.null(value)) stop("Data is missing.")
   if(anyNA(value)) stop("Data must not contain NA missing values.")
   if(is.ts(value)){
     object@data.set <- value
@@ -544,3 +543,5 @@ if(!isGeneric("npcpts")) {
   setGeneric("npcpts", fun)
 }
 setMethod("npcpts","pcpt",function(object){return(nsegs(object))})
+
+

@@ -1,18 +1,9 @@
-param.prior.make.pois <- function(param.a, param.b, ...){
+param.prior.make.pois <- function(param.a = 1, param.b = 1, ...){
   ##y~pois(lambda), lambda~gamma(param.a, param.b)
-  if(missing(param.a) || is.null(param.a)){
-    param.a <- 1
-  }else{
-    if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0) || anyNA(param.a))
-      stop("Hyper-parameter `param.a` specified incorrectly.")
-  }
-
-  if(missing(param.b) || is.null(param.b)){
-    param.b <- 1
-  }else{
-    if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0) || anyNA(param.b))
-      stop("Hyper-parameter `param.b` specified incorrectly.")
-  }
+  if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0) || anyNA(param.a))
+    stop("Hyper-parameter `param.a` specified incorrectly.")
+  if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0) || anyNA(param.b))
+    stop("Hyper-parameter `param.b` specified incorrectly.")
   out <- c("param.a" = param.a, "param.b" = param.b)
   return(out)
 }
@@ -25,6 +16,7 @@ PeriodCPT.pois <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   distribution <- "pois"
   nsegparam <- 1
   Mprior <- Mprior[1]
+  if(missing(data)) stop("Data is missing.")
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
                      distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,

@@ -5,7 +5,8 @@ summarize_chains <- function(object, all = TRUE){
 summarise_chains <- function(object, all = TRUE){
 
   if(class(object) != "pcpt") stop("Unexpected class of `object`.")
-
+  if(length(object@date) == 0)
+    stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
   if(length(all)!=1 | !is.logical(all) | anyNA(all))
     stop("Argument `all` is not a single logical value.")
 
@@ -320,7 +321,7 @@ quantile_per_time_slot <- function(object, ...){
 #         side=2, labels=c(paste0("tau",1:N),"m1"), las = 1)
 #    fields::image.plot(NA,zlim=c(0,1),col=c("#FFFFFF","#FFFFFF"),
 #                       legend.only = TRUE, axis.args = list(col="white", at = c(0,1),
-#                                                            labels=c("","")))  ##To blank out legend
+#                          labels=c("","")))  ##To blank out legend
 #    fields::image.plot(NA,zlim=c(0,1),col=collegend,legend.only = TRUE)
 #    segments(diff(range(rng))*-0.005,AT + 0.5,rep(max(rng)*0.827,13),
 #             AT + 0.5)

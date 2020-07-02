@@ -1,12 +1,11 @@
 PeriodCPT_extend <- function(object, newiters = 1e4){
   ##--Input check--
   if(class(object) != "pcpt") stop("Unexpected class of `object`.")
+  if(length(object@date) == 0) stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
   if(length(newiters) != 1 | !is.numeric(newiters)) stop("Argument `newiters` must be a single positive integer.")
   if(newiters <= 0 | floor(newiters) != newiters) stop("Argument `newiters` must be a single positive integer.")
 
   ##Evaluate inital values as last case from last scenario.
-  if((length(MCMC.last(object)) == 0) | (length(MCMC.last(object)) != n.chains(object)))
-    stop("Cannot determine initial values from previous run.")
   first.inits <- MCMC.inits(object)
   MCMC.inits(object) <- MCMC.last(object)
   newburn <- n.burn(object) + n.iter(object) ##add last iters to burn (hold in temp variable)

@@ -1,36 +1,16 @@
-param.prior.make.norm <- function(param.m, param.c, param.a, param.b, ...){
+param.prior.make.norm <- function(param.m = 0, param.c = 1, param.a = 1, param.b = 1, ...){
   ##y ~ Norm(theta[1], theta[2]),
   ##theta[1] ~ Norm(param.m, param.c * theta[2])
   ##theta[2] ~ IGamma(param.a, param.b)
 
-  if(missing(param.m) || is.null(param.m)){
-    param.m <- 0
-  }else{
-    if(!is.numeric(param.m) || length(param.m) != 1 || anyNA(param.m))
-      stop("Hyper-parameter `param.m` specified incorrectly.")
-  }
-
-  if(missing(param.c) || is.null(param.c)){
-    param.c <- 1
-  }else{
-    if(!is.numeric(param.c) || length(param.c) != 1 || any(param.c <= 0) || anyNA(param.c))
-      stop("Hyper-parameter `param.c` specified incorrectly.")
-  }
-
-  if(missing(param.a) || is.null(param.a)){
-    param.a <- 1
-  }else{
-    if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0) || anyNA(param.a))
-      stop("Hyper-parameter `param.a` specified incorrectly.")
-  }
-
-  if(missing(param.b) || is.null(param.b)){
-    param.b <- 1
-  }else{
-    if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0) || anyNA(param.b))
-      stop("Hyper-parameter `param.b` specified incorrectly.")
-  }
-
+  if(!is.numeric(param.m) || length(param.m) != 1 || anyNA(param.m))
+    stop("Hyper-parameter `param.m` specified incorrectly.")
+  if(!is.numeric(param.c) || length(param.c) != 1 || any(param.c <= 0) || anyNA(param.c))
+    stop("Hyper-parameter `param.c` specified incorrectly.")
+  if(!is.numeric(param.a) || length(param.a) != 1 || any(param.a <= 0) || anyNA(param.a))
+    stop("Hyper-parameter `param.a` specified incorrectly.")
+  if(!is.numeric(param.b) || length(param.b) != 1 || any(param.b <= 0) || anyNA(param.b))
+    stop("Hyper-parameter `param.b` specified incorrectly.")
   out <- c("param.m" = param.m, "param.c" = param.c,
            "param.a" = param.a, "param.b" = param.b)
   return(out)
@@ -45,6 +25,7 @@ PeriodCPT.norm <- function(data, periodlength = NULL, minseglen = 1, Mprior = c(
   distribution <- "norm"
   nsegparam <- 2
   Mprior <- Mprior[1]
+  if(missing(data)) stop("Data is missing.")
   ans <- class_input(data = data, periodlength = periodlength, minseglen = minseglen,
                      distribution = distribution, nsegparam = nsegparam, Mprior = Mprior, Mhyp = Mhyp,
                      spread = spread, inits = inits, n.iter = n.iter, n.chains = n.chains,

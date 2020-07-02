@@ -84,7 +84,7 @@ PeriodCPT.main <- function(object){
     param.mode(object) <- mode_param
     fit(object) <- draw$fit
   }
-
+  object@date <- date()
   return(object)
 }
 

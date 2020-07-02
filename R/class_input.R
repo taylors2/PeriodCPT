@@ -1,14 +1,14 @@
 ##pcpt, class_input
 
-class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
-                        Mprior, Mhyp, spread, inits, ...){
+class_input <- function(data, periodlength = NULL, minseglen = 1, distribution = NULL,
+                        nsegparam = NULL, Mprior = NULL, Mhyp = NULL, spread = 1,
+                        inits = NULL, ...){
 
   ans               = methods::new("pcpt")
   distribution(ans) = distribution
   data.set(ans)     = data
   ans <- eval(parse(text = paste0("data_value_check.", distribution(ans), "(object = ans)")))
 
-  if(missing(periodlength)) periodlength <- NULL
   if(!is.null(periodlength)){
     periodlength(ans) = periodlength
   }else if(is.ts(data)){
@@ -21,12 +21,7 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
     stop("Length of data is too short or period length is too long.")
   if(periodlength(ans) == 1) stop("Period length must be greater than 1.")
 
-  if(missing(minseglen) | is.null(minseglen)){
-    minseglen(ans)    = 1
-  }else{
-    minseglen(ans)    = minseglen;
-  }
-
+  minseglen(ans)    = minseglen;
   nsegparam(ans)    = nsegparam
   pcpt.prior(ans)   = pcpt.prior.make(Mprior, Mhyp, spread)
   param.prior(ans)  = param.prior.make(distribution, ...)
@@ -40,7 +35,7 @@ class_input <- function(data, periodlength, minseglen, distribution, nsegparam,
 }
 
 ## Create/check within cpt prior info for slot
-pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
+pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp = NULL, spread = 1){
 
   if(is.null(Mprior)) stop("Mprior cannot be NULL.")
   Mprior <- match.arg(Mprior)
@@ -48,7 +43,7 @@ pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
   if(Mprior == "unif"){
     Mhyp <- 0  ##This is not used, set as zero for holding space.
   }else if(Mprior == "pois"){
-    if(missing(Mhyp) | is.null(Mhyp)){
+    if(is.null(Mhyp)){
       Mhyp <- 1
     }else{
       if(length(Mhyp) != 1 | !is.numeric(Mhyp) | any(Mhyp <= 0) | anyNA(Mhyp))
@@ -56,7 +51,7 @@ pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
     }
   }
 
-  if(missing(spread) | is.null(spread)) spread = 1
+  if(is.null(spread)) spread = 1
   if(!is.numeric(spread) | length(spread) != 1 | anyNA(spread))
     stop("Hyper-parameter `spread` specified incorrectly.")
   if(spread <= 0) stop("Hyper-parameter `spread` specified incorrectly.")
@@ -65,20 +60,17 @@ pcpt.prior.make <- function(Mprior = c("pois", "unif"), Mhyp, spread = 1){
 }
 
 ## Create/check parameter prior info for slot
-param.prior.make <- function(distribution, ...){
-
+param.prior.make <- function(distribution = NULL, ...){
   param.prior.make.fn <- paste0("PeriodCPT:::param.prior.make.",distribution,"(...)")
   return(eval(parse(text = param.prior.make.fn)))
 }
 
 ## Create/check MCMC options for slot
-MCMC.options.make <- function(object, n.iter, n.chains, n.burn,
-                              cachesize, quiet, ...){
+MCMC.options.make <- function(object, n.iter = NULL, n.chains = 1, n.burn = 0,
+                              cachesize = 50, quiet = FALSE, ...){
   MCMC.options(object) <- list()
 
-  if(missing(n.iter) | is.null(n.iter)){
-    stop("MCMC option - n.iter not specified.")
-  }else if(!is.numeric(n.iter)){
+  if(!is.numeric(n.iter)){
     stop("MCMC option - n.iter specified incorrectly.")
   }else if( length(n.iter) != 1 | any(n.iter <= 0) | anyNA(n.iter) |
             any(floor(n.iter) != n.iter) ){
@@ -86,9 +78,7 @@ MCMC.options.make <- function(object, n.iter, n.chains, n.burn,
   }
   n.iter(object) <- n.iter
 
-  if(missing(n.chains) | is.null(n.chains)){
-    n.chains <- 1
-  }else if(!is.numeric(n.chains)){
+  if(!is.numeric(n.chains)){
     stop("MCMC option - n.chains specified incorrectly.")
   }else if( length(n.chains) != 1 | anyNA(n.chains) | any(n.chains <= 0) |
             any(floor(n.chains) != n.chains) ){
@@ -96,9 +86,7 @@ MCMC.options.make <- function(object, n.iter, n.chains, n.burn,
   }
   n.chains(object) <- n.chains
 
-  if(missing(n.burn) | is.null(n.burn)){
-    n.burn <- 0
-  }else if(!is.numeric(n.burn)){
+  if(!is.numeric(n.burn)){
     stop("MCMC option - n.burn specified incorrectly.")
   }else if( length(n.burn) != 1 | anyNA(n.burn) | any(n.burn < 0) |
             any(floor(n.burn) != n.burn) ){
@@ -106,9 +94,7 @@ MCMC.options.make <- function(object, n.iter, n.chains, n.burn,
   }
   n.burn(object) <- n.burn
 
-  if(missing(cachesize) | is.null(cachesize)){
-    cachesize <- 50
-  }else if(!is.numeric(cachesize)){
+  if(!is.numeric(cachesize)){
     stop("MCMC option - cachesize specified incorrectly.")
   }else if(length(cachesize) != 1 | anyNA(cachesize) | any(cachesize <= 0) |
            any(floor(cachesize) != cachesize) ){
@@ -116,9 +102,7 @@ MCMC.options.make <- function(object, n.iter, n.chains, n.burn,
   }
   object@MCMC.options[["cachesize"]] <- cachesize
 
-  if(missing(quiet) | is.null(quiet)){
-    quiet <- FALSE
-  }else if(!is.logical(quiet)){
+  if(!is.logical(quiet)){
     stop("MCMC option - quiet specified incorrectly.")
   }else if(length(quiet) != 1 | anyNA(quiet)){
     stop("MCMC option - quiet specified incorrectly.")
@@ -166,11 +150,11 @@ rpcpt_single <- function(object){
 }
 
 ## Create/simulate & check chain initial values
-Definie.inits <- function(object, inits, ...){
+Definie.inits <- function(object, inits = NULL, ...){
 
   inits.pcpt <- list()
 
-  if(missing(inits) | is.null(inits)){
+  if(is.null(inits)){
     ##Generate inits from prior
     for(i in 1:n.chains(object)) inits.pcpt[[i]] <- rpcpt_single(object)
   }else if(is.function(inits)){
