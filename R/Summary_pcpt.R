@@ -7,6 +7,8 @@ summarise_chains <- function(object, all = TRUE){
   if(class(object) != "pcpt") stop("Unexpected class of `object`.")
   if(length(object@date) == 0)
     stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
+  if(length(summarised(object)) == 1 & all(summarised(object)))
+    return(object)  #Already summarised!!!
   if(length(all)!=1 | !is.logical(all) | anyNA(all))
     stop("Argument `all` is not a single logical value.")
 
@@ -29,8 +31,8 @@ summarise_combine <- function(object){
   #}
   if(n.chains(object) == 1) #There is only one summarised chain, done!
     return(object)
-  if(length(summarised(object)) == 1) #Summarised chains have already been combined
-    return(object)
+#  if(length(summarised(object)) == 1 & all(summarised(object))) #Summarised chains have already been combined
+#    return(object)
 
   tab <- result(object, 1)
   for(c in 2:n.chains(object)){
