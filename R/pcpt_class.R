@@ -310,8 +310,15 @@ if(!isGeneric("result")) {
   setGeneric("result", fun)
 }
 setMethod("result","pcpt",function(object, index){
-  if(!(index %in% as.numeric(names(object@results))))
-    stop(paste0("Index `",index,"` not found in results list."))
+  if(!(index %in% as.numeric(names(object@results)))){
+    if((index > length(summarised(object))) & (index <= n.chains(object))){
+      stop(paste0("Cannot access information for index `",index,
+                  "`. It is likely that the contents accoss multiple chains ",
+                  "has been combined into the first index."))
+    }else{
+      stop(paste0("Index `",index,"` not found in results list."))
+    }
+  }
   object@results[[as.character(index)]]
 })
 setGeneric("result<-", function(object, index, value) standardGeneric("result<-"))
