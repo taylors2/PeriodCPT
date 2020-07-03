@@ -310,6 +310,8 @@ if(!isGeneric("result")) {
   setGeneric("result", fun)
 }
 setMethod("result","pcpt",function(object, index){
+  if(missing(index)) stop("Argument 'index' missing with no default.")
+  if(!is.numeric(index) | length(index) != 1) stop("Argument 'index' must be a single numeric value.")
   if(!(index %in% as.numeric(names(object@results)))){
     if((index > length(summarised(object))) & (index <= n.chains(object))){
       stop(paste0("Cannot access information for index `",index,
@@ -370,11 +372,10 @@ if(!isGeneric("summarized")) {
   }
   setGeneric("summarized", fun)
 }
-setMethod("summarized","pcpt",function(object) object@summarised)
+setMethod("summarized","pcpt",function(object) summarised(object))
 setGeneric("summarized<-", function(object, value) standardGeneric("summarized<-"))
 setReplaceMethod("summarized", "pcpt", function(object, value) {
-  if(!is.logical(value)) stop("Can only assign logical to summarised slot.")
-  object@summarised <- value
+  summarised(object) <- value
   return(object)
 })
 
