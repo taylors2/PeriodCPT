@@ -201,7 +201,7 @@ ErrorMessages <- c(
   "Data is invalid for '$(sub_st)$options_distribution[[case[1]]]$(sub_ed)$' sampling distribution.",
   "Argument `all` is not a single logical value.",
   "argument \"object\" is missing, with no default",         ###30
-  "",
+  "Cannot access information for index `$(sub_st)$index$(sub_ed)$`. It is likely that the contents accoss multiple chains has been combined into the first index.",
   "Period length specified incorrectly.",
   "Minimum segment length specifed incorrectly.",
   "",
@@ -470,4 +470,63 @@ test_that("SummariSe -- two chains, ncol(tab1) > ncol(tab2)",
           expect_s4_class(summarise_chains(ans, all = TRUE),"pcpt"))
 test_that("SummariZe -- two chains, ncol(tab1) > ncol(tab2)",
           expect_s4_class(summarize_chains(ans, all = TRUE),"pcpt"))
+
+x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE, inits = "ends")
+ans <- summarise_chains(ans, all = TRUE)
+for(index in 1:n.chains(ans)){
+  if(index==1){
+    test_that(paste0("SummariS/Ze -- two chains, accessing results (",index,")."),
+          expect_is(result(ans,index),"matrix"))
+  }else{
+    msg <- ErrorMessages[31]
+    msg <- gsub('$(sub_st)$', '",', msg, fixed=TRUE)
+    msg <- gsub('$(sub_ed)$', ',"', msg, fixed=TRUE)
+    msg <- eval(parse(text = paste0('paste0("',msg,'")')))
+    test_that(paste0("SummariS/Ze -- two chains, accessing results (",index,")."),
+              expect_that(result(ans,index),throws_error(msg, fixed = TRUE)))
+  }
+}
+
+
+####TESTTHAT: table_npcpt()
+
+x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE, inits = "ends")
+ans2 <- summarise_chains(ans, all = FALSE)
+ans3 <- summarise_chains(ans, all = TRUE)
+test_that("TableM - missing input",
+          expect_that(table_npcpt(), throws_error(ErrorMessages[30])))
+test_that("TableM - class error",
+          expect_that(table_npcpt(1), throws_error(ErrorMessages[7])))
+test_that("TableM - object not an output from PeriodCPT",
+          expect_that(table_npcpt(object = new("pcpt")), throws_error(ErrorMessages[16])))
+test_that("TableM - Good, using raw chains",
+          expect_is(table_npcpt(object = ans), "table"))
+test_that("TableM - Good, using separtate summarised chains",
+          expect_is(table_npcpt(object = ans2), "table"))
+test_that("TableM - Good, using overall summarised chains",
+          expect_is(table_npcpt(object = ans3), "table"))
+
+
+####TESTTHAT: table_pcpt()
+
+x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE, inits = "ends")
+ans2 <- summarise_chains(ans, all = FALSE)
+ans3 <- summarise_chains(ans, all = TRUE)
+test_that("TableTAU - missing input",
+          expect_that(table_pcpt(), throws_error(ErrorMessages[30])))
+test_that("TableTAU - class error",
+          expect_that(table_pcpt(1), throws_error(ErrorMessages[7])))
+test_that("TableTAU - object not an output from PeriodCPT",
+          expect_that(table_pcpt(object = new("pcpt")), throws_error(ErrorMessages[16])))
+test_that("TableTAU - Good, using raw chains",
+          expect_is(table_pcpt(object = ans), "table"))
+test_that("TableTAU - Good, using separtate summarised chains",
+          expect_is(table_pcpt(object = ans2), "table"))
+test_that("TableTAU - Good, using overall summarised chains",
+          expect_is(table_pcpt(object = ans3), "table"))
+
+
 
