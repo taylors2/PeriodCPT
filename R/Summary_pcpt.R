@@ -8,7 +8,7 @@ summarise_chains <- function(object, all = TRUE){
   if(length(object@date) == 0)
     stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
   if(length(summarised(object)) == 1 & all(summarised(object)))
-    return(object)  #Already summarised!!!
+    return(object)  #Already summarised & combinded!!!
   if(length(all)!=1 | !is.logical(all) | anyNA(all))
     stop("Argument `all` is not a single logical value.")
 
@@ -72,7 +72,7 @@ summarise_combine <- function(object){
   tab <- tab[order(tab[,2],decreasing = TRUE),, drop=FALSE]
 
   #Put tab matrix into required format for results slot and assign
-  out <- as.list(tab)
+  out <- list(tab)
   names(out) <- 1
   results(object) <- out
   summarised(object) <- TRUE
@@ -152,88 +152,76 @@ summarise_single_chain <- function(object, index = 1){
 }
 
 table_npcpt <- function(object){
-  if(!summarised(object)){
-    #results has chain
-    tab <- matrix(NA,nrow=n.chains(object),ncol=npcpts.max(object))
-    for(c in 1:nrow(tab)){
-      m_chain <- apply(!is.na(result(object,c)),1,sum)
-      tab[c,] <- as.numeric(table(c(m_chain,1:ncol(tab))))-1
+  if(class(object) != "pcpt") stop("Unexpected class of `object`.")
+  if(length(object@date) == 0)
+    stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
+
+  len_result <- length(summarised(object))
+  tab <- matrix(0,nrow=len_result, ncol=npcpts.max(object))
+  for(index in 1:len_result){
+    if(summarised(object)[index]){
+      x <- result(object, index)
+      for(m in 1:npcpts.max(object)){
+        tab[index,m] <- sum(x[x[, "m"]==m, "freq"])
+      }
+    }else{
+      m_chain <- apply(!is.na(result(object, index)),1,sum)
+      tab[index,] <- as.numeric(table(c(m_chain,1:ncol(tab))))-1
     }
+  }
+
+  if(len_result > 1){
     colnames(tab) <- paste0("m",1:ncol(tab))
     rownames(tab) <- paste0("Chain ",1:nrow(tab))
-    return(as.table(tab))
-  }
-
-  #results has summary
-  x <- results(object)
-  tab <- matrix(0, nrow=length(x),ncol=npcpts.max(object))
-  for(c in 1:length(x)){
-    xc <- x[[c]]
-    for(i in 1:nrow(x[[c]])){
-      m <- xc[i,1]
-      tab[c,m] <- tab[c,m] + xc[i,2]
-    }
-  }
-
-  if(nrow(tab) == 1){
+  }else{
     tab <- as.numeric(tab)
     names(tab) <- paste0("m",1:length(tab))
-    return(as.table(tab))
-  }else{
-    colnames(tab) <- paste0("m",1:ncol(tab))
-    rownames(tab) <- paste0("Chain ",1:nrow(tab))
-    return(as.table(tab))
   }
+  return(as.table(tab))
 }
 
-table_pcpt <- function(object){
-  N <- periodlength(object)
-  if(!summarised(object)){
-    #results has chain
-    tab <- matrix(NA, nrow=n.chains(object),ncol=N + 1)
-    for(c in 1:nrow(tab)){
-      tau_chain <- result(object,c)
-      m1        <- apply(!is.na(result(object,c)),1,sum) == 1
-      if(all(m1)){
-        tab[c,] <- c(rep(0,N),sum(m1))
-      }else{
-        tau_chain <- as.numeric(tau_chain[!m1,])
-        tau_chain <- tau_chain[!is.na(tau_chain)]
-        tab[c,] <-  c(as.numeric(table(c(tau_chain,1:N)))-1, sum(m1))
-      }
-    }
-    colnames(tab) <- c(paste0("tau",1:N),"m1")
-    rownames(tab) <- paste0("Chain ",1:nrow(tab))
-    return(as.table(tab))
-  }
 
-  #results has summary
-  x <- results(object)
-  tab <- matrix(0, nrow = length(x), ncol = N + 1)
-  for(c in 1:length(x)){
-    xc <- x[[c]]
-    for(i in 1:nrow(x[[c]])){
-      m <- xc[i,1]
-      if(m==1){
-        tab[c,N+1] <- tab[c,N+1] + x[i,c]
-      }else{
-        for(j in 1:m){
-          tau <- xc[i,2+j]
-          tab[c,tau] <- tab[c,tau] + xc[i,2]
+table_pcpt <- function(object){
+
+  if(class(object) != "pcpt") stop("Unexpected class of `object`.")
+  if(length(object@date) == 0)
+    stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
+  N <- periodlength(object)
+
+  len_result <- length(summarised(object))
+  tab <- matrix(0,nrow=len_result, ncol=N+1)
+  for(index in 1:len_result){
+    x <- result(object, index)
+    if(summarised(object)[index]){
+      for(i in 1:nrow(x)){
+        if(x[i,"m"] == 1){
+          tab[index, N+1] <- x[i, "freq"]
+        }else{
+          for(j in 1:x[i,"m"]){
+            tau <- x[i, paste0("tau",j)]
+            tab[index, tau] <- tab[index, tau] + x[i, "freq"]
+          }
+        }
+      }
+    }else{
+      L <- apply(!is.na(x),1,sum) == 1
+      tab[index, N+1] <- sum(L)
+      x <- x[!L, , drop=FALSE]
+      if(nrow(x)>0){
+        for(tau in 1:N){
+          tab[index, tau] <- sum(apply(x == tau,1,any,na.rm=TRUE))
         }
       }
     }
   }
-
-  if(nrow(tab) == 1){
-    tab <- as.numeric(tab)
-    names(tab) <- c(paste0("tau",1:N),"m1")
-    return(as.table(tab))
-  }else{
+  if(len_result > 1){
     colnames(tab) <- c(paste0("tau",1:N),"m1")
     rownames(tab) <- paste0("Chain ",1:nrow(tab))
-    return(as.table(tab))
+  }else{
+    tab <- as.numeric(tab)
+    names(tab) <- c(paste0("tau",1:N),"m1")
   }
+  return(as.table(tab))
 }
 
 
