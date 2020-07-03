@@ -380,6 +380,8 @@ test_that("Edits with periodlength and minseglen v2", expect_equal({
   tmp
 }, c(10, 5)))
 
+
+
 #######################
 x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
 ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE, inits = "ends")
@@ -402,6 +404,9 @@ for(i in 1:length(options_index)){
             expect_that(result(ans, options_index[[i]]),throws_error(msg,fixed = TRUE)))
 }
 
+test_that("Accessing results", expect_is(results(ans),"list"))
+
+
 ####TESTTHAT: PeriodCPT_extend()
 
 x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
@@ -409,11 +414,6 @@ ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
 
 test_that("Extend - minimal use",
           expect_s4_class({PeriodCPT_extend(object = ans)},"pcpt"))
-test_that("Extend - minimal use (not-quiet)",
-          expect_s4_class({
-            quiet <- FALSE
-            PeriodCPT_extend(object = ans)
-            },"pcpt"))
 test_that("Extend - specify valid newiters",
           expect_s4_class({PeriodCPT_extend(object = ans, newiters = options_n.iter[[1]])},
                          "pcpt"))
@@ -534,6 +534,7 @@ for(dist in options_distribution){
   test_that(paste0("SummariSe - ",dist), expect_s4_class(summarise_chains(ans),"pcpt"))
   test_that(paste0("SummariZe - ",dist), expect_s4_class(summarise_chains(ans),"pcpt"))
 }
+
 
 ####TESTTHAT: table_npcpt()
 

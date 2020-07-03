@@ -48,7 +48,7 @@ PeriodCPT.main <- function(object){
              nburn   = as.integer(n.burn(object)),
              niter   = as.integer(n.iter(object)),
              cache   = as.integer(MCMC.options(object)$cachesize),
-             quiet   = as.integer(MCMC.options(object)$quiet),
+             quiet   = as.integer(quiet(object)),
              blank   = as.integer(BLANK),
              error   = as.integer(0),
              draw    = vector("integer", length = n.chains(object) *
