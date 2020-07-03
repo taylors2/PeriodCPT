@@ -73,8 +73,8 @@ PeriodCPT.main <- function(object){
                                             blank = BLANK)
   }
   ##Extract last sample per chain and store
-  MCMC.last(object) <- Calc_MCMC_last(object)
   summarised(object)   = rep(FALSE, n.chains(object))
+  MCMC.last(object) <- Calc_MCMC_last(object)
 
   if(Eval_Mode){
     pcpt.mode(object) <- draw$mode_pcpt[draw$mode_pcpt != BLANK]
