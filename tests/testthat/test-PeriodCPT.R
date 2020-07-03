@@ -204,9 +204,9 @@ ErrorMessages <- c(
   "Cannot access information for index `$(sub_st)$index$(sub_ed)$`. It is likely that the contents accoss multiple chains has been combined into the first index.",
   "Period length specified incorrectly.",
   "Minimum segment length specifed incorrectly.",
-  "",
-  "",
-  "",
+  "Argument 'index' missing with no default.",
+  "Argument 'index' must be a single numeric value.",
+  "Index `$(sub_st)$options_index[[i]]$(sub_ed)$` not found in results list.",
   "",
   "",
   "Can only assign logical to summarised slot.",
@@ -296,6 +296,8 @@ result_index_function <- function(LIST, index){
 RES_LIST <- RES_LIST_ERR <- list(0,0)
 names(RES_LIST) <- as.character(1:2)
 
+options_index <- list(0,-1,0.5,"A",NA,NULL,c(1,2),c(2,3))
+
 
 ################################################################
 ################################################################
@@ -362,11 +364,43 @@ test_that("Edits with periodlength and minseglen", expect_that({
     x <- new("pcpt")
     data.set(x) <- ts(rbinom(100, size = 1, prob = 0.5), frequency = 5)
     periodlength(x) <- 20
-    minseglen(x) <- 7
+    minseglen(x) <- 7 #defines npcpt.max
     periodlength(x) <- NULL
   }, throws_error( ErrorMessages[43] )))
 
 
+test_that("Edits with periodlength and minseglen v2", expect_equal({
+  tmp <- c(NA,NA)
+  x <- new("pcpt")
+  data.set(x) <- ts(rbinom(100, size = 1, prob = 0.5), frequency = 20)
+  minseglen(x) <- 2 #defines npcpt.max
+  tmp[1] <- npcpts.max(x)
+  periodlength(x) <- 10 #adjusts npcpt.max
+  tmp[2] <- npcpts.max(x)
+  tmp
+}, c(10, 5)))
+
+#######################
+x <- ts(sample(c(0,1), size = 240, replace = TRUE), frequency = 24)
+ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE, inits = "ends")
+test_that("Accessing Results - missing index",
+          expect_that(result(ans),throws_error(ErrorMessages[34])))
+for(index in 1:n.chains(ans)){
+  test_that(paste0("Accessing Results - good, chain ",index),
+            expect_is(result(ans, index),"matrix"))
+}
+for(i in 1:length(options_index)){
+  if(i<=3){
+    msg <- ErrorMessages[36]
+    msg <- gsub('$(sub_st)$', '",', msg, fixed=TRUE)
+    msg <- gsub('$(sub_ed)$', ',"', msg, fixed=TRUE)
+    msg <- eval(parse(text = paste0('paste0("',msg,'")')))
+  }else{
+    msg <- ErrorMessages[35]
+  }
+  test_that(paste0("Accessing Results - bad index (", i,")"),
+            expect_that(result(ans, options_index[[i]]),throws_error(msg,fixed = TRUE)))
+}
 
 ####TESTTHAT: PeriodCPT_extend()
 
@@ -375,6 +409,11 @@ ans <- PeriodCPT(data = x, distribution = "bern", n.iter = 100, quiet = TRUE)
 
 test_that("Extend - minimal use",
           expect_s4_class({PeriodCPT_extend(object = ans)},"pcpt"))
+test_that("Extend - minimal use (not-quiet)",
+          expect_s4_class({
+            quiet <- FALSE
+            PeriodCPT_extend(object = ans)
+            },"pcpt"))
 test_that("Extend - specify valid newiters",
           expect_s4_class({PeriodCPT_extend(object = ans, newiters = options_n.iter[[1]])},
                          "pcpt"))
@@ -488,6 +527,13 @@ for(index in 1:n.chains(ans)){
   }
 }
 
+for(dist in options_distribution){
+  if(dist == "invalid") next
+  data <- make_test_data(dist, 1)
+  ans <- PeriodCPT(data, dist, quiet = TRUE, n.iter = 100)
+  test_that(paste0("SummariSe - ",dist), expect_s4_class(summarise_chains(ans),"pcpt"))
+  test_that(paste0("SummariZe - ",dist), expect_s4_class(summarise_chains(ans),"pcpt"))
+}
 
 ####TESTTHAT: table_npcpt()
 
