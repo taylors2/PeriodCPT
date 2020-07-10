@@ -148,8 +148,9 @@ extern void PeriodCPT_EvaluateSufficientStats(
   double **SumStats = Summary_Stats(data, time, n, N);
   int numSumStats = (int)SumStats[0][0];
 
-  int thistau, prevtau;
-  double *thisStats, *thisSuff;
+  //int thistau, prevtau;
+  //double *thisStats;
+  double *thisSuff;
   MCMCitem_t *current;
 
   for(int i = 0; i < *nrdraws; i++){
@@ -159,6 +160,19 @@ extern void PeriodCPT_EvaluateSufficientStats(
     }
     current = Make_blank_MCMCitem(m, &(draws[i * *ncdraws]));
 
+    for(int seg = 0; seg < current->m; seg++){
+      double *thisStats = my_calloc(SumStats[0][0],sizeof(double));
+      Calc_Seg_SumStats(current, seg, SumStats, N, thisStats);
+      thisSuff = (double *)my_calloc(*nSuffStats, sizeof(double));
+      Sufficient_Stats( thisStats, numSumStats, *nSuffStats, Phyp, thisSuff);
+      my_free(thisStats);
+      for(int k = 0; k < *nSuffStats; k++){
+        out[i * *nSuffStats * (*ncdraws) + k * (*ncdraws) + seg] = thisSuff[k];
+      }
+      my_free(thisSuff);
+    }
+
+/*
     for(int seg = (current->m-1); seg >= 0; seg--){
       thistau = current->tau[seg];
       if(seg == 0){
@@ -188,6 +202,8 @@ extern void PeriodCPT_EvaluateSufficientStats(
 
       my_free(thisSuff);
     }
+ */
+
     Delete_MCMCitem(current);
   }
 
