@@ -6,7 +6,7 @@ summarise_chains <- function(object, all = TRUE){
 
   if(class(object) != "pcpt") stop("Unexpected class of `object`.")
   if(length(object@date) == 0)
-    stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
+    stop("Argument `object` does not appear to be an output from a PeriodCPT function.")
   if(length(summarised(object)) == 1 & all(summarised(object)))
     return(object)  #Already summarised & combinded!!!
   if(length(all)!=1 | !is.logical(all) | anyNA(all))
@@ -154,7 +154,7 @@ summarise_single_chain <- function(object, index = 1){
 table_npcpt <- function(object){
   if(class(object) != "pcpt") stop("Unexpected class of `object`.")
   if(length(object@date) == 0)
-    stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
+    stop("Argument `object` does not appear to be an output from a PeriodCPT function.")
 
   len_result <- length(summarised(object))
   tab <- matrix(0,nrow=len_result, ncol=npcpts.max(object))
@@ -185,7 +185,7 @@ table_pcpt <- function(object){
 
   if(class(object) != "pcpt") stop("Unexpected class of `object`.")
   if(length(object@date) == 0)
-    stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
+    stop("Argument `object` does not appear to be an output from a PeriodCPT function.")
   N <- periodlength(object)
 
   len_result <- length(summarised(object))

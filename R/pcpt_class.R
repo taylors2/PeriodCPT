@@ -444,7 +444,7 @@ setMethod("summary","pcpt",function(object, ...){
 })
 
 setMethod("quantile","pcpt",function(x, ...){
-  return(quantile_per_time_slot(object = x, ...))
+  return(quantile.master(object = x, ...))
 })
 
 setMethod("plot","pcpt",function(x, ...){

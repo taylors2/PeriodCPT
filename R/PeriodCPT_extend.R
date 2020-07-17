@@ -1,7 +1,7 @@
 PeriodCPT_extend <- function(object, newiters = 1e4){
   ##--Input check--
   if(class(object) != "pcpt") stop("Unexpected class of `object`.")
-  if(length(object@date) == 0) stop("Argument `object` does not appear to be an output from a PeriodCPT funciton.")
+  if(length(object@date) == 0) stop("Argument `object` does not appear to be an output from a PeriodCPT function.")
   if(length(newiters) != 1 | !is.numeric(newiters)) stop("Argument `newiters` must be a single positive integer.")
   if(newiters <= 0 | floor(newiters) != newiters) stop("Argument `newiters` must be a single positive integer.")
 

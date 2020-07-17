@@ -186,7 +186,7 @@ ErrorMessages <- c(
   "MCMC option - quiet specified incorrectly.",
   "Argument `newiters` must be a single positive integer.",
   "Cannot pass arguments 'pcpt.object' and 'chain.index' from '...' into inits(). These inputs to inits() are managed internally.",
-  "Argument `object` does not appear to be an output from a PeriodCPT funciton.",
+  "Argument `object` does not appear to be an output from a PeriodCPT function.",
   "Incorrect number of initial values for specified number of chains.",
   "Class of at least one inits is not numeric.",
   "Incorrect number of within period changepoints specified by inits.",
@@ -207,7 +207,7 @@ ErrorMessages <- c(
   "Argument 'index' missing with no default.",
   "Argument 'index' must be a single numeric value.",
   "Index `$(sub_st)$options_index[[i]]$(sub_ed)$` not found in results list.",
-  "",
+  "Probabilities must be a numerical vector between 0 and 1.",
   "",
   "Can only assign logical to summarised slot.",
   "Assignment to nsegparam slot is not a single positive integer.",    ###40
@@ -576,4 +576,36 @@ test_that("TableTAU - Good, using overall summarised chains",
           expect_is(table_pcpt(object = ans3), "table"))
 
 
+
+
+
+test_that(paste0("Quantile - ",dist,", not PeriodCPT output"),
+          expect_that(quantile(new("pcpt")),throws_error(ErrorMessages[16])))
+for(dist in unlist(options_distribution)){
+  if(dist == "invalid") next
+  ans <- PeriodCPT(make_test_data(data, 1), distribution = dist, quiet = TRUE, n.iter = 1000)
+  test_that(paste0("Quantile - ",dist,", default, not summarised"),
+            expect_is(quantile(ans),"matrix"))
+  ans <- summarise_chains(ans, all = TRUE)
+  test_that(paste0("Quantile - ",dist,", default, summarised"),
+            expect_is(quantile(ans),"matrix"))
+  test_that(paste0("Quantile - ",dist,", default, other ignored imput"),
+            expect_is(quantile(ans, junk = "RUBBISH"),"matrix"))
+  test_that(paste0("Quantile - ",dist,", p = 0.5, summarised"),
+            expect_is(quantile(ans, probs = 0.5),"matrix"))
+  test_that(paste0("Quantile - ",dist,", p = 95%CI, summarised"),
+            expect_is(quantile(ans, probs = c(0.025,0.975)),"matrix"))
+
+  test_that(paste0("Quantile - ",dist,", p = NA, summarised"),
+            expect_that(quantile(ans, probs = NA),throws_error(ErrorMessages[37])))
+  test_that(paste0("Quantile - ",dist,", p = NULL, summarised"),
+            expect_that(quantile(ans, probs = NULL),throws_error(ErrorMessages[37])))
+  test_that(paste0("Quantile - ",dist,", p = too big, summarised"),
+            expect_that(quantile(ans, probs = c(0.025,1.1)),throws_error(ErrorMessages[37])))
+  test_that(paste0("Quantile - ",dist,", p = too small, summarised"),
+            expect_that(quantile(ans, probs = c(-0.1, 0.975)),throws_error(ErrorMessages[37])))
+  test_that(paste0("Quantile - ",dist,", p = char, summarised"),
+            expect_that(quantile(ans, probs = c("0.025", "0.975")),throws_error(ErrorMessages[37])))
+
+}
 

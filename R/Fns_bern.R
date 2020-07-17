@@ -45,3 +45,26 @@ data_value_check.bern <- function(object){
   }
   return(object)
 }
+
+get_Q.bern.fn <- function(){
+  return(Q.bern.fn)
+}
+
+Q.bern.fn <- function(x, SSinfo, prob, index = 1, param.prior = NULL){
+  if(length(x)>1){
+    FN <- rep(NA,length(x))
+    for(i in 1:length(x)){
+      FN[i] <- Q.bern.fn(x=x[i], SSinfo=SSinfo, prob=prob, index=index,
+                         param.prior=param.prior)
+    }
+    return(FN)
+  }
+  FN <- NA
+  if(index == 1){
+    FN <- sum(pbeta(x, shape1 = SSinfo[,"A"], shape2 = SSinfo[,"B"]) *
+                SSinfo[,"freq"]) - prob * sum(SSinfo[,"freq"])
+  }
+  return(FN)
+}
+Q.bern.range <- function(){return(cbind(lower = 0, upper = 1))}
+

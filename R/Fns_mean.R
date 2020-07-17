@@ -45,4 +45,27 @@ data_value_check.mean <- function(object){
   return(object)
 }
 
+get_Q.mean.fn <- function(){
+  return(Q.mean.fn)
+}
+
+Q.mean.fn <- function(x, SSinfo, prob, index = 1, param.prior = NULL){
+  if(length(x)>1){
+    FN <- rep(NA,length(x))
+    for(i in 1:length(x)){
+      FN[i] <- Q.mean.fn(x=x[i], SSinfo=SSinfo, prob=prob, index=index,
+                         param.prior=param.prior)
+    }
+    return(FN)
+  }
+  FN <- NA
+  if(index == 1){
+    FN <- sum(pnorm(x, mean = SSinfo[,"M"],
+                    sd = sqrt(SSinfo[,"C"]*param.prior["const.var"])) *
+                SSinfo[,"freq"]) - prob * sum(SSinfo[,"freq"])
+  }
+  return(FN)
+}
+Q.mean.range <- function(){ return(cbind(lower = -Inf, upper = Inf))}
+
 

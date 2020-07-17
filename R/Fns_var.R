@@ -44,14 +44,25 @@ data_value_check.var <- function(object){
   return(object)
 }
 
-#param_mode_calc.var <- function(stats){
-#  if(length(stats) != 2)
-#    stop("Length of sufficient statistcs in param_mode_calc.var is not 2.")
-#  phi = stats[2]/(stats[1]+1)
-#  names(phi) = "lambda"
-#  return(phi)
-#}
+get_Q.var.fn <- function(){
+  return(Q.var.fn)
+}
 
-#SummariseOutput.var <- function(object){
-#  return(object)
-#}
+Q.var.fn <- function(x, SSinfo, prob, index = 1, param.prior = NULL){
+  if(length(x)>1){
+    FN <- rep(NA,length(x))
+    for(i in 1:length(x)){
+      FN[i] <- Q.var.fn(x=x[i], SSinfo=SSinfo, prob=prob, index=index,
+                        param.prior=param.prior)
+    }
+    return(FN)
+  }
+
+  FN <- NA
+  if(index == 1){
+    FN <- sum(pgamma(1 / x, shape = SSinfo[,"A"], rate = SSinfo[,"B"],lower.tail = FALSE) *
+                SSinfo[,"freq"]) - prob * sum(SSinfo[,"freq"])
+  }
+  return(FN)
+}
+Q.var.range <- function(){return(cbind(lower = 0, upper = Inf))}
