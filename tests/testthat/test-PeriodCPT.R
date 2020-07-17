@@ -583,7 +583,7 @@ test_that(paste0("Quantile - ",dist,", not PeriodCPT output"),
           expect_that(quantile(new("pcpt")),throws_error(ErrorMessages[16])))
 for(dist in unlist(options_distribution)){
   if(dist == "invalid") next
-  ans <- PeriodCPT(make_test_data(data, 1), distribution = dist, quiet = TRUE, n.iter = 1000)
+  ans <- PeriodCPT(make_test_data(dist, 1), distribution = dist, quiet = TRUE, n.iter = 1000)
   test_that(paste0("Quantile - ",dist,", default, not summarised"),
             expect_is(quantile(ans),"matrix"))
   ans <- summarise_chains(ans, all = TRUE)
