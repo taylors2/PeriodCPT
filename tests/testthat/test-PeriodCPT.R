@@ -607,5 +607,8 @@ for(dist in unlist(options_distribution)){
   test_that(paste0("Quantile - ",dist,", p = char, summarised"),
             expect_that(quantile(ans, probs = c("0.025", "0.975")),throws_error(ErrorMessages[37])))
 
+  ans <- PeriodCPT(make_test_data(dist, 2), distribution = dist, quiet = TRUE, n.iter = 1000)
+  test_that(paste0("Quantile - ",dist,", default, not summarised, single segment"),
+            expect_is(quantile(ans),"matrix"))
 }
 
