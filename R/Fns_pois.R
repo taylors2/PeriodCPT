@@ -46,26 +46,19 @@ data_value_check.pois <- function(object){
   return(object)
 }
 
-get_Q.pois.fn <- function(){
-  return(Q.pois.fn)
-}
-
-Q.pois.fn <- function(x, SSinfo, prob, index = 1, param.prior = NULL){
-  if(length(x)>1){
-    FN <- rep(NA,length(x))
-    for(i in 1:length(x)){
-      FN[i] <- Q.pois.fn(x=x[i], SSinfo=SSinfo, prob=prob, index=index,
-                         param.prior=param.prior)
-    }
-    return(FN)
+FNs.pois <- function(x, prob, SSinfo, param.prior = NULL, index = 1){
+  q <- rep(NA,length(x))
+  for(i in 1:length(x)){
+    px <- pgamma(x[i], shape = SSinfo[,"A"], rate = SSinfo[,"B"])
+    p  <- sum(px*SSinfo[,"freq"])/sum(SSinfo[,"freq"])
+    q[i] <- p - prob
   }
-  FN <- NA
-  if(index == 1){
-    FN <- sum(pgamma(x, shape = SSinfo[,"A"], rate = SSinfo[,"B"]) *
-                SSinfo[,"freq"]) - prob * sum(SSinfo[,"freq"])
-  }
-  return(FN)
+  return(q)
 }
-Q.pois.range <- function(){return(cbind(lower = 0, upper = Inf))}
+get_FNs.pois <- function(){return(FNs.pois)}
+RNG.pois <- function(prob, SSinfo, param.prior = NULL, index = 1){
+  q <- qgamma(prob, shape = SSinfo[,"A"], rate = SSinfo[,"B"])
+  return(range(q))
+}
 
 

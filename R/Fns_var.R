@@ -44,25 +44,17 @@ data_value_check.var <- function(object){
   return(object)
 }
 
-get_Q.var.fn <- function(){
-  return(Q.var.fn)
-}
-
-Q.var.fn <- function(x, SSinfo, prob, index = 1, param.prior = NULL){
-  if(length(x)>1){
-    FN <- rep(NA,length(x))
-    for(i in 1:length(x)){
-      FN[i] <- Q.var.fn(x=x[i], SSinfo=SSinfo, prob=prob, index=index,
-                        param.prior=param.prior)
-    }
-    return(FN)
+FNs.var <- function(x, prob, SSinfo, param.prior = NULL, index = 1){
+  q <- rep(NA,length(x))
+  for(i in 1:length(x)){
+    px <- pgamma(1 / x, shape = SSinfo[,"A"], rate = SSinfo[,"B"],lower.tail = FALSE)
+    p  <- sum(px*SSinfo[,"freq"])/sum(SSinfo[,"freq"])
+    q[i] <- p - prob
   }
-
-  FN <- NA
-  if(index == 1){
-    FN <- sum(pgamma(1 / x, shape = SSinfo[,"A"], rate = SSinfo[,"B"],lower.tail = FALSE) *
-                SSinfo[,"freq"]) - prob * sum(SSinfo[,"freq"])
-  }
-  return(FN)
+  return(q)
 }
-Q.var.range <- function(){return(cbind(lower = 0, upper = Inf))}
+get_FNs.var <- function(){return(FNs.var)}
+RNG.var <- function(prob, SSinfo, param.prior = NULL, index = 1){
+  q <- 1 / qgamma(prob, shape = SSinfo[,"A"], rate = SSinfo[,"B"], lower.tail = FALSE)
+  return(range(q))
+}

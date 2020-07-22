@@ -52,32 +52,31 @@ data_value_check.norm <- function(object){
   return(object)
 }
 
-get_Q.norm.fn <- function(){
-  return(Q.norm.fn)
-}
 
-Q.norm.fn <- function(x, SSinfo, prob, index = 1, param.prior = NULL){
 
-  if(length(x)>1){
-    FN <- rep(NA,length(x))
-    for(i in 1:length(x)){
-      FN[i] <- Q.norm.fn(x=x[i], SSinfo=SSinfo, prob=prob, index=index,
-                         param.prior=param.prior)
+FNs.norm <- function(x, prob, SSinfo, param.prior = NULL, index = 1){
+  q <- rep(NA,length(x))
+  for(i in 1:length(x)){
+    if(index == 1){
+      xx <- (x - SSinfo[,"M"])/sqrt( SSinfo[,"B"]*SSinfo[,"C"]/SSinfo[,"A"]  )
+      px <- pt(xx, df = 2*SSinfo[,"A"])
+    }else{
+      px <- pgamma(1 / x, shape = SSinfo[,"A"], rate = SSinfo[,"B"], lower.tail = FALSE)
     }
-    return(FN)
+    p  <- sum(px*SSinfo[,"freq"])/sum(SSinfo[,"freq"])
+    q[i] <- p - prob
   }
-
-  FN <- NA
-  if(index == 1){
-    y <- (x - SSinfo[,"M"])/sqrt( SSinfo[,"B"]*SSinfo[,"C"]/SSinfo[,"A"]  )
-    FN <- sum(pt(y, df = 2*SSinfo[,"A"]) * SSinfo[,"freq"]) -
-      prob * sum(SSinfo[,"freq"])
-  }else if(index ==2 ){
-    FN <- sum(pgamma(1 / x, shape = SSinfo[,"A"], rate = SSinfo[,"B"],lower.tail = FALSE) *
-                SSinfo[,"freq"]) - prob * sum(SSinfo[,"freq"])
-  }
-  return(FN)
+  return(q)
 }
-Q.norm.range <- function(){return(cbind(lower = c(-Inf,0), upper = c(Inf,Inf)))}
+get_FNs.norm <- function(){return(FNs.norm)}
+RNG.norm <- function(prob, SSinfo, param.prior = NULL, index = 1){
+  if(index == 1){
+    q <- qt(prob, df = 2 * SSinfo[,"A"])
+    q <- SSinfo[,"M"] + q * sqrt( SSinfo[,"B"]*SSinfo[,"C"]/SSinfo[,"A"] )
+  }else{
+    q <- 1/pgamma(prob, shape = SSinfo[,"A"], rate = SSinfo[,"B"], lower.tail = FALSE)
+  }
+  return(range(q))
+}
 
 

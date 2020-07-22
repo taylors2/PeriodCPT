@@ -5,37 +5,31 @@ quantile.master <- function(object, probs = seq(0, 1, 0.25), ...){
   quants <- array(NA, dim = c(periodlength(object), length(probs) * nsegparam(object)))
   IDs <- segID(object)
 
-  FNs  <- eval(parse(text = paste0("get_Q.",distribution(object),".fn()")))
-  RANGE <- eval(parse(text = paste0("Q.",distribution(object),".range()")))
+  FNs <- eval(parse(text = paste0("get_FNs.",distribution(object),"()")))
 
   SSnames <- names(param.prior(object))
   L <- grepl("param.", SSnames)
   nSuffStats <- sum(L)
   SSnames <- toupper(sub("param.","",SSnames[L]))
-  x <- result(object, 1)
+  components <- result(object, 1)
   for(i in 1:periodlength(object)){
+    SSinfo <- matrix(NA, nrow = nrow(IDs), ncol = 1+nSuffStats)
+    for(k in 1:nrow(IDs)){
+      SSinfo[k,] <- components[k, c("freq", paste0(SSnames,IDs[k,i]))]
+    }
+    colnames(SSinfo) <- c("freq", SSnames)
     for(p in 1:length(probs)){
-      PLACE <- p + ((1:nsegparam(object))-1)*length(probs)
-      if(probs[p] == 0){
-        quants[i,PLACE] <- RANGE[,1]
-      }else if(probs[p] == 1){
-        quants[i,PLACE] <- RANGE[,2]
-      }else{
-        SSinfo <- matrix(NA, nrow = nrow(IDs), ncol = 1+nSuffStats)
-        for(k in 1:nrow(IDs)){
-          SSinfo[k,] <- x[k, c("freq", paste0(SSnames,IDs[k,i]))]
-        }
-        colnames(SSinfo) <- c("freq", SSnames)
+      for(j in 1:nsegparam(object)){
+        PLACE <- p + (j-1)*length(probs)
+        lim <- eval(parse(text = paste0("RNG.",distribution(object),"(prob = probs[p],",
+            " SSinfo = SSinfo, param.prior = param.prior(object), index = j)")))
+        if(lim[1] == lim[2]){
+          quants[i,PLACE] <- lim[1]
+        }else{
+          quants[i,PLACE] <- uniroot(f = FNs, lower = lim[1], upper = lim[2],
+                       SSinfo = SSinfo, prob = probs[p],
+                       param.prior = param.prior(object), index = j)$root
 
-        for(j in 1:nsegparam(object)){
-          lim <- RANGE[j,]
-          if(lim[1] == -Inf) lim[1] <- -.Machine$double.xmax
-          if(lim[2] == +Inf) lim[2] <- +.Machine$double.xmax
-          root <- uniroot(f = FNs, SSinfo = SSinfo, prob = probs[p],
-                          interval = lim,
-                          param.prior = param.prior(object),
-                          index = j)
-          quants[i,PLACE[j]] <- root$root
         }
       }
     }
