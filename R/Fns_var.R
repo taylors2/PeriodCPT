@@ -47,7 +47,7 @@ data_value_check.var <- function(object){
 FNs.var <- function(x, prob, SSinfo, param.prior = NULL, index = 1){
   q <- rep(NA,length(x))
   for(i in 1:length(x)){
-    px <- pgamma(1 / x, shape = SSinfo[,"A"], rate = SSinfo[,"B"],lower.tail = FALSE)
+    px <- pgamma(1 / x[i], shape = SSinfo[,"A"], rate = SSinfo[,"B"],lower.tail = FALSE)
     p  <- sum(px*SSinfo[,"freq"])/sum(SSinfo[,"freq"])
     q[i] <- p - prob
   }

@@ -41,7 +41,7 @@ make_test_data <- function(dist, caseid){
                    frequency = periodlength)
       return(data)
     }
-    data <- ts(data = rnorm(cycles*periodlength, mean = 0, sd = 1),
+    data <- ts(data = rnorm(cycles*periodlength, mean = 0, sd = 2),
                            frequency = periodlength)
     if(caseid == 2) return(data)
   }else if(dist == "norm"){
@@ -52,7 +52,7 @@ make_test_data <- function(dist, caseid){
                   frequency = periodlength)
       return(data)
     }
-    data <- ts(data = rnorm(cycles*periodlength, mean = 5, sd = 1),
+    data <- ts(data = rnorm(cycles*periodlength, mean = 5, sd = 0.5),
                             frequency = periodlength)
     if(caseid == 2) return(data)
   }else{

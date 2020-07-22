@@ -48,7 +48,7 @@ data_value_check.mean <- function(object){
 FNs.mean <- function(x, prob, SSinfo, param.prior = NULL, index = 1){
   q <- rep(NA,length(x))
   for(i in 1:length(x)){
-    px <- pnorm(x, mean = SSinfo[,"M"], sd = sqrt(SSinfo[,"C"]*param.prior["const.var"]))
+    px <- pnorm(x[i], mean = SSinfo[,"M"], sd = sqrt(SSinfo[,"C"]*param.prior["const.var"]))
     p  <- sum(px*SSinfo[,"freq"])/sum(SSinfo[,"freq"])
     q[i] <- p - prob
   }

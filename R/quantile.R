@@ -38,7 +38,7 @@ quantile.master <- function(object, probs = seq(0, 1, 0.25), ...){
   if(nsegparam(object) == 1){
     colnames(quants) <- probtext
   }else{
-    colnames(quants) <- paste0(rep(paste0("param",1:3),
+    colnames(quants) <- paste0(rep(paste0("param",1:nsegparam(object)),
                                    each=length(probs)),"_",probtext)
   }
   rownames(quants) <- as.character(1:periodlength(object))

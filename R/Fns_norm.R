@@ -58,10 +58,10 @@ FNs.norm <- function(x, prob, SSinfo, param.prior = NULL, index = 1){
   q <- rep(NA,length(x))
   for(i in 1:length(x)){
     if(index == 1){
-      xx <- (x - SSinfo[,"M"])/sqrt( SSinfo[,"B"]*SSinfo[,"C"]/SSinfo[,"A"]  )
+      xx <- (x[i] - SSinfo[,"M"])/sqrt( SSinfo[,"B"]*SSinfo[,"C"]/SSinfo[,"A"]  )
       px <- pt(xx, df = 2*SSinfo[,"A"])
     }else{
-      px <- pgamma(1 / x, shape = SSinfo[,"A"], rate = SSinfo[,"B"], lower.tail = FALSE)
+      px <- pgamma(1 / x[i], shape = SSinfo[,"A"], rate = SSinfo[,"B"], lower.tail = FALSE)
     }
     p  <- sum(px*SSinfo[,"freq"])/sum(SSinfo[,"freq"])
     q[i] <- p - prob
@@ -74,7 +74,7 @@ RNG.norm <- function(prob, SSinfo, param.prior = NULL, index = 1){
     q <- qt(prob, df = 2 * SSinfo[,"A"])
     q <- SSinfo[,"M"] + q * sqrt( SSinfo[,"B"]*SSinfo[,"C"]/SSinfo[,"A"] )
   }else{
-    q <- 1/pgamma(prob, shape = SSinfo[,"A"], rate = SSinfo[,"B"], lower.tail = FALSE)
+    q <- 1/qgamma(prob, shape = SSinfo[,"A"], rate = SSinfo[,"B"], lower.tail = FALSE)
   }
   return(range(q))
 }
