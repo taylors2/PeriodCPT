@@ -79,4 +79,19 @@ RNG.norm <- function(prob, SSinfo, param.prior = NULL, index = 1){
   return(range(q))
 }
 
+plot.est.format.norm <- function(object, probs = 0.5, param = 0){
+  if(param == 1L | param == 2L){
+    Q <- quantile(object, probs = probs)
+    out <- Q[, grepl(paste0("param",param),colnames(Q)), drop = FALSE]
+  }else{
+    Q <- quantile(object, probs = 0.5)
+    MU <- Q[,1]
+    SD <- sqrt(Q[,2])
+    out <- matrix(NA, nrow = periodlength(object), ncol = 3)
+    out[,1] <- qnorm(probs[1]/2, mean = MU, sd = SD, lower.tail = TRUE )
+    out[,2] <- qnorm(0.5,        mean = MU, sd = SD, lower.tail = TRUE )
+    out[,3] <- qnorm(probs[1]/2, mean = MU, sd = SD, lower.tail = FALSE)
+  }
+  return(out)
+}
 

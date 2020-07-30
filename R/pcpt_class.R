@@ -448,7 +448,7 @@ setMethod("quantile","pcpt",function(x, ...){
 })
 
 setMethod("plot","pcpt",function(x, ...){
-  cat("Plot function for pcpt class not yet implemented !!!\n")
+  plot.master(x, ...)
 })
 
 

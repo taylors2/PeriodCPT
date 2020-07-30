@@ -58,3 +58,11 @@ RNG.var <- function(prob, SSinfo, param.prior = NULL, index = 1){
   q <- 1 / qgamma(prob, shape = SSinfo[,"A"], rate = SSinfo[,"B"], lower.tail = FALSE)
   return(range(q))
 }
+
+
+plot.est.format.var <- function(object, probs = 0.5, param = 0){
+  out <- quantile(object, probs = probs)
+  return(out)
+}
+
+

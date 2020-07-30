@@ -61,3 +61,9 @@ RNG.bern <- function(prob, SSinfo, param.prior = NULL, index = 1){
   return(range(q))
 }
 
+plot.est.format.bern <- function(object, probs = 0.5, param = 0){
+  out <- quantile(object, probs = probs)
+  return(out)
+}
+
+
